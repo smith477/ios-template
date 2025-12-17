@@ -1,0 +1,15 @@
+{
+  "originHash" : "4bb05a51cfe91f8db9f8f7abacb083c2381228f76c9884c4a6bd8406259f1ed2",
+  "pins" : [
+    {
+      "identity" : "api-client",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/smith477/api-client",
+      "state" : {
+        "branch" : "main",
+        "revision" : "27a8e2f1f035ea4120b65784af66c559caae46d0"
+      }
+    }
+  ],
+  "version" : 3
+}
