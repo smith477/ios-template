@@ -4,6 +4,7 @@ import APIClient
 import Foundation
 import Persistence
 import Products
+import Users
 
 /// Owns the platform dependencies and hands them to features.
 ///
@@ -28,3 +29,4 @@ final class AppContainer {
 }
 
 extension AppContainer: ProductsDependencies {}
+extension AppContainer: UsersDependencies {}
