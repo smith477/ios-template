@@ -18,8 +18,16 @@ let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
 let baseSettings: SettingsDictionary = [
-    "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
     "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
+].swiftVersion("6.0")
+
+// MainActor-by-default is a property of UI code, not of the project. Applied
+// project-wide it lands on Domain types, storage and repositories — none of
+// which touch the main actor — and every one of them then needs `nonisolated`
+// to opt back out. Feature Presentation code carries its own `@MainActor`, and
+// SwiftUI's `View` already supplies it, so only the App target takes it here.
+let appSettings: SettingsDictionary = [
+    "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
 ]
 
 func platform(
@@ -105,7 +113,8 @@ let project = Project(
                 .target(name: "Users"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
-            ]
+            ],
+            settings: .settings(base: appSettings)
         ),
         .target(
             name: "AppTests",

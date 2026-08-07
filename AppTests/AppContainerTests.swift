@@ -18,7 +18,7 @@ struct AppContainerTests {
     @Test @MainActor
     func usesTheStoreItIsGiven() throws {
         let container = AppContainer(
-            storageProvider: .inMemory(modelName: "ios_template"),
+            storageProvider: try .inMemory(modelName: "ios_template"),
             apiClient: APIClient(baseURL: URL(string: "https://example.invalid")!)
         )
 
@@ -31,14 +31,14 @@ struct AppContainerTests {
     /// A feature is satisfied by anything meeting its own protocol, so a test
     /// builds only what that feature needs rather than the whole container.
     @Test @MainActor
-    func featureAcceptsATestDouble() {
+    func featureAcceptsATestDouble() throws {
         struct Stub: ProductsDependencies {
             let storageProvider: StorageProvider
             let apiClient: APIClient
         }
 
         let stub = Stub(
-            storageProvider: .inMemory(modelName: "ios_template"),
+            storageProvider: try .inMemory(modelName: "ios_template"),
             apiClient: APIClient(baseURL: URL(string: "https://example.invalid")!)
         )
 

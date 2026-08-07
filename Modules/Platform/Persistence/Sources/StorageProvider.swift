@@ -10,7 +10,7 @@ import Foundation
 ///
 /// Example:
 /// ```swift
-/// let provider = StorageProvider(modelName: "MyApp")
+/// let provider = try StorageProvider(modelName: "MyApp")
 ///
 /// // Reading on main thread
 /// let request = ItemEntity.fetchRequest()
@@ -43,11 +43,13 @@ public final class StorageProvider: @unchecked Sendable {
     ///   - modelName: Name of your .xcdatamodeld file without extension
     ///   - inMemory: When true, uses in-memory store instead of SQLite
     ///   - bundle: Bundle containing the model file
-    public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) {
+    /// - Throws: `StorageError.modelNotFound` if the model is missing from the
+    ///   bundle, or `StorageError.storeLoadFailed` if the store cannot be opened.
+    public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) {
         guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelURL)
         else {
-            fatalError("Failed to load Core Data model: \(modelName)")
+            throw .modelNotFound(name: modelName)
         }
 
         persistentContainer = NSPersistentContainer(name: modelName, managedObjectModel: model)
@@ -58,14 +60,18 @@ public final class StorageProvider: @unchecked Sendable {
             persistentContainer.persistentStoreDescriptions = [description]
         }
 
+        // loadPersistentStores calls its completion synchronously for the store
+        // types used here, so the error is available by the time it returns.
+        var loadError: Error?
         persistentContainer.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Failed to load persistent stores: \(error)")
-            }
+            loadError = error
+        }
+        if let loadError {
+            throw .storeLoadFailed(loadError)
         }
 
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-        persistentContainer.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
 
     /// Executes a closure on a private background context.
@@ -78,10 +84,10 @@ public final class StorageProvider: @unchecked Sendable {
     /// - Returns: The value returned by the closure.
     /// - Throws: Rethrows any error thrown by the closure.
     public func performBackground<T: Sendable>(
-        _ block: @escaping (NSManagedObjectContext) throws -> T
+        _ block: @escaping @Sendable (NSManagedObjectContext) throws -> T
     ) async throws -> T {
         let context = persistentContainer.newBackgroundContext()
-        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         return try await context.perform {
             try block(context)
         }
@@ -89,7 +95,7 @@ public final class StorageProvider: @unchecked Sendable {
 
     /// Creates an in-memory StorageProvider for unit testing.
     /// Each call creates a fresh, isolated store.
-    public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) -> StorageProvider {
-        StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
+    public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) -> StorageProvider {
+        try StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
     }
 }
