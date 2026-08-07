@@ -3,7 +3,7 @@
 import APIClient
 import Foundation
 
-public protocol ProductApiClient {
+public protocol ProductApiClient: Sendable {
     func fetchProducts() async throws(APIError) -> [Product]
 }
 
