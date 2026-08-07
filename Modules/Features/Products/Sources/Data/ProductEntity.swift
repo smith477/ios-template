@@ -11,7 +11,7 @@ public class ProductEntity: NSManagedObject {
     @NSManaged public var title: String
     @NSManaged public var productDescription: String?
     @NSManaged public var category: String?
-    @NSManaged public var price: Float
+    @NSManaged public var price: NSDecimalNumber
     @NSManaged public var brand: String?
     @NSManaged public var thumbnail: String?
     @NSManaged public var images: Set<ProductImagesEntity>
@@ -58,7 +58,7 @@ extension ProductEntity {
             title: title,
             description: productDescription ?? "",
             category: category ?? "",
-            price: Double(price),
+            price: price as Decimal,
             tags: tags.compactMap { $0.tag },
             brand: brand ?? "",
             meta: meta?.toDomain() ?? Meta(createdAt: Date(), updatedAt: Date()),
@@ -72,35 +72,57 @@ extension ProductEntity {
         title = product.title
         productDescription = product.description
         category = product.category
-        price = Float(product.price)
+        price = product.price as NSDecimalNumber
         brand = product.brand
         thumbnail = product.thumbnail
 
-        images.forEach { context.delete($0) }
-        tags.forEach { context.delete($0) }
-        if let existingMeta = meta {
-            context.delete(existingMeta)
-        }
+        // Only the rows that actually changed are touched. Deleting every child
+        // and recreating it churns the store on each refresh, and leaves a
+        // window where a product has no images.
+        syncImages(product.images, in: context)
+        syncTags(product.tags, in: context)
 
-        for imageUrl in product.images {
-            let imageEntity = ProductImagesEntity(context: context)
-            imageEntity.image = imageUrl
-            imageEntity.product = self
-            addToImages(imageEntity)
-        }
-
-        for tag in product.tags {
-            let tagEntity = ProductTagsEntity(context: context)
-            tagEntity.tag = tag
-            tagEntity.product = self
-            addToTags(tagEntity)
-        }
-
-        let metaEntity = MetaEntity(context: context)
+        let metaEntity = meta ?? MetaEntity(context: context)
         metaEntity.createdAt = product.meta.createdAt
         metaEntity.updatedAt = product.meta.updatedAt
         metaEntity.product = self
         meta = metaEntity
+    }
+
+    private func syncImages(_ urls: [String], in context: NSManagedObjectContext) {
+        let wanted = Set(urls)
+        let existing = Dictionary(
+            images.compactMap { entity in entity.image.map { ($0, entity) } },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        for (url, entity) in existing where !wanted.contains(url) {
+            context.delete(entity)
+        }
+        for url in wanted where existing[url] == nil {
+            let entity = ProductImagesEntity(context: context)
+            entity.image = url
+            entity.product = self
+            addToImages(entity)
+        }
+    }
+
+    private func syncTags(_ names: [String], in context: NSManagedObjectContext) {
+        let wanted = Set(names)
+        let existing = Dictionary(
+            tags.compactMap { entity in entity.tag.map { ($0, entity) } },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        for (name, entity) in existing where !wanted.contains(name) {
+            context.delete(entity)
+        }
+        for name in wanted where existing[name] == nil {
+            let entity = ProductTagsEntity(context: context)
+            entity.tag = name
+            entity.product = self
+            addToTags(entity)
+        }
     }
 
     convenience init(product: Product, context: NSManagedObjectContext) {

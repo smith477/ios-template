@@ -3,27 +3,32 @@
     <entity name="MetaEntity" representedClassName="MetaEntity" syncable="YES">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="product" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ProductEntity" inverseName="meta" inverseEntity="ProductEntity"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ProductEntity" inverseName="meta" inverseEntity="ProductEntity"/>
     </entity>
     <entity name="ProductEntity" representedClassName="ProductEntity" syncable="YES">
         <attribute name="brand" optional="YES" attributeType="String"/>
         <attribute name="category" optional="YES" attributeType="String"/>
-        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="price" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="price" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="productDescription" optional="YES" attributeType="String"/>
         <attribute name="thumbnail" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <relationship name="images" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductImagesEntity" inverseName="product" inverseEntity="ProductImagesEntity"/>
-        <relationship name="meta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MetaEntity" inverseName="product" inverseEntity="MetaEntity"/>
-        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductTagsEntity" inverseName="product" inverseEntity="ProductTagsEntity"/>
+        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ProductImagesEntity" inverseName="product" inverseEntity="ProductImagesEntity"/>
+        <relationship name="meta" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="MetaEntity" inverseName="product" inverseEntity="MetaEntity"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ProductTagsEntity" inverseName="product" inverseEntity="ProductTagsEntity"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="ProductImagesEntity" representedClassName="ProductImagesEntity" syncable="YES">
         <attribute name="image" optional="YES" attributeType="String"/>
-        <relationship name="product" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ProductEntity" inverseName="images" inverseEntity="ProductEntity"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ProductEntity" inverseName="images" inverseEntity="ProductEntity"/>
     </entity>
     <entity name="ProductTagsEntity" representedClassName="ProductTagsEntity" syncable="YES">
         <attribute name="tag" optional="YES" attributeType="String"/>
-        <relationship name="product" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ProductEntity" inverseName="tags" inverseEntity="ProductEntity"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ProductEntity" inverseName="tags" inverseEntity="ProductEntity"/>
     </entity>
     <entity name="UserEntity" representedClassName="UserEntity" syncable="YES">
         <attribute name="email" optional="YES" attributeType="String"/>
@@ -31,5 +36,10 @@
         <attribute name="id" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="image" optional="YES" attributeType="String"/>
         <attribute name="lastName" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
 </model>

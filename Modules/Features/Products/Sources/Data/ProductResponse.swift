@@ -11,7 +11,9 @@ struct ProductResponse: Decodable {
     let title: String
     let description: String
     let category: String
-    let price: Double
+    // Decoded straight to Decimal: going through Double first would round the
+    // value before it is ever stored.
+    let price: Decimal
     let discountPercentage: Double
     let rating: Double
     let stock: Int
