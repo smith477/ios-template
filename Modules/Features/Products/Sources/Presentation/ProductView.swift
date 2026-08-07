@@ -2,10 +2,14 @@
 
 import SwiftUI
 
-struct ProductView: View {
-    @State var viewModel: ProductViewModel
+public struct ProductView: View {
+    @State private var viewModel: ProductViewModel
 
-    var body: some View {
+    public init(viewModel: ProductViewModel) {
+        _viewModel = State(wrappedValue: viewModel)
+    }
+
+    public var body: some View {
         Group {
             switch viewModel.loadingState {
             case .loading:
@@ -21,7 +25,7 @@ struct ProductView: View {
         }
     }
 
-    var listView: some View {
+    private var listView: some View {
         List(viewModel.products) { product in
             Text(product.title)
         }

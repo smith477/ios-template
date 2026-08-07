@@ -62,6 +62,14 @@ let project = Project(
             ]
         ),
 
+        feature(
+            "Products",
+            dependencies: [
+                .target(name: "Persistence"),
+                .external(name: "APIClient"),
+            ]
+        ),
+
         .target(
             name: "App",
             destinations: destinations,
@@ -71,10 +79,14 @@ let project = Project(
             deploymentTargets: deploymentTargets,
             infoPlist: .extendingDefault(with: [
                 "UILaunchScreen": [:],
+                // Tuist's default plist requires armv7, which no simulator
+                // reports — it hides every simulator from the run destinations.
+                "UIRequiredDeviceCapabilities": ["arm64"],
             ]),
             sources: ["App/**"],
             resources: ["App/Assets.xcassets"],
             dependencies: [
+                .target(name: "Products"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -88,6 +100,9 @@ let project = Project(
             sources: ["AppTests/**"],
             dependencies: [
                 .target(name: "App"),
+                .target(name: "Products"),
+                .target(name: "Persistence"),
+                .external(name: "APIClient"),
             ]
         ),
         .target(
