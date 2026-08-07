@@ -2,6 +2,7 @@
 
 import CoreData
 import Foundation
+import Persistence
 
 /// Defines local storage operations for Product entities.
 public protocol ProductStorage: Sendable {

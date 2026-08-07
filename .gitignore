@@ -4,6 +4,7 @@
 # Run `mise install && tuist install && tuist generate` after cloning.
 *.xcodeproj
 *.xcworkspace
+buildServer.json
 Derived/
 Tuist/.build/
 .tuist-version

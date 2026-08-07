@@ -2,6 +2,7 @@
 
 import APIClient
 import Foundation
+import Persistence
 
 @MainActor
 public final class AppContainer {

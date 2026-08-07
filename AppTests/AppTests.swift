@@ -1,17 +1,13 @@
 //
-//  ios_templateTests.swift
-//  ios-templateTests
-//
-//  Created by Dusan Kovacevic on 05/12/2025.
+//  AppTests.swift
+//  AppTests
 //
 
 import Testing
-@testable import ios_template
+@testable import App
 
-struct ios_templateTests {
-
+struct AppTests {
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     }
-
 }

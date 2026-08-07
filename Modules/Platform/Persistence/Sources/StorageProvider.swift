@@ -32,12 +32,18 @@ public final class StorageProvider: @unchecked Sendable {
         persistentContainer.viewContext
     }
 
+    /// The bundle holding this module's Core Data model.
+    ///
+    /// The model ships in this module's resource bundle rather than the app's,
+    /// so `Bundle.main` will not find it.
+    public static var modelBundle: Bundle { .module }
+
     /// Creates a StorageProvider with the specified model name.
     /// - Parameters:
     ///   - modelName: Name of your .xcdatamodeld file without extension
     ///   - inMemory: When true, uses in-memory store instead of SQLite
     ///   - bundle: Bundle containing the model file
-    public init(modelName: String, inMemory: Bool = false, bundle: Bundle = .main) {
+    public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) {
         guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelURL)
         else {
@@ -83,7 +89,7 @@ public final class StorageProvider: @unchecked Sendable {
 
     /// Creates an in-memory StorageProvider for unit testing.
     /// Each call creates a fresh, isolated store.
-    public static func inMemory(modelName: String, bundle: Bundle = .main) -> StorageProvider {
+    public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) -> StorageProvider {
         StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
     }
 }
