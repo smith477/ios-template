@@ -5,6 +5,7 @@
 
 import Products
 import SwiftUI
+import Users
 
 @main
 struct TemplateApp: App {
@@ -12,7 +13,14 @@ struct TemplateApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ProductView(viewModel: Products.viewModel(container))
+            TabView {
+                Tab("Products", systemImage: "bag") {
+                    ProductView(viewModel: Products.viewModel(container))
+                }
+                Tab("Users", systemImage: "person.2") {
+                    UserView(viewModel: Users.viewModel(container))
+                }
+            }
         }
     }
 }

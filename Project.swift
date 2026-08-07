@@ -69,6 +69,13 @@ let project = Project(
                 .external(name: "APIClient"),
             ]
         ),
+        feature(
+            "Users",
+            dependencies: [
+                .target(name: "Persistence"),
+                .external(name: "APIClient"),
+            ]
+        ),
 
         .target(
             name: "App",
@@ -87,6 +94,7 @@ let project = Project(
             resources: ["App/Assets.xcassets"],
             dependencies: [
                 .target(name: "Products"),
+                .target(name: "Users"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
