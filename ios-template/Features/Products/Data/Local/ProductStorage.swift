@@ -38,7 +38,7 @@ final class ProductCoreDataStorage: ProductStorage {
         do {
             return try await storageProvider.performBackground { context in
                 let request = ProductEntity.fetchRequest()
-                request.predicate = NSPredicate(format: "id == \(id)")
+                request.predicate = NSPredicate(format: "id == %d", id)
                 request.fetchLimit = 1
                 return try context.fetch(request).first?.toDomain()
             }
@@ -52,7 +52,7 @@ final class ProductCoreDataStorage: ProductStorage {
             try await storageProvider.performBackground { context in
                 for product in products {
                     let request = ProductEntity.fetchRequest()
-                    request.predicate = NSPredicate(format: "id == \(product.id)")
+                    request.predicate = NSPredicate(format: "id == %d", product.id)
                     request.fetchLimit = 1
 
                     let entry = try context.fetch(request).first ?? ProductEntity(context: context)
@@ -69,7 +69,7 @@ final class ProductCoreDataStorage: ProductStorage {
         do {
             try await storageProvider.performBackground { context in
                 let request = ProductEntity.fetchRequest()
-                request.predicate = NSPredicate(format: "id == \(id)")
+                request.predicate = NSPredicate(format: "id == %d", id)
                 request.fetchLimit = 1
 
                 if let entry = try context.fetch(request).first {

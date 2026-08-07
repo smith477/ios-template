@@ -2,8 +2,8 @@
 
 import Foundation
 
-enum ProductLoadingsState {
-    case loading, loaded, error(error: Error)
+enum ProductLoadingState {
+    case loading, loaded, error(Error)
 }
 
 @Observable
@@ -11,7 +11,7 @@ class ProductViewModel {
     private let repository: ProductRepository
 
     private(set) var products: [Product] = []
-    var loadingState: ProductLoadingsState = .loading
+    var loadingState: ProductLoadingState = .loading
 
     init(repository: ProductRepository) {
         self.repository = repository
@@ -24,7 +24,7 @@ class ProductViewModel {
             products = result
             loadingState = .loaded
         } catch {
-            loadingState = .error(error: error)
+            loadingState = .error(error)
         }
     }
 }
