@@ -1,10 +1,6 @@
-// ProductRepository.swift
+// ProductDataRepository.swift
 
 import Foundation
-
-public protocol ProductRepository {
-    func getProducts() async throws -> [Product]
-}
 
 final class ProductDataRepository: ProductRepository {
     private let apiClient: ProductApiClient
