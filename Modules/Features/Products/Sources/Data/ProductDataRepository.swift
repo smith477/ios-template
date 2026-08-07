@@ -1,20 +1,21 @@
 // ProductDataRepository.swift
 
+import AppKit
 import Foundation
 
 final class ProductDataRepository: ProductRepository {
     private let apiClient: ProductApiClient
     private let storage: ProductStorage
-    private let now: @Sendable () -> Date
+    private let dateProvider: DateProvider
 
     init(
         apiClient: ProductApiClient,
         storage: ProductStorage,
-        now: @escaping @Sendable () -> Date = { Date() }
+        dateProvider: DateProvider = SystemDateProvider()
     ) {
         self.apiClient = apiClient
         self.storage = storage
-        self.now = now
+        self.dateProvider = dateProvider
     }
 
     func getProducts(policy: CachePolicy) async throws -> [Product] {
@@ -39,6 +40,6 @@ final class ProductDataRepository: ProductRepository {
     private func isCacheFresh(maxAge: Duration) async throws -> Bool {
         guard let lastSaved = await storage.lastSavedAt() else { return false }
         guard try await !storage.getAll().isEmpty else { return false }
-        return now().timeIntervalSince(lastSaved) < Double(maxAge.components.seconds)
+        return dateProvider.now.timeIntervalSince(lastSaved) < Double(maxAge.components.seconds)
     }
 }

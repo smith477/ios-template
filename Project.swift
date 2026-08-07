@@ -69,6 +69,7 @@ let project = Project(
     settings: .settings(base: baseSettings),
     targets: [
         platform("Identity"),
+        platform("AppKit"),
         platform(
             "Persistence",
             coreDataModels: [
@@ -80,6 +81,7 @@ let project = Project(
             "Products",
             dependencies: [
                 .target(name: "Identity"),
+                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -88,6 +90,7 @@ let project = Project(
             "Users",
             dependencies: [
                 .target(name: "Identity"),
+                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -126,6 +129,7 @@ let project = Project(
             dependencies: [
                 .target(name: "App"),
                 .target(name: "Products"),
+                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]

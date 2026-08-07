@@ -1,5 +1,6 @@
 // ProductsTesting.swift
 
+import AppKit
 import Foundation
 import Persistence
 
@@ -10,18 +11,24 @@ import Persistence
 /// them directly, and a test target cannot use `@testable` against a framework
 /// it links normally.
 public enum ProductsTesting {
-    public static func makeStorage(storageProvider: StorageProvider) -> any ProductStorage {
+    /// Storage backed by a throwaway `UserDefaults` suite, so the cache
+    /// timestamp of one test never leaks into the next.
+    public static func makeStorage(
+        storageProvider: StorageProvider,
+        dateProvider: DateProvider = SystemDateProvider()
+    ) -> any ProductStorage {
         ProductCoreDataStorage(
             storageProvider: storageProvider,
-            clock: ProductCacheClock(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+            timestamp: ProductCacheTimestamp(defaults: UserDefaults(suiteName: UUID().uuidString)!),
+            dateProvider: dateProvider
         )
     }
 
     public static func makeRepository(
         apiClient: any ProductApiClient,
         storage: any ProductStorage,
-        now: @escaping @Sendable () -> Date = { Date() }
+        dateProvider: DateProvider = SystemDateProvider()
     ) -> any ProductRepository {
-        ProductDataRepository(apiClient: apiClient, storage: storage, now: now)
+        ProductDataRepository(apiClient: apiClient, storage: storage, dateProvider: dateProvider)
     }
 }
