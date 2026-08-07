@@ -22,8 +22,8 @@ struct ProductView: View {
     }
 
     var listView: some View {
-        List(viewModel.products) { produt in
-            Text(produt.title)
+        List(viewModel.products) { product in
+            Text(product.title)
         }
     }
 }
