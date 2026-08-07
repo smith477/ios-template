@@ -29,5 +29,8 @@ public struct ProductView: View {
         List(viewModel.products) { product in
             Text(product.title)
         }
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
 }

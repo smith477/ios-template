@@ -7,7 +7,7 @@ public struct Product: Identifiable, Sendable {
     public let title: String
     public let description: String
     public let category: String
-    public let price: Double
+    public let price: Decimal
     public let tags: [String]
     public let brand: String?
     public let meta: Meta
@@ -19,7 +19,7 @@ public struct Product: Identifiable, Sendable {
         title: String,
         description: String,
         category: String,
-        price: Double,
+        price: Decimal,
         tags: [String],
         brand: String?,
         meta: Meta,

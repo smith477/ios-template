@@ -11,13 +11,42 @@ public protocol ProductStorage: Sendable {
     func save(_ products: [Product]) async throws(StorageError)
     func delete(id: Int) async throws(StorageError)
     func deleteAll() async throws(StorageError)
+
+    /// When `save(_:)` last completed, or nil if nothing has been cached.
+    ///
+    /// This is the cache's own age. `Meta.updatedAt` comes from the API and
+    /// describes the product, not when it was last read.
+    func lastSavedAt() async -> Date?
+}
+
+/// Records when the products cache was last written.
+///
+/// `UserDefaults` is documented as thread-safe but is not marked `Sendable`,
+/// so the conformance is asserted here rather than at every use site.
+struct ProductCacheClock: @unchecked Sendable {
+    private let defaults: UserDefaults
+    private let key = "products.lastSavedAt"
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    var lastSavedAt: Date? { defaults.object(forKey: key) as? Date }
+    func markSaved(at date: Date) { defaults.set(date, forKey: key) }
+    func clear() { defaults.removeObject(forKey: key) }
 }
 
 final class ProductCoreDataStorage: ProductStorage {
     private let storageProvider: StorageProvider
+    private let clock: ProductCacheClock
 
-    init(storageProvider: StorageProvider) {
+    init(storageProvider: StorageProvider, clock: ProductCacheClock = ProductCacheClock()) {
         self.storageProvider = storageProvider
+        self.clock = clock
+    }
+
+    func lastSavedAt() async -> Date? {
+        clock.lastSavedAt
     }
 
     func getAll() async throws(StorageError) -> [Product] {
@@ -61,6 +90,7 @@ final class ProductCoreDataStorage: ProductStorage {
                 }
                 try context.save()
             }
+            clock.markSaved(at: Date())
         } catch {
             throw .saveFailed(error)
         }
@@ -98,6 +128,7 @@ final class ProductCoreDataStorage: ProductStorage {
                     into: [context]
                 )
             }
+            clock.clear()
         } catch {
             throw .deleteFailed(error)
         }
