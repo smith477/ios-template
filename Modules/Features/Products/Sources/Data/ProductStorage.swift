@@ -1,5 +1,6 @@
 // ProductStorage.swift
 
+import AppKit
 import CoreData
 import Foundation
 import Persistence
@@ -21,9 +22,13 @@ public protocol ProductStorage: Sendable {
 
 /// Records when the products cache was last written.
 ///
+/// This persists a timestamp; it does not read the current time. The clock
+/// itself is `DateProvider` — keeping the two apart is what lets a test set
+/// "now" without also having to fake the stored value.
+///
 /// `UserDefaults` is documented as thread-safe but is not marked `Sendable`,
 /// so the conformance is asserted here rather than at every use site.
-struct ProductCacheClock: @unchecked Sendable {
+struct ProductCacheTimestamp: @unchecked Sendable {
     private let defaults: UserDefaults
     private let key = "products.lastSavedAt"
 
@@ -38,15 +43,21 @@ struct ProductCacheClock: @unchecked Sendable {
 
 final class ProductCoreDataStorage: ProductStorage {
     private let storageProvider: StorageProvider
-    private let clock: ProductCacheClock
+    private let timestamp: ProductCacheTimestamp
+    private let dateProvider: DateProvider
 
-    init(storageProvider: StorageProvider, clock: ProductCacheClock = ProductCacheClock()) {
+    init(
+        storageProvider: StorageProvider,
+        timestamp: ProductCacheTimestamp = ProductCacheTimestamp(),
+        dateProvider: DateProvider = SystemDateProvider()
+    ) {
         self.storageProvider = storageProvider
-        self.clock = clock
+        self.timestamp = timestamp
+        self.dateProvider = dateProvider
     }
 
     func lastSavedAt() async -> Date? {
-        clock.lastSavedAt
+        timestamp.lastSavedAt
     }
 
     func getAll() async throws(StorageError) -> [Product] {
@@ -90,7 +101,7 @@ final class ProductCoreDataStorage: ProductStorage {
                 }
                 try context.save()
             }
-            clock.markSaved(at: Date())
+            timestamp.markSaved(at: dateProvider.now)
         } catch {
             throw .saveFailed(error)
         }
@@ -128,7 +139,7 @@ final class ProductCoreDataStorage: ProductStorage {
                     into: [context]
                 )
             }
-            clock.clear()
+            timestamp.clear()
         } catch {
             throw .deleteFailed(error)
         }
