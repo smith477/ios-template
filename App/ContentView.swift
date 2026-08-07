@@ -1,8 +1,6 @@
 //
 //  ContentView.swift
-//  ios-template
-//
-//  Created by Dusan Kovacevic on 05/12/2025.
+//  App
 //
 
 import APIClient

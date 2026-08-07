@@ -1,14 +1,12 @@
 //
-//  ios_templateApp.swift
-//  ios-template
-//
-//  Created by Dusan Kovacevic on 05/12/2025.
+//  TemplateApp.swift
+//  App
 //
 
 import SwiftUI
 
 @main
-struct ios_templateApp: App {
+struct TemplateApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

@@ -1,5 +1,19 @@
 import ProjectDescription
 
+// The dependency rules this manifest enforces:
+//
+//   App       may import every feature and platform module. It is the only
+//             place where features are wired together.
+//   Feature   may import platform modules and APIClient.
+//             A feature may never import another feature — that is the one
+//             boundary worth a target, because it is what keeps a feature
+//             copyable into another project.
+//   Platform  imports nothing from this project. It knows no feature.
+//
+// Layers inside a feature (Domain / Data / Presentation) are folders, not
+// targets. Split a feature into layer targets only once it is large enough to
+// earn them; until then the ceremony costs more than it returns.
+
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
@@ -8,49 +22,83 @@ let baseSettings: SettingsDictionary = [
     "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
 ]
 
+func platform(
+    _ name: String,
+    dependencies: [TargetDependency] = [],
+    coreDataModels: [CoreDataModel] = []
+) -> Target {
+    .target(
+        name: name,
+        destinations: destinations,
+        product: .staticFramework,
+        bundleId: "dusan.kovacevic.platform.\(name.lowercased())",
+        deploymentTargets: deploymentTargets,
+        sources: ["Modules/Platform/\(name)/Sources/**"],
+        dependencies: dependencies,
+        coreDataModels: coreDataModels
+    )
+}
+
+func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
+    .target(
+        name: name,
+        destinations: destinations,
+        product: .staticFramework,
+        bundleId: "dusan.kovacevic.feature.\(name.lowercased())",
+        deploymentTargets: deploymentTargets,
+        sources: ["Modules/Features/\(name)/Sources/**"],
+        dependencies: dependencies
+    )
+}
+
 let project = Project(
     name: "ios-template",
     settings: .settings(base: baseSettings),
     targets: [
+        platform(
+            "Persistence",
+            coreDataModels: [
+                .coreDataModel("Modules/Platform/Persistence/Sources/ios_template.xcdatamodeld"),
+            ]
+        ),
+
         .target(
-            name: "ios-template",
+            name: "App",
             destinations: destinations,
             product: .app,
-            productName: "ios-template",
+            productName: "App",
             bundleId: "dusan.kovacevic.ios-template",
             deploymentTargets: deploymentTargets,
             infoPlist: .extendingDefault(with: [
                 "UILaunchScreen": [:],
             ]),
-            sources: ["ios-template/**"],
-            resources: ["ios-template/Assets.xcassets"],
+            sources: ["App/**"],
+            resources: ["App/Assets.xcassets"],
             dependencies: [
+                .target(name: "Persistence"),
                 .external(name: "APIClient"),
-            ],
-            coreDataModels: [
-                .coreDataModel("ios-template/ios_template.xcdatamodeld"),
             ]
         ),
         .target(
-            name: "ios-templateTests",
+            name: "AppTests",
             destinations: destinations,
             product: .unitTests,
-            bundleId: "dusan.kovacevic.ios-templateTests",
+            bundleId: "dusan.kovacevic.AppTests",
             deploymentTargets: deploymentTargets,
-            sources: ["ios-templateTests/**"],
+            sources: ["AppTests/**"],
             dependencies: [
-                .target(name: "ios-template"),
+                .target(name: "App"),
             ]
         ),
         .target(
-            name: "ios-templateUITests",
+            name: "AppUITests",
             destinations: destinations,
             product: .uiTests,
-            bundleId: "dusan.kovacevic.ios-templateUITests",
+            bundleId: "dusan.kovacevic.AppUITests",
             deploymentTargets: deploymentTargets,
-            sources: ["ios-templateUITests/**"],
+            sources: ["AppUITests/**"],
             dependencies: [
-                .target(name: "ios-template"),
+                .target(name: "App"),
             ]
         ),
     ]
