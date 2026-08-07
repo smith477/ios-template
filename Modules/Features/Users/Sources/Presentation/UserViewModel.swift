@@ -1,6 +1,7 @@
 // UserViewModel.swift
 
 import Foundation
+import Identity
 
 public enum UserLoadingState {
     case loading, loaded, error(Error)

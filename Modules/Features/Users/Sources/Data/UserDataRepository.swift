@@ -1,6 +1,7 @@
 // UserDataRepository.swift
 
 import Foundation
+import Identity
 
 final class UserDataRepository: UserRepository {
     private let apiClient: UserApiClient

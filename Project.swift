@@ -53,8 +53,14 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
 
 let project = Project(
     name: "ios-template",
+    // One scheme per target fills the picker with entries nobody selects on
+    // purpose, including Tuist's internal resource-bundle target. Declare the
+    // App scheme instead; `tuist test` runs every target's tests regardless of
+    // which schemes exist.
+    options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
+        platform("Identity"),
         platform(
             "Persistence",
             coreDataModels: [
@@ -65,6 +71,7 @@ let project = Project(
         feature(
             "Products",
             dependencies: [
+                .target(name: "Identity"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -72,6 +79,7 @@ let project = Project(
         feature(
             "Users",
             dependencies: [
+                .target(name: "Identity"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -123,6 +131,15 @@ let project = Project(
             dependencies: [
                 .target(name: "App"),
             ]
+        ),
+    ],
+    schemes: [
+        .scheme(
+            name: "App",
+            shared: true,
+            buildAction: .buildAction(targets: ["App"]),
+            testAction: .targets(["AppTests", "AppUITests"]),
+            runAction: .runAction(executable: "App")
         ),
     ]
 )

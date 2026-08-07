@@ -1,5 +1,6 @@
 // UserView.swift
 
+import Identity
 import SwiftUI
 
 public struct UserView: View {
