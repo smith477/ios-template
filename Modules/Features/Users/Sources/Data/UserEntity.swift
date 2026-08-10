@@ -14,7 +14,8 @@ final class UserEntity: NSManagedObject {
 }
 
 extension UserEntity {
-    @nonobjc class func fetchRequest() -> NSFetchRequest<UserEntity> {
+    @nonobjc
+    class func fetchRequest() -> NSFetchRequest<UserEntity> {
         NSFetchRequest<UserEntity>(entityName: "UserEntity")
     }
 

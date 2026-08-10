@@ -32,6 +32,7 @@ final class AppContainer {
         do {
             return AppContainer(
                 storageProvider: try StorageProvider(modelName: "ios_template"),
+                // swiftlint:disable:next force_unwrapping - a literal URL that parses or the build is broken
                 apiClient: APIClient(baseURL: URL(string: "https://dummyjson.com")!)
             )
         } catch {

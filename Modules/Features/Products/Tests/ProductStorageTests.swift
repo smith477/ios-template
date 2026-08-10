@@ -1,12 +1,13 @@
 //
 //  ProductStorageTests.swift
-//  AppTests
+//  ProductsTests
 //
 
 import Foundation
 import Persistence
-import Products
 import Testing
+
+@testable import Products
 
 struct ProductStorageTests {
     private func makeProduct(
@@ -35,9 +36,7 @@ struct ProductStorageTests {
     /// deletion took the product with it.
     @Test
     func repeatedSavesKeepTheProduct() async throws {
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template")
-        )
+        let storage = try makeStorage()
         let product = makeProduct()
 
         try await storage.save([product])
@@ -54,9 +53,7 @@ struct ProductStorageTests {
     /// are left alone rather than deleted and rebuilt.
     @Test
     func updateDiffsChildren() async throws {
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template")
-        )
+        let storage = try makeStorage()
 
         try await storage.save([makeProduct(tags: ["a", "b"], images: ["one.jpg", "two.jpg"])])
         try await storage.save([makeProduct(tags: ["b", "c"], images: ["two.jpg"])])
@@ -70,9 +67,7 @@ struct ProductStorageTests {
     /// binary floating point survives the round trip exactly.
     @Test
     func priceRoundTripsExactly() async throws {
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template")
-        )
+        let storage = try makeStorage()
 
         try await storage.save([makeProduct(price: Decimal(string: "19.99")!)])
 

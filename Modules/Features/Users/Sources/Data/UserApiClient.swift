@@ -26,13 +26,13 @@ enum UserEndpoint: Endpoint {
 
     var path: String {
         switch self {
-        case .list: return "/users"
+        case .list: "/users"
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .list: return .GET
+        case .list: .GET
         }
     }
 }

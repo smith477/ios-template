@@ -1,14 +1,15 @@
 //
 //  ProductCachePolicyTests.swift
-//  AppTests
+//  ProductsTests
 //
 
 import APIClient
 import AppKit
 import Foundation
 import Persistence
-import Products
 import Testing
+
+@testable import Products
 
 /// Counts calls so a test can tell a cache hit from a refetch.
 private final class CountingApiClient: ProductApiClient, @unchecked Sendable {
@@ -64,11 +65,8 @@ struct ProductCachePolicyTests {
     func cacheFirstServesFromCacheWhileFresh() async throws {
         let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
         let api = CountingApiClient(products: [makeProduct()])
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template"),
-            dateProvider: clock
-        )
-        let repository = ProductsTesting.makeRepository(
+        let storage = try makeStorage(dateProvider: clock)
+        let repository = ProductDataRepository(
             apiClient: api,
             storage: storage,
             dateProvider: clock
@@ -88,11 +86,8 @@ struct ProductCachePolicyTests {
     func cacheFirstRefetchesOnceStale() async throws {
         let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
         let api = CountingApiClient(products: [makeProduct()])
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template"),
-            dateProvider: clock
-        )
-        let repository = ProductsTesting.makeRepository(
+        let storage = try makeStorage(dateProvider: clock)
+        let repository = ProductDataRepository(
             apiClient: api,
             storage: storage,
             dateProvider: clock
@@ -110,11 +105,8 @@ struct ProductCachePolicyTests {
     func reloadAlwaysRefetches() async throws {
         let clock = FixedDateProvider(Date(timeIntervalSince1970: 1_000_000))
         let api = CountingApiClient(products: [makeProduct()])
-        let storage = ProductsTesting.makeStorage(
-            storageProvider: try .inMemory(modelName: "ios_template"),
-            dateProvider: clock
-        )
-        let repository = ProductsTesting.makeRepository(
+        let storage = try makeStorage(dateProvider: clock)
+        let repository = ProductDataRepository(
             apiClient: api,
             storage: storage,
             dateProvider: clock

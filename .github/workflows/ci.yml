@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # mise pins swiftlint and swiftformat in mise.toml, so CI and a
+      # developer machine run the same versions.
+      - uses: jdx/mise-action@v2
+
+      - name: SwiftFormat
+        run: mise exec -- swiftformat . --lint
+
+      - name: SwiftLint
+        run: mise exec -- swiftlint lint --strict
+
+  test:
+    name: Build and test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      # The runner defaults to Xcode 16, which cannot build an iOS 26
+      # deployment target. Several Xcode 26 point releases are installed as
+      # Xcode_26.x.app; pick the newest rather than pinning a version the
+      # image will eventually drop.
+      - name: Select Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          echo "Selecting $xcode"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      # Resolves the Swift packages into Tuist/.build, which is gitignored and
+      # so absent on a fresh checkout.
+      - name: Resolve dependencies
+        run: mise exec -- tuist install
+
+      - name: Generate project
+        run: mise exec -- tuist generate --no-open
+
+      # The boundary the module graph depends on: a target that uses a module
+      # it does not declare would otherwise compile here and break when the
+      # module is copied into another project.
+      - name: Check for implicit dependencies
+        run: mise exec -- tuist inspect implicit-imports
+
+      - name: Test
+        run: mise exec -- tuist test App --no-selective-testing --device "iPhone 17 Pro"

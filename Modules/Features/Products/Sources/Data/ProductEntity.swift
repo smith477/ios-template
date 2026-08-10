@@ -20,35 +20,44 @@ public class ProductEntity: NSManagedObject {
 }
 
 public extension ProductEntity {
-    @nonobjc class func fetchRequest() -> NSFetchRequest<ProductEntity> {
+    @nonobjc
+    class func fetchRequest() -> NSFetchRequest<ProductEntity> {
         NSFetchRequest<ProductEntity>(entityName: "ProductEntity")
     }
 }
 
 extension ProductEntity {
     @objc(addImagesObject:)
-    @NSManaged func addToImages(_ value: ProductImagesEntity)
+    @NSManaged
+    func addToImages(_ value: ProductImagesEntity)
 
     @objc(removeImagesObject:)
-    @NSManaged func removeFromImages(_ value: ProductImagesEntity)
+    @NSManaged
+    func removeFromImages(_ value: ProductImagesEntity)
 
     @objc(addImages:)
-    @NSManaged func addToImages(_ values: NSSet)
+    @NSManaged
+    func addToImages(_ values: NSSet)
 
     @objc(removeImages:)
-    @NSManaged func removeFromImages(_ values: NSSet)
+    @NSManaged
+    func removeFromImages(_ values: NSSet)
 
     @objc(addTagsObject:)
-    @NSManaged func addToTags(_ value: ProductTagsEntity)
+    @NSManaged
+    func addToTags(_ value: ProductTagsEntity)
 
     @objc(removeTagsObject:)
-    @NSManaged func removeFromTags(_ value: ProductTagsEntity)
+    @NSManaged
+    func removeFromTags(_ value: ProductTagsEntity)
 
     @objc(addTags:)
-    @NSManaged func addToTags(_ values: NSSet)
+    @NSManaged
+    func addToTags(_ values: NSSet)
 
     @objc(removeTags:)
-    @NSManaged func removeFromTags(_ values: NSSet)
+    @NSManaged
+    func removeFromTags(_ values: NSSet)
 }
 
 extension ProductEntity {
@@ -59,11 +68,11 @@ extension ProductEntity {
             description: productDescription ?? "",
             category: category ?? "",
             price: price as Decimal,
-            tags: tags.compactMap { $0.tag },
+            tags: tags.compactMap(\.tag),
             brand: brand ?? "",
             meta: meta?.toDomain() ?? Meta(createdAt: Date(), updatedAt: Date()),
             thumbnail: thumbnail ?? "",
-            images: images.compactMap { $0.image }
+            images: images.compactMap(\.image)
         )
     }
 
@@ -141,7 +150,8 @@ public class MetaEntity: NSManagedObject {
 }
 
 extension MetaEntity {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<MetaEntity> {
+    @nonobjc
+    public class func fetchRequest() -> NSFetchRequest<MetaEntity> {
         NSFetchRequest<MetaEntity>(entityName: "MetaEntity")
     }
 
@@ -159,7 +169,8 @@ public class ProductImagesEntity: NSManagedObject {
 }
 
 public extension ProductImagesEntity {
-    @nonobjc class func fetchRequest() -> NSFetchRequest<ProductImagesEntity> {
+    @nonobjc
+    class func fetchRequest() -> NSFetchRequest<ProductImagesEntity> {
         NSFetchRequest<ProductImagesEntity>(entityName: "ProductImagesEntity")
     }
 }
@@ -173,7 +184,8 @@ public class ProductTagsEntity: NSManagedObject {
 }
 
 public extension ProductTagsEntity {
-    @nonobjc class func fetchRequest() -> NSFetchRequest<ProductTagsEntity> {
+    @nonobjc
+    class func fetchRequest() -> NSFetchRequest<ProductTagsEntity> {
         NSFetchRequest<ProductTagsEntity>(entityName: "ProductTagsEntity")
     }
 }

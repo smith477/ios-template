@@ -59,6 +59,33 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
     )
 }
 
+// A module's tests live beside it and use @testable, so a module needs no
+// public surface for the sake of being tested. Tests that span modules — the
+// container, routing — belong to the App target instead.
+func tests(
+    for name: String,
+    at path: String,
+    dependencies: [TargetDependency] = []
+) -> Target {
+    .target(
+        name: "\(name)Tests",
+        destinations: destinations,
+        product: .unitTests,
+        bundleId: "dusan.kovacevic.\(name.lowercased()).tests",
+        deploymentTargets: deploymentTargets,
+        sources: ["Modules/\(path)/\(name)/Tests/**"],
+        dependencies: [.target(name: name)] + dependencies
+    )
+}
+
+func featureTests(_ name: String, dependencies: [TargetDependency] = []) -> Target {
+    tests(for: name, at: "Features", dependencies: dependencies)
+}
+
+func platformTests(_ name: String, dependencies: [TargetDependency] = []) -> Target {
+    tests(for: name, at: "Platform", dependencies: dependencies)
+}
+
 let project = Project(
     name: "ios-template",
     // One scheme per target fills the picker with entries nobody selects on
@@ -96,6 +123,16 @@ let project = Project(
             ]
         ),
 
+        featureTests(
+            "Products",
+            dependencies: [
+                .target(name: "AppKit"),
+                .target(name: "Persistence"),
+                .external(name: "APIClient"),
+            ]
+        ),
+        platformTests("AppKit"),
+
         .target(
             name: "App",
             destinations: destinations,
@@ -131,7 +168,6 @@ let project = Project(
                 .target(name: "App"),
                 .target(name: "Products"),
                 .target(name: "Users"),
-                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
@@ -153,7 +189,7 @@ let project = Project(
             name: "App",
             shared: true,
             buildAction: .buildAction(targets: ["App"]),
-            testAction: .targets(["AppTests", "AppUITests"]),
+            testAction: .targets(["AppTests", "ProductsTests", "AppKitTests", "AppUITests"]),
             runAction: .runAction(executable: "App")
         ),
     ]

@@ -1,0 +1,46 @@
+# Matches the style already in the tree rather than imposing a new one.
+
+--swiftversion 6.0
+
+--exclude Derived,Tuist/.build,.build,**/Derived
+
+# Tuist regenerates these; formatting them churns the diff for no gain.
+
+--indent 4
+--maxwidth 140
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--commas always
+--trimwhitespace always
+--stripunusedargs closure-only
+--self remove
+--importgrouping alphabetized
+--patternlet inline
+--funcattributes prev-line
+--typeattributes prev-line
+--storedvarattrs same-line
+
+--disable blankLinesAroundMark
+--disable wrapMultilineStatementBraces
+
+# redundantType would strip the explicit types that document intent in this
+# codebase's initialisers.
+--disable redundantType
+
+# `try` stays on the call that throws — `storageProvider: try Storage(...)`
+# says which argument can fail, where hoisting it to the outer expression
+# does not.
+--disable hoistTry
+--disable hoistAwait
+
+# `case let .detail(id)` throughout, rather than `case .detail(let id)`.
+--disable hoistPatternLet
+
+# @testable imports sit last, after a blank line, which alphabetical sorting
+# across the whole block would undo.
+--disable sortImports
+
+# Comments are wrapped by hand where the break belongs, not at a column.
+--disable wrapSingleLineComments
