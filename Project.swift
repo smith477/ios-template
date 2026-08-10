@@ -114,6 +114,7 @@ let project = Project(
             dependencies: [
                 .target(name: "Products"),
                 .target(name: "Users"),
+                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
@@ -129,6 +130,7 @@ let project = Project(
             dependencies: [
                 .target(name: "App"),
                 .target(name: "Products"),
+                .target(name: "Users"),
                 .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),

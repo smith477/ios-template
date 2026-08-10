@@ -11,12 +11,25 @@ public enum UserLoadingState {
 @Observable
 public final class UserViewModel {
     private let repository: UserRepository
+    private let emit: (UserEvent) -> Void
 
     public private(set) var users: [User] = []
     public private(set) var loadingState: UserLoadingState = .loading
 
-    public init(repository: UserRepository) {
+    /// - Parameters:
+    ///   - repository: Source of the user list.
+    ///   - emit: Receives user actions. Defaults to discarding them; see
+    ///     `ProductViewModel.init(repository:emit:)`.
+    public init(
+        repository: UserRepository,
+        emit: @escaping (UserEvent) -> Void = { _ in }
+    ) {
         self.repository = repository
+        self.emit = emit
+    }
+
+    public func didTapUser(id: Int) {
+        emit(.userTapped(id: id))
     }
 
     public func getUsers() async {

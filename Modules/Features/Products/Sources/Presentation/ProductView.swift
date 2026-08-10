@@ -27,7 +27,22 @@ public struct ProductView: View {
 
     private var listView: some View {
         List(viewModel.products) { product in
-            Text(product.title)
+            Button {
+                viewModel.didTapProduct(id: product.id)
+            } label: {
+                HStack {
+                    Text(product.title)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            // Whole row hittable, not just the text.
+            .contentShape(.rect)
+            // Identified by id rather than title: titles come from the API.
+            .accessibilityIdentifier("product-row-\(product.id)")
         }
         .refreshable {
             await viewModel.refresh()
