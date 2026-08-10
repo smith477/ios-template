@@ -85,7 +85,7 @@ extension ProductResponse {
     }
 }
 
-extension Array where Element == ProductResponse {
+extension [ProductResponse] {
     func toDomain() -> [Product] {
         map { $0.toDomain() }
     }

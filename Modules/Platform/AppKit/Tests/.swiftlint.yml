@@ -1,0 +1,8 @@
+# Inherits the root configuration. A force unwrap or force try in a test fails
+# that test immediately and never ships, so those rules are off here.
+parent_config: ../.swiftlint.yml
+
+disabled_rules:
+  - force_unwrapping
+  - force_cast
+  - force_try
