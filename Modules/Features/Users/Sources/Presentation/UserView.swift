@@ -28,12 +28,23 @@ public struct UserView: View {
 
     private var listView: some View {
         List(viewModel.users) { user in
-            VStack(alignment: .leading) {
-                Text(user.fullName)
-                Text(user.email)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            Button {
+                viewModel.didTapUser(id: user.id)
+            } label: {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(user.fullName)
+                        Text(user.email)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
+            .buttonStyle(.plain)
         }
     }
 }

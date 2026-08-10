@@ -10,12 +10,26 @@ public enum ProductLoadingState {
 @Observable
 public final class ProductViewModel {
     private let repository: ProductRepository
+    private let emit: (ProductEvent) -> Void
 
     public private(set) var products: [Product] = []
     public private(set) var loadingState: ProductLoadingState = .loading
 
-    public init(repository: ProductRepository) {
+    /// - Parameters:
+    ///   - repository: Source of the product list.
+    ///   - emit: Receives user actions. Defaults to discarding them so
+    ///     previews and tests need no navigation wiring; omitting it in an app
+    ///     produces a screen whose buttons do nothing.
+    public init(
+        repository: ProductRepository,
+        emit: @escaping (ProductEvent) -> Void = { _ in }
+    ) {
         self.repository = repository
+        self.emit = emit
+    }
+
+    public func didTapProduct(id: Int) {
+        emit(.productTapped(id: id))
     }
 
     public func getProducts() async {

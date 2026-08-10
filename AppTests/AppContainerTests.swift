@@ -42,6 +42,9 @@ struct AppContainerTests {
             apiClient: APIClient(baseURL: URL(string: "https://example.invalid")!)
         )
 
-        _ = Products.viewModel(stub)
+        // This test is about the dependency seam, not navigation, so events
+        // go nowhere. `emit` has no default at this entry point precisely so
+        // that ignoring them has to be written down.
+        _ = Products.viewModel(stub, emit: { _ in })
     }
 }
