@@ -89,9 +89,8 @@ func platformTests(_ name: String, dependencies: [TargetDependency] = []) -> Tar
 let project = Project(
     name: "ios-template",
     // One scheme per target fills the picker with entries nobody selects on
-    // purpose, including Tuist's internal resource-bundle target. Declare the
-    // App scheme instead; `tuist test` runs every target's tests regardless of
-    // which schemes exist.
+    // purpose, including Tuist's internal resource-bundle target. The schemes
+    // this project wants are declared at the bottom of this file instead.
     options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
@@ -185,6 +184,7 @@ let project = Project(
         ),
     ],
     schemes: [
+        // Everything: what CI runs, and the scheme to pick when running the app.
         .scheme(
             name: "App",
             shared: true,
@@ -192,5 +192,23 @@ let project = Project(
             testAction: .targets(["AppTests", "ProductsTests", "AppKitTests", "AppUITests"]),
             runAction: .runAction(executable: "App")
         ),
+
+        // One scheme per test bundle, so a module's tests can be run on their
+        // own from the scheme picker without waiting for the rest. Declared
+        // rather than generated: automatic schemes would also add one for
+        // every framework and for Tuist's internal resource-bundle target.
+        testScheme("ProductsTests"),
+        testScheme("AppKitTests"),
+        testScheme("AppTests"),
+        testScheme("AppUITests"),
     ]
 )
+
+func testScheme(_ target: String) -> Scheme {
+    .scheme(
+        name: target,
+        shared: true,
+        buildAction: .buildAction(targets: ["\(target)"]),
+        testAction: .targets(["\(target)"])
+    )
+}
