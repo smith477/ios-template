@@ -3,10 +3,10 @@
 import SwiftUI
 
 public struct ProductDetailView: View {
-    @State private var viewModel: ProductDetailViewModel
+    private let viewModel: ProductDetailViewModel
 
     public init(viewModel: ProductDetailViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
