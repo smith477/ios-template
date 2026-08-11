@@ -41,11 +41,11 @@ public struct ProductView: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
+                // Must be inside the label: `.plain` hit-tests the label's own
+                // shape, so outside the Button the row's gaps ignore taps.
+                .contentShape(.rect)
             }
             .buttonStyle(.plain)
-            // Whole row hittable, not just the text.
-            .contentShape(.rect)
-            // Identified by id rather than title: titles come from the API.
             .accessibilityIdentifier("product-row-\(product.id)")
         }
         .refreshable {

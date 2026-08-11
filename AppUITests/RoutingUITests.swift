@@ -6,37 +6,32 @@
 import XCTest
 
 /// End-to-end coverage of navigation, which the unit tests cannot reach: they
-/// assert that `AppRouter` mutates its stacks, not that SwiftUI accepts those
-/// stacks as bindings or that a push renders.
-///
-/// Limited to the cross-feature flow — list, detail, then a seller's profile
-/// pushed on top — as the path most likely to break without a unit test
-/// noticing. It is the one flow where a stack renders another feature's route,
-/// so it is what would break if a destination went unregistered.
+/// assert that `AppRouter` mutates its stacks, not that a push renders.
 final class RoutingUITests: XCTestCase {
-    /// Whether `testTappingASellerPushesTheProfile` can pass. See its
-    /// documentation.
-    private static let sellerRowIsTappableUnderTest = false
+    /// Whether the app can get past its first screen. See
+    /// `testTappingASellerPushesTheProfile`.
+    private static let appLoadsPastTheProductList = false
 
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
 
-    /// Verifies that tapping a product opens its detail screen, that tapping
-    /// the seller there pushes that user's profile on top of it, and that Back
-    /// returns to the product rather than leaving the Products tab.
+    /// Tapping a product opens its detail, tapping the seller pushes that
+    /// user's profile on top of it, and Back returns to the product rather
+    /// than leaving the Products tab.
     ///
-    /// - Warning: Skipped — this test does not currently pass, and a green
-    ///   suite does not cover this flow. Tapping the seller row has no effect
-    ///   under `XCUITest`, though the flow works when the app is driven by
-    ///   hand. Orientation, the element query, accessibility grouping,
-    ///   coordinate taps, and the load guard in `didTapSeller` have all been
-    ///   excluded. The same button pattern in `ProductView` works, leaving the
-    ///   `Section` wrapper in `ProductDetailView` as the remaining difference
-    ///   to investigate.
+    /// - Warning: Skipped, and a green suite does not cover this flow. Two
+    ///   separate defects sat behind the original skip. The first is fixed:
+    ///   both rows applied `.contentShape(.rect)` to the `Button` instead of
+    ///   its label, so a `.plain` button hit-tested only its opaque subviews
+    ///   and most of each row ignored taps. The second is open: once a screen
+    ///   is pushed, the app freezes — the pushed view sits on a spinner, the
+    ///   tab bar and Back stop responding, and `sample` shows every thread
+    ///   parked with no app code running. It reproduces by hand and on a
+    ///   baseline build with none of these changes, so it predates them.
     @MainActor
     func testTappingASellerPushesTheProfile() throws {
-        try XCTSkipUnless(Self.sellerRowIsTappableUnderTest)
+        try XCTSkipUnless(Self.appLoadsPastTheProductList)
 
         // The runner inherits the simulator's last orientation; landscape
         // moves the rows out from under the taps below.
