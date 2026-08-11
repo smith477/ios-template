@@ -152,6 +152,16 @@ let project = Project(
                 // Tuist's default plist requires armv7, which no simulator
                 // reports — it hides every simulator from the run destinations.
                 "UIRequiredDeviceCapabilities": ["arm64"],
+                // Deep links: `template://products/7`. Claiming a custom scheme
+                // is first-come on device, so a shipping app wants a name it
+                // owns, or universal links, which prove the association.
+                // `DeepLink` parses what arrives here.
+                "CFBundleURLTypes": [
+                    [
+                        "CFBundleURLName": "dusan.kovacevic.ios-template",
+                        "CFBundleURLSchemes": ["template"],
+                    ],
+                ],
             ]),
             sources: ["App/**"],
             resources: ["App/Assets.xcassets"],

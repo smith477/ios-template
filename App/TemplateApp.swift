@@ -51,6 +51,12 @@ struct TemplateApp: App {
             // The tab bar shrinks out of the way on a downward scroll and
             // returns on the way back up.
             .tabBarMinimizeBehavior(.onScrollDown)
+            // Deep links, whether the app was launched by one or was already
+            // running. Attached outside the `TabView` so that a link arriving
+            // while a stack is deep is still handled — the tab it names may
+            // not be the one on screen. A URL the app cannot parse is left
+            // alone rather than navigating somewhere approximate.
+            .onOpenURL { router.open($0) }
         }
     }
 }
