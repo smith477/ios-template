@@ -3,48 +3,20 @@
 import CoreData
 import Foundation
 
-/// Encapsulates the Core Data stack and provides access to managed object contexts.
-///
-/// Use `viewContext` for read operations on the main thread.
-/// Use `performBackground(_:)` for write operations or heavy reads.
-///
-/// Example:
-/// ```swift
-/// let provider = try StorageProvider(modelName: "MyApp")
-///
-/// // Reading on main thread
-/// let request = ItemEntity.fetchRequest()
-/// let items = try provider.viewContext.fetch(request)
-///
-/// // Writing on background
-/// try await provider.performBackground { context in
-///     let entity = ItemEntity(context: context)
-///     entity.name = "New Item"
-///     try context.save()
-/// }
-/// ```
+/// Encapsulates the Core Data stack: `viewContext` for main-thread reads,
+/// `performBackground(_:)` for writes and heavy reads.
 public final class StorageProvider: @unchecked Sendable {
     private let persistentContainer: NSPersistentContainer
 
-    /// The main queue context for UI operations.
-    /// Only access managed objects fetched from this context on the main thread.
+    /// Managed objects fetched here may only be touched on the main thread.
     public var viewContext: NSManagedObjectContext {
         persistentContainer.viewContext
     }
 
-    /// The bundle holding this module's Core Data model.
-    ///
     /// The model ships in this module's resource bundle rather than the app's,
     /// so `Bundle.main` will not find it.
     public static var modelBundle: Bundle { .module }
 
-    /// Creates a StorageProvider with the specified model name.
-    /// - Parameters:
-    ///   - modelName: Name of your .xcdatamodeld file without extension
-    ///   - inMemory: When true, uses in-memory store instead of SQLite
-    ///   - bundle: Bundle containing the model file
-    /// - Throws: `StorageError.modelNotFound` if the model is missing from the
-    ///   bundle, or `StorageError.storeLoadFailed` if the store cannot be opened.
     public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) {
         guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelURL)
@@ -74,15 +46,8 @@ public final class StorageProvider: @unchecked Sendable {
         persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
 
-    /// Executes a closure on a private background context.
-    ///
-    /// Use this method for write operations or expensive reads to avoid blocking the main thread.
-    /// The closure executes synchronously on the context's private queue.
-    /// Changes are not automatically saved - call `context.save()` within the closure.
-    ///
-    /// - Parameter block: A closure that receives the background context and returns a value.
-    /// - Returns: The value returned by the closure.
-    /// - Throws: Rethrows any error thrown by the closure.
+    /// Executes `block` on a private background context. Changes are not saved
+    /// automatically — call `context.save()` inside the closure.
     public func performBackground<T: Sendable>(
         _ block: @escaping @Sendable (NSManagedObjectContext) throws -> T
     ) async throws -> T {
@@ -93,8 +58,7 @@ public final class StorageProvider: @unchecked Sendable {
         }
     }
 
-    /// Creates an in-memory StorageProvider for unit testing.
-    /// Each call creates a fresh, isolated store.
+    /// A fresh, isolated in-memory store for unit testing.
     public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) -> StorageProvider {
         try StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
     }

@@ -18,11 +18,8 @@ public final class ProductDetailViewModel {
 
     public private(set) var state: ProductDetailState = .loading
 
-    /// - Parameters:
-    ///   - repository: Source of the product.
-    ///   - id: Which product to show.
-    ///   - emit: Receives user actions. Defaults to discarding them; see
-    ///     `ProductViewModel.init(repository:emit:)`.
+    /// - Parameter emit: Receives user actions, discarded by default so
+    ///   previews and tests need no navigation wiring.
     public init(
         repository: ProductRepository,
         id: Int,
@@ -51,12 +48,9 @@ public final class ProductDetailViewModel {
         emit(.sellerTapped(userId: Self.sellerId(for: product)))
     }
 
-    /// A placeholder seller, derived from the product so that it varies
-    /// between products and is stable for any one of them.
-    ///
-    /// - Note: The API exposes no seller relationship. Replace this with
-    ///   `product.sellerId` once it does. The range matches the user ids the
-    ///   users endpoint returns (1...30).
+    /// A placeholder seller: the API exposes no seller relationship, so this
+    /// derives a stable id in the range the users endpoint returns (1...30).
+    /// Replace with `product.sellerId` once the API has one.
     private static func sellerId(for product: Product) -> Int {
         product.id % 30 + 1
     }

@@ -13,21 +13,17 @@ public protocol ProductStorage: Sendable {
     func delete(id: Int) async throws(StorageError)
     func deleteAll() async throws(StorageError)
 
-    /// When `save(_:)` last completed, or nil if nothing has been cached.
-    ///
-    /// This is the cache's own age. `Meta.updatedAt` comes from the API and
-    /// describes the product, not when it was last read.
+    /// When `save(_:)` last completed — the cache's own age, unlike
+    /// `Meta.updatedAt`, which comes from the API and describes the product.
     func lastSavedAt() async -> Date?
 }
 
-/// Records when the products cache was last written.
+/// Records when the products cache was last written. Persists a timestamp
+/// only; the clock itself is `DateProvider`, so a test can set "now" without
+/// faking the stored value.
 ///
-/// This persists a timestamp; it does not read the current time. The clock
-/// itself is `DateProvider` — keeping the two apart is what lets a test set
-/// "now" without also having to fake the stored value.
-///
-/// `UserDefaults` is documented as thread-safe but is not marked `Sendable`,
-/// so the conformance is asserted here rather than at every use site.
+/// `UserDefaults` is thread-safe but unmarked, so `Sendable` is asserted here
+/// rather than at every use site.
 struct ProductCacheTimestamp: @unchecked Sendable {
     private let defaults: UserDefaults
     private let key = "products.lastSavedAt"

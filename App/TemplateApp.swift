@@ -12,11 +12,8 @@ struct TemplateApp: App {
     @State private var container: AppContainer
     @State private var router: AppRouter
 
-    // Each tab's root view model is built once and kept, rather than rebuilt
-    // every time `body` runs. A view holds its view model with `let` and does
-    // not own its lifetime, so whoever constructs it has to keep it alive —
-    // otherwise every re-render would hand the view a new one and restart its
-    // work.
+    // Built once and kept: a view holds its view model with `let` and does not
+    // own its lifetime, so rebuilding these per render would restart their work.
     @State private var products: ProductViewModel
     @State private var users: UserViewModel
 
@@ -48,28 +45,18 @@ struct TemplateApp: App {
                     }
                 }
             }
-            // The tab bar shrinks out of the way on a downward scroll and
-            // returns on the way back up.
             .tabBarMinimizeBehavior(.onScrollDown)
-            // Deep links, whether the app was launched by one or was already
-            // running. Attached outside the `TabView` so that a link arriving
-            // while a stack is deep is still handled — the tab it names may
-            // not be the one on screen. A URL the app cannot parse is left
-            // alone rather than navigating somewhere approximate.
+            // Outside the `TabView` so a link naming a tab other than the one
+            // on screen is still handled.
             .onOpenURL { router.open($0) }
         }
     }
 }
 
 private extension View {
-    /// Registers every feature's routes on a navigation stack.
-    ///
-    /// Both stacks register all destinations because either can show either
-    /// feature's screens — a product's seller opens a user profile.
-    ///
-    /// Unlike the tab roots, these view models are built here rather than held:
-    /// SwiftUI calls this closure once per pushed route value and keeps the
-    /// result for as long as that screen is on the stack.
+    /// Registers every feature's routes on a navigation stack. Both stacks
+    /// register all destinations because either can show either feature's
+    /// screens — a product's seller opens a user profile.
     func navigationDestinations(container: AppContainer, router: AppRouter) -> some View {
         navigationDestination(for: AnyRoute.self) { route in
             switch route {
