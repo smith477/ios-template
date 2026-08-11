@@ -50,9 +50,8 @@ public struct ProductDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// The image runs to both edges and continues behind the navigation bar:
-    /// `backgroundExtensionEffect` mirrors and blurs it outwards rather than
-    /// leaving a hard edge under the bar's glass.
+    /// `backgroundExtensionEffect` mirrors and blurs the image outwards rather
+    /// than leaving a hard edge under the navigation bar's glass.
     private func hero(_ product: Product) -> some View {
         ProductImage(url: product.thumbnail)
             .frame(height: 280)
@@ -61,9 +60,6 @@ public struct ProductDetailView: View {
             .backgroundExtensionEffect()
     }
 
-    /// A glass surface rather than a list row — the one place this screen asks
-    /// for the material explicitly instead of inheriting it from a standard
-    /// control.
     private var sellerRow: some View {
         Button {
             viewModel.didTapSeller()
@@ -76,9 +72,10 @@ public struct ProductDetailView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding()
+            // Inside the label, for the same reason as the rows in `ProductView`.
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .contentShape(.rect)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
         .accessibilityIdentifier("seller-row")
     }
