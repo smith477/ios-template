@@ -30,7 +30,11 @@ public struct ProductView: View {
             Button {
                 viewModel.didTapProduct(id: product.id)
             } label: {
-                HStack {
+                HStack(spacing: 12) {
+                    ProductImage(url: product.thumbnail)
+                        .frame(width: 44, height: 44)
+                        .clipShape(.rect(cornerRadius: 8))
+
                     Text(product.title)
                     Spacer()
                     Image(systemName: "chevron.right")

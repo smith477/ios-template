@@ -28,31 +28,58 @@ public struct ProductDetailView: View {
     }
 
     private func detail(_ product: Product) -> some View {
-        List {
-            Section {
-                Text(product.title).font(.headline)
-                Text(product.description)
-                Text(product.price, format: .currency(code: "USD"))
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                hero(product)
 
-            Section {
-                Button {
-                    viewModel.didTapSeller()
-                } label: {
-                    HStack {
-                        Label("Seller", systemImage: "person.crop.circle")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(product.title).font(.title2.weight(.semibold))
+                    Text(product.price, format: .currency(code: "USD"))
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Text(product.description)
                 }
-                .buttonStyle(.plain)
-                .contentShape(.rect)
-                .accessibilityIdentifier("seller-row")
+                .padding(.horizontal)
+
+                sellerRow
+                    .padding(.horizontal)
             }
+            .padding(.bottom, 32)
         }
         .navigationTitle(product.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// The image runs to both edges and continues behind the navigation bar:
+    /// `backgroundExtensionEffect` mirrors and blurs it outwards rather than
+    /// leaving a hard edge under the bar's glass.
+    private func hero(_ product: Product) -> some View {
+        ProductImage(url: product.thumbnail)
+            .frame(height: 280)
+            .frame(maxWidth: .infinity)
+            .clipped()
+            .backgroundExtensionEffect()
+    }
+
+    /// A glass surface rather than a list row — the one place this screen asks
+    /// for the material explicitly instead of inheriting it from a standard
+    /// control.
+    private var sellerRow: some View {
+        Button {
+            viewModel.didTapSeller()
+        } label: {
+            HStack {
+                Label("Seller", systemImage: "person.crop.circle")
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding()
+        }
+        .buttonStyle(.plain)
+        .contentShape(.rect)
+        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+        .accessibilityIdentifier("seller-row")
     }
 }
