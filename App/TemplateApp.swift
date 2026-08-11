@@ -48,6 +48,9 @@ struct TemplateApp: App {
                     }
                 }
             }
+            // The tab bar shrinks out of the way on a downward scroll and
+            // returns on the way back up.
+            .tabBarMinimizeBehavior(.onScrollDown)
         }
     }
 }
