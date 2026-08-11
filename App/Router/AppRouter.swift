@@ -70,7 +70,25 @@ final class AppRouter {
         }
     }
 
+    /// Pops `tab` back to its root.
+    ///
+    /// - Parameter tab: The tab whose stack to empty. Does not change the
+    ///   selected tab.
+    func clearStack(_ tab: Tab) {
+        switch tab {
+        case .products: productsStack = []
+        case .users: usersStack = []
+        }
+    }
+
     /// Shows `route` in `tab`, selecting that tab first.
+    ///
+    /// For destinations the user asked to go to outright — a deep link, a
+    /// notification tap — not for a screen that belongs to the one on display.
+    /// Pushing a related screen onto the current stack, as a product's seller
+    /// does, keeps Back pointing at where the user came from; crossing tabs
+    /// would strand them in a tab with no way back. `open(_:)` is the caller;
+    /// no feature event maps here, and one that did would be worth questioning.
     ///
     /// When `tab` is not already selected, `route` **replaces** its stack: the
     /// user arrives on the screen they asked for rather than on top of screens
