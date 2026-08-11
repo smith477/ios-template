@@ -4,10 +4,10 @@ import Identity
 import SwiftUI
 
 public struct UserView: View {
-    @State private var viewModel: UserViewModel
+    private let viewModel: UserViewModel
 
     public init(viewModel: UserViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
