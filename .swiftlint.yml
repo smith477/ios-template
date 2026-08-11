@@ -70,8 +70,11 @@ identifier_name:
 nesting:
   type_level: 2
 
+# Errors, not warnings: a force unwrap in shipping code is a crash with no
+# explanation. Trap deliberately with `fatalError` and say what broke instead.
+# The test bundles relax these in their own nested configs.
 force_unwrapping:
-  severity: warning
+  severity: error
 
-force_cast: warning
-force_try: warning
+force_cast: error
+force_try: error
