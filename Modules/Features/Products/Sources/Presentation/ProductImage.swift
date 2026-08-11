@@ -3,16 +3,12 @@
 import SwiftUI
 
 /// A product image loaded from its URL, with a placeholder while it loads and
-/// wherever there is no usable URL.
+/// wherever there is no usable URL — the domain model maps a missing image
+/// to `""`.
 ///
-/// An empty string is a normal value here rather than an error: the domain
-/// model maps a missing image to `""`, so a product with no picture arrives
-/// looking the same as one whose download failed.
-///
-/// - Note: `AsyncImage` does no caching of its own beyond `URLSession`'s small
-///   default, so scrolling a long list refetches. That is left as it is: a
-///   template should not ship an image cache its users have to understand
-///   before replacing it with whichever one they already use.
+/// - Note: `AsyncImage` caches no further than `URLSession`'s small default,
+///   so a long list refetches while scrolling. Left for whoever adopts this
+///   template to replace with their own image cache.
 struct ProductImage: View {
     let url: String
     var contentMode: ContentMode = .fill

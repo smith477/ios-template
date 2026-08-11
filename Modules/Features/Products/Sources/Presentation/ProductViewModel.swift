@@ -15,11 +15,9 @@ public final class ProductViewModel {
     public private(set) var products: [Product] = []
     public private(set) var loadingState: ProductLoadingState = .loading
 
-    /// - Parameters:
-    ///   - repository: Source of the product list.
-    ///   - emit: Receives user actions. Defaults to discarding them so
-    ///     previews and tests need no navigation wiring; omitting it in an app
-    ///     produces a screen whose buttons do nothing.
+    /// - Parameter emit: Receives user actions, discarded by default so
+    ///   previews and tests need no navigation wiring. Omitting it in an app
+    ///   produces a screen whose buttons do nothing.
     public init(
         repository: ProductRepository,
         emit: @escaping (ProductEvent) -> Void = { _ in }

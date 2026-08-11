@@ -4,15 +4,8 @@ import Foundation
 
 /// A person, as more than one feature understands them.
 ///
-/// This type started inside the Users feature and moved here when Products
-/// needed it too. That is the admission rule for this module and every other
-/// module under Platform: a type moves out when a *second* feature already
-/// needs it, never in anticipation. Value types only — no services, no
-/// networking, no persistence.
-///
-/// The module is named Identity rather than Shared or Common because a name
-/// that describes its contents is the thing that keeps unrelated types from
-/// accumulating in it.
+/// Admission rule for Platform modules: a type moves here once a *second*
+/// feature needs it, never in anticipation. Value types only.
 public struct User: Identifiable, Sendable, Hashable {
     public let id: Int
     public let firstName: String
