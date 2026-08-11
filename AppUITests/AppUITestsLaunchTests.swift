@@ -2,8 +2,6 @@
 //  AppUITestsLaunchTests.swift
 //  AppUITests
 //
-//  Created by Dusan Kovacevic on 05/12/2025.
-//
 
 import XCTest
 

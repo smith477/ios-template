@@ -17,6 +17,14 @@ import ProjectDescription
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
+// Tests run on iPhone 17 Pro. `tuist test` otherwise picks whichever
+// simulator happens to be booted, and a device on an older screen geometry
+// puts UI-test taps in the wrong place:
+//
+//     tuist test App --device "iPhone 17 Pro"
+//
+// The CI workflow passes the same flag.
+
 let baseSettings: SettingsDictionary = [
     "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
 ].swiftVersion("6.0")
