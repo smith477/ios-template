@@ -20,19 +20,24 @@ final class AppContainer {
         self.apiClient = apiClient
     }
 
-    /// The production container. A store that cannot be opened leaves the app
-    /// with no data, so this traps rather than pretending otherwise.
+    /// The production container. Both failures here leave the app with nothing
+    /// to show, so each traps with the reason rather than pretending otherwise.
     static func live() -> AppContainer {
+        guard let baseURL = URL(string: baseURLString) else {
+            fatalError("Malformed API base URL: \(baseURLString)")
+        }
+
         do {
             return AppContainer(
                 storageProvider: try StorageProvider(modelName: "ios_template"),
-                // swiftlint:disable:next force_unwrapping - a literal URL that parses or the build is broken
-                apiClient: APIClient(baseURL: URL(string: "https://dummyjson.com")!)
+                apiClient: APIClient(baseURL: baseURL)
             )
         } catch {
-            preconditionFailure("Could not open the Core Data store: \(error)")
+            fatalError("Could not open the Core Data store: \(error)")
         }
     }
+
+    private static let baseURLString = "https://dummyjson.com"
 }
 
 extension AppContainer: ProductsDependencies {}
