@@ -9,10 +9,12 @@ import XCTest
 /// assert that `AppRouter` mutates its stacks, not that SwiftUI accepts those
 /// stacks as bindings or that a push renders.
 ///
-/// Limited to the cross-feature flow — list, detail, then a seller in another
-/// tab — as the path most likely to break without a unit test noticing.
+/// Limited to the cross-feature flow — list, detail, then a seller's profile
+/// pushed on top — as the path most likely to break without a unit test
+/// noticing. It is the one flow where a stack renders another feature's route,
+/// so it is what would break if a destination went unregistered.
 final class RoutingUITests: XCTestCase {
-    /// Whether `testTappingASellerCrossesToTheUsersTab` can pass. See its
+    /// Whether `testTappingASellerPushesTheProfile` can pass. See its
     /// documentation.
     private static let sellerRowIsTappableUnderTest = false
 
@@ -20,8 +22,9 @@ final class RoutingUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// Verifies that tapping a product opens its detail screen, and that
-    /// tapping the seller there lands on that user's profile in the Users tab.
+    /// Verifies that tapping a product opens its detail screen, that tapping
+    /// the seller there pushes that user's profile on top of it, and that Back
+    /// returns to the product rather than leaving the Products tab.
     ///
     /// - Warning: Skipped — this test does not currently pass, and a green
     ///   suite does not cover this flow. Tapping the seller row has no effect
@@ -32,7 +35,7 @@ final class RoutingUITests: XCTestCase {
     ///   `Section` wrapper in `ProductDetailView` as the remaining difference
     ///   to investigate.
     @MainActor
-    func testTappingASellerCrossesToTheUsersTab() throws {
+    func testTappingASellerPushesTheProfile() throws {
         try XCTSkipUnless(Self.sellerRowIsTappableUnderTest)
 
         // The runner inherits the simulator's last orientation; landscape
@@ -69,13 +72,25 @@ final class RoutingUITests: XCTestCase {
 
         seller.tap()
 
-        // The profile is reachable only from the Users tab, so its presence
-        // covers the tab switch. `isSelected` on a SwiftUI tab bar is not
-        // dependable. Which user appears depends on live data.
+        // Which user appears depends on live data, so the profile is
+        // identified by its fields rather than by name.
         XCTAssertTrue(
             app.staticTexts["Email"].waitForExistence(timeout: 30),
             "Tapping the seller did not open a user profile."
         )
         XCTAssertTrue(app.staticTexts["Name"].exists)
+
+        // The point of pushing rather than crossing tabs: the profile sits on
+        // the Products stack, so there is a Back button and it leads to the
+        // product. A profile that had replaced the Users tab's stack would be
+        // a root, with nothing to go back to.
+        let back = app.navigationBars.buttons.firstMatch
+        XCTAssertTrue(back.exists, "The pushed profile had no Back button.")
+        back.tap()
+
+        XCTAssertTrue(
+            seller.waitForExistence(timeout: 15),
+            "Going back from the profile did not return to the product."
+        )
     }
 }

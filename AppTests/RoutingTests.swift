@@ -24,16 +24,31 @@ struct AppRouterTests {
         #expect(router.selectedTab == .products)
     }
 
-    /// A Products event resolves to a screen in the Users tab.
+    /// A Products event resolves to another feature's screen, on the Products
+    /// stack: the seller sits above the product rather than in the Users tab,
+    /// so Back returns to the product.
     @Test
-    func aSellerTapCrossesToTheUsersTab() {
+    func aSellerTapPushesTheProfileOntoTheProductsStack() {
         let router = AppRouter()
+        router.handle(.productTapped(id: 7))
 
         router.handle(.sellerTapped(userId: 3))
 
-        #expect(router.selectedTab == .users)
-        #expect(router.usersStack == [.user(.profile(id: 3))])
-        #expect(router.productsStack.isEmpty)
+        #expect(router.productsStack == [.product(.detail(id: 7)), .user(.profile(id: 3))])
+        #expect(router.selectedTab == .products)
+    }
+
+    /// Opening a seller leaves the Users tab as the user left it.
+    @Test
+    func aSellerTapDoesNotDisturbTheUsersTab() {
+        let router = AppRouter()
+        router.handle(.userTapped(id: 8))
+        router.handle(.userTapped(id: 9))
+
+        router.handle(.sellerTapped(userId: 3))
+
+        #expect(router.usersStack == [.user(.profile(id: 8)), .user(.profile(id: 9))])
+        #expect(router.selectedTab == .products)
     }
 
     /// Each tab keeps its own stack.
@@ -49,13 +64,14 @@ struct AppRouterTests {
     }
 
     /// Crossing into an unselected tab replaces whatever it was showing.
+    /// Not reachable through events today; deep linking will call it.
     @Test
     func crossingIntoABusyTabReplacesItsStack() {
         let router = AppRouter()
         router.handle(.userTapped(id: 8))
         router.handle(.userTapped(id: 9))
 
-        router.handle(.sellerTapped(userId: 3))
+        router.crossTo(.user(.profile(id: 3)), in: .users)
 
         #expect(router.usersStack == [.user(.profile(id: 3))])
         #expect(router.selectedTab == .users)
