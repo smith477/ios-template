@@ -118,13 +118,22 @@ wrong place.
 
 Run `mise exec -- tuist generate` first if `Project.swift` changed.
 
-## The skipped UI test
+## The UI test that used to be skipped
 
-`AppUITests/RoutingUITests.swift` gates on
-`private static let appLoadsPastTheProductList = false` and `XCTSkipUnless`. Its
-doc comment records an open defect: once a screen is pushed the app freezes, and
-it reproduces on a baseline build, so it predates the surrounding work.
+`AppUITests/RoutingUITests.swift` was skipped behind
+`appLoadsPastTheProductList = false`, recording a whole-app freeze once a screen
+was pushed. The skip is gone and the test passes: the freeze was really a
+pushed screen that never redrew.
 
-A green suite therefore does not cover that flow. Do not flip the flag or delete
-the skip to make things pass — fixing it means fixing the freeze, and the comment
-is the record of what is known.
+A view must read an `@Observable` view model through a property wrapper for
+SwiftUI to track it. `ProductDetailView` and `UserProfileView` held theirs in a
+plain `let`, so no dependency was registered and neither view was invalidated
+when `state` left `.loading` — the screen drew its `ProgressView` forever while
+the push and the `.task` both ran normally. Both now use `@State`. The root
+views were never affected, because `TemplateApp` holds their view models in
+`@State` already.
+
+Worth knowing when a UI test hangs on a screen that looks stuck: check that the
+view actually observes its view model before suspecting the loading path. The
+data layer was innocent here — `ProductDetailViewModel.load()` against the live
+API and a real store finishes in 0.29s.

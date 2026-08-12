@@ -3,10 +3,13 @@
 import SwiftUI
 
 public struct ProductDetailView: View {
-    private let viewModel: ProductDetailViewModel
+    /// `@State`, not `let`: SwiftUI only tracks an `@Observable` object read
+    /// through a property wrapper, and a pushed screen that holds its view
+    /// model in a plain `let` never redraws when `state` changes.
+    @State private var viewModel: ProductDetailViewModel
 
     public init(viewModel: ProductDetailViewModel) {
-        self.viewModel = viewModel
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {

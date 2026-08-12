@@ -4,10 +4,13 @@ import Identity
 import SwiftUI
 
 public struct UserProfileView: View {
-    private let viewModel: UserProfileViewModel
+    /// `@State` for the same reason as `ProductDetailView`: a pushed screen
+    /// holding its `@Observable` view model in a plain `let` is never
+    /// invalidated when the view model changes.
+    @State private var viewModel: UserProfileViewModel
 
     public init(viewModel: UserProfileViewModel) {
-        self.viewModel = viewModel
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {

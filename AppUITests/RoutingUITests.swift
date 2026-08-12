@@ -5,10 +5,6 @@ import XCTest
 /// End-to-end coverage of navigation, which the unit tests cannot reach: they
 /// assert that `AppRouter` mutates its stacks, not that a push renders.
 final class RoutingUITests: XCTestCase {
-    /// Whether the app can get past its first screen. See
-    /// `testTappingASellerPushesTheProfile`.
-    private static let appLoadsPastTheProductList = false
-
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
@@ -17,19 +13,20 @@ final class RoutingUITests: XCTestCase {
     /// user's profile on top of it, and Back returns to the product rather
     /// than leaving the Products tab.
     ///
-    /// - Warning: Skipped, and a green suite does not cover this flow. Two
-    ///   separate defects sat behind the original skip. The first is fixed:
-    ///   both rows applied `.contentShape(.rect)` to the `Button` instead of
-    ///   its label, so a `.plain` button hit-tested only its opaque subviews
-    ///   and most of each row ignored taps. The second is open: once a screen
-    ///   is pushed, the app freezes — the pushed view sits on a spinner, the
-    ///   tab bar and Back stop responding, and `sample` shows every thread
-    ///   parked with no app code running. It reproduces by hand and on a
-    ///   baseline build with none of these changes, so it predates them.
+    /// Two defects sat behind the skip this test used to carry, and both are
+    /// fixed. The first: both rows applied `.contentShape(.rect)` to the
+    /// `Button` rather than its label, so a `.plain` button hit-tested only its
+    /// opaque subviews and most of each row ignored taps.
+    ///
+    /// The second was described as the app freezing once a screen is pushed.
+    /// It was really a missing observation: a pushed screen held its
+    /// `@Observable` view model in a plain `let`, so SwiftUI never registered a
+    /// dependency on it and the view was never invalidated when `state` left
+    /// `.loading`. The push and the `.task` both ran — the screen just kept
+    /// drawing its `ProgressView` forever. The root views escaped it only
+    /// because `TemplateApp` keeps their view models in `@State`.
     @MainActor
     func testTappingASellerPushesTheProfile() throws {
-        try XCTSkipUnless(Self.appLoadsPastTheProductList)
-
         // The runner inherits the simulator's last orientation; landscape
         // moves the rows out from under the taps below.
         XCUIDevice.shared.orientation = .portrait
