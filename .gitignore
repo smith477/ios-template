@@ -73,3 +73,12 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Claude Code
+#
+# A global gitignore excludes .claude/, but the skills are part of the template
+# and travel with it. Re-include them, and keep local settings out.
+!.claude/
+.claude/*
+!.claude/skills/
+.claude/settings.local.json
