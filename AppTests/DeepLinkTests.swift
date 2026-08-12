@@ -1,7 +1,4 @@
-//
-//  DeepLinkTests.swift
-//  AppTests
-//
+// DeepLinkTests.swift
 
 import Foundation
 import Products

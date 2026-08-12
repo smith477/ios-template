@@ -1,7 +1,4 @@
-//
-//  DateProviderTests.swift
-//  AppKitTests
-//
+// DateProviderTests.swift
 
 import Foundation
 import Testing

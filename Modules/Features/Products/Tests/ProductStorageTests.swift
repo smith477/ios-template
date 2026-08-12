@@ -1,7 +1,4 @@
-//
-//  ProductStorageTests.swift
-//  ProductsTests
-//
+// ProductStorageTests.swift
 
 import Foundation
 import Persistence

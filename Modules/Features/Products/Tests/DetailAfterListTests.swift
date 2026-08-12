@@ -1,7 +1,4 @@
-//
-//  DetailAfterListTests.swift
-//  ProductsTests
-//
+// DetailAfterListTests.swift
 
 import APIClient
 import AppKit

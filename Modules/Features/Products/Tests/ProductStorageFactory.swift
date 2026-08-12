@@ -1,7 +1,4 @@
-//
-//  ProductStorageFactory.swift
-//  ProductsTests
-//
+// ProductStorageFactory.swift
 
 import AppKit
 import Foundation

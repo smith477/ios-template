@@ -1,7 +1,4 @@
-//
-//  AppContainerTests.swift
-//  AppTests
-//
+// AppContainerTests.swift
 
 import APIClient
 import CoreData
@@ -9,6 +6,7 @@ import Foundation
 import Persistence
 import Products
 import Testing
+
 @testable import App
 
 struct AppContainerTests {

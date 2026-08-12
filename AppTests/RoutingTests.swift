@@ -1,7 +1,4 @@
-//
-//  RoutingTests.swift
-//  AppTests
-//
+// RoutingTests.swift
 
 import Foundation
 import Products
