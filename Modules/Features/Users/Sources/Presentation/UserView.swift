@@ -43,6 +43,7 @@ public struct UserView: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
+                .contentShape(.rect)
             }
             .buttonStyle(.plain)
         }
