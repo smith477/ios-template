@@ -1,7 +1,4 @@
-//
-//  ProductCachePolicyTests.swift
-//  ProductsTests
-//
+// ProductCachePolicyTests.swift
 
 import APIClient
 import AppKit

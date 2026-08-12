@@ -1,7 +1,4 @@
-//
-//  TemplateApp.swift
-//  App
-//
+// TemplateApp.swift
 
 import Products
 import SwiftUI

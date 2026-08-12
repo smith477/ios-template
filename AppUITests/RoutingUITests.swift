@@ -1,7 +1,4 @@
-//
-//  RoutingUITests.swift
-//  AppUITests
-//
+// RoutingUITests.swift
 
 import XCTest
 

@@ -1,7 +1,4 @@
-//
-//  ProductEventTests.swift
-//  ProductsTests
-//
+// ProductEventTests.swift
 
 import Foundation
 import Testing
