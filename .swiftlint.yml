@@ -78,3 +78,20 @@ force_unwrapping:
 
 force_cast: error
 force_try: error
+
+# `@unchecked Sendable` asserts thread safety the compiler cannot check, so a
+# wrong assertion is a data race Swift 6 no longer catches. Applies to tests too;
+# docs/agents/conventions.md lists the provable alternatives.
+custom_rules:
+  no_unchecked_sendable:
+    name: "No @unchecked Sendable"
+    regex: '@unchecked\s+Sendable'
+    excluded_match_kinds:
+      - comment
+      - comment.mark
+      - comment.url
+      - doccomment
+      - doccomment.field
+      - string
+    message: "Make the conformance provable instead: store a Sendable value, or guard state in a Mutex."
+    severity: error
