@@ -117,6 +117,20 @@ struct DeepLinkTests {
         #expect(router.selectedTab == .users)
     }
 
+    /// A link into the tab already on screen pushes rather than replacing, so
+    /// Back still returns to what the user was looking at.
+    @Test
+    func openingALinkIntoTheSelectedTabPushes() {
+        let router = AppRouter()
+        router.selectedTab = .users
+        router.handle(.userTapped(id: 8))
+
+        router.open(URL(string: "template://users/3")!)
+
+        #expect(router.usersStack == [.user(.profile(id: 8)), .user(.profile(id: 3))])
+        #expect(router.selectedTab == .users)
+    }
+
     /// A bare tab link lands on that tab's root.
     @Test
     func openingATabLinkClearsThatStack() {
