@@ -61,7 +61,6 @@ struct AppRouterTests {
     }
 
     /// Crossing into an unselected tab replaces whatever it was showing.
-    /// Not reachable through events today; deep linking will call it.
     @Test
     func crossingIntoABusyTabReplacesItsStack() {
         let router = AppRouter()
@@ -75,7 +74,7 @@ struct AppRouterTests {
     }
 
     /// Routing to the selected tab pushes rather than replacing, preserving
-    /// the visible back stack. Not reachable through events today.
+    /// the visible back stack. A deep link into the selected tab reaches this.
     @Test
     func crossingIntoTheCurrentTabPushesInsteadOfReplacing() {
         let router = AppRouter()
