@@ -13,7 +13,7 @@ func makeStorage(
 ) throws(StorageError) -> ProductCoreDataStorage {
     ProductCoreDataStorage(
         storageProvider: try .inMemory(modelName: "ios_template"),
-        timestamp: ProductCacheTimestamp(defaults: UserDefaults(suiteName: UUID().uuidString)!),
+        timestamp: ProductCacheTimestamp(suiteName: UUID().uuidString),
         dateProvider: dateProvider
     )
 }
