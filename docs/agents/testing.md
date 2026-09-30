@@ -69,8 +69,8 @@ not shared fixtures:
 
 ```swift
 /// Counts calls so a test can tell a cache hit from a refetch.
-private final class CountingApiClient: ProductApiClient, @unchecked Sendable {
-    private(set) var fetchCount = 0
+private final class CountingApiClient: ProductApiClient {
+    private let count = Mutex(0)
     ...
 }
 ```
@@ -78,12 +78,12 @@ private final class CountingApiClient: ProductApiClient, @unchecked Sendable {
 Shared *factories* are the exception, and go in a file with no `@Test` in it —
 `Modules/Features/Products/Tests/ProductStorageFactory.swift` exposes a free
 `makeStorage(dateProvider:)` returning storage over an in-memory store and a
-`UserDefaults(suiteName: UUID().uuidString)`, so neither the rows nor the cache
-timestamp of one test reach the next.
+`ProductCacheTimestamp(suiteName: UUID().uuidString)`, so neither the rows nor the
+cache timestamp of one test reach the next.
 
 Seams that already exist, to use rather than replace: `DateProvider` (inject
 `MovableDateProvider` to age a cache without waiting), `ProductCacheTimestamp`
-(injectable `UserDefaults`), and the defaulted `emit` closure on view-model
+(injectable `UserDefaults` suite name), and the defaulted `emit` closure on view-model
 initialisers.
 
 ## Imports
