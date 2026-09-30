@@ -67,10 +67,21 @@ no-op so previews and tests need no navigation wiring.
 
 ## Views
 
-`public struct X: View` holding `private let viewModel` — **not** `@State`. The
-view does not own the view model's lifetime; `TemplateApp` does, holding them in
-`@State` at the root and building them once (commit `265c051`). `@State` inside a
-feature view is a mistake unless it is genuinely view-local UI state.
+`public struct X: View`, holding its view model in one of two ways depending on
+who builds it:
+
+- **Root list views** (`ProductView`, `UserView`) take theirs as
+  `private let viewModel`. `TemplateApp` builds each one once and owns it in
+  `@State` (commit `265c051`), so rebuilding it per render cannot restart its work.
+- **Pushed screens** built by `Products.view` / `Users.view` (`ProductDetailView`,
+  `UserProfileView`) hold theirs in `@State private var viewModel`, set from the
+  initialiser with `_viewModel = State(wrappedValue:)`. SwiftUI tracks an
+  `@Observable` only when it is read through a property wrapper; a plain `let`
+  registers no observation, so the screen never redraws after `state` leaves
+  `.loading` (commit `b9fba80`).
+
+Beyond those two cases, `@State` in a feature view is for genuinely view-local UI
+state only.
 
 Body is a `Group { switch viewModel.state { ... } }` with `.task { await ... }`
 attached. Subviews are `private var x: some View` when they take no parameters and
