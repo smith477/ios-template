@@ -18,9 +18,8 @@ Domain, Data and Presentation are **folders inside a feature, not targets**. Spl
 a feature into layer targets only once it is large enough to earn them; until then
 the ceremony costs more than it returns.
 
-`tuist inspect dependencies --only implicit` is what catches a violation. CI runs
-it under the older `tuist inspect implicit-imports` spelling, which Tuist 4.203.3
-deprecates but still accepts.
+`tuist inspect dependencies --only implicit` is what catches a violation, locally
+and in CI.
 
 ## What goes in Platform
 

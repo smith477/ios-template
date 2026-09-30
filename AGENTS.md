@@ -19,8 +19,7 @@ build settings and schemes are edited in `Project.swift`, then regenerated with
 platform module. A feature may import platform modules and `APIClient`. Platform
 imports nothing from this project. This is the boundary that keeps a feature
 copyable into another project, which is what the template exists for.
-`tuist inspect dependencies --only implicit` catches a violation. (CI still calls
-the deprecated `tuist inspect implicit-imports` spelling; both work today.)
+`tuist inspect dependencies --only implicit` catches a violation.
 
 **Features never navigate.** A feature emits an event describing what happened;
 `AppRouter` decides where it leads. See `docs/agents/architecture.md`.
