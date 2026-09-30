@@ -82,3 +82,6 @@ fastlane/test_output
 .claude/*
 !.claude/skills/
 .claude/settings.local.json
+
+# Retro ledger: whether a fix held is tracked per engineer, so it stays local.
+.claude/skills/retro/ledger.md

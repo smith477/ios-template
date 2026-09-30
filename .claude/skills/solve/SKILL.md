@@ -7,14 +7,15 @@ description: Drive a piece of work from unread scope to an approved multi-phase 
 
 One fixed opening sequence for every piece of work, so the approach never drifts.
 This skill drives the work to an approved plan, then builds it one phase at a
-time. The rules it builds against are in `AGENTS.md` and `docs/agents/`.
+time, and closes with a retro on the session. The rules it builds against are in
+`AGENTS.md` and `docs/agents/`.
 
 Run the phases in order. Do not skip ahead: no branch before the scope is read
 back, no grilling before the branch exists, no plan before grilling settles, no
 second build phase before the owner has reviewed the first.
 
 Every phase ends by naming the next phase and stopping. Do not run two phases in
-one turn.
+one turn. The one exception is Phase 6, which starts without being asked.
 
 ## The argument
 
@@ -32,7 +33,7 @@ issue to fetch — that is normal here, not a reason to stop and ask for one.
 
 Give a **brief** step-by-step of what solve will do for this work — a short
 numbered list, not an essay. Cover the sequence: read scope → branch → grill →
-plan → build one phase at a time. Then stop and wait for the owner to confirm
+plan → build one phase at a time → retro. Then stop and wait for the owner to confirm
 before doing anything else.
 
 ## Phase 1: Read the scope
@@ -200,3 +201,21 @@ reviewed on its own.
 7. **Commits and pushes happen only on explicit instruction.** Reaching the end of
    a phase is not that instruction. When the owner does ask, the commit is a subject
    line only — imperative, no body, no trailers.
+
+## Phase 6: Retro
+
+Invoke the [retro](../retro/SKILL.md) skill with the Skill tool (`skill: "retro"`) on
+this session once the last build phase has been reviewed and the owner has said the
+work is done. Retro owns how the log is read and where each fix lands; this phase only
+fixes its place in the run. It is the last phase, and the run ends when the owner has
+ruled on every retro finding.
+
+This is the one phase that opens without the owner's word to continue: when the owner
+closes the last build phase, name Phase 6 and start it in the same turn. Nothing it
+proposes is written without the owner's ruling, so starting it costs nothing, and
+waiting to be asked is how a retro gets skipped.
+
+Run it every time, not only when something went wrong. A run that felt smooth still
+shows where the owner repeated a correction, or where a rule in this skill or in
+`AGENTS.md` was broken while written, and those are the findings that keep the rules
+from drifting.
