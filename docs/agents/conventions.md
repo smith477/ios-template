@@ -111,9 +111,20 @@ only**, and `Project.swift` explains why: applied project-wide it lands on domai
 types, storage and repositories, every one of which would then need `nonisolated`
 to opt back out.
 
-`@unchecked Sendable` always carries a comment justifying it. Prefer
-`Date.ISO8601FormatStyle` over `ISO8601DateFormatter`, which is a non-Sendable
-class.
+**No `@unchecked Sendable`**, in shipping code or tests. It asserts safety the
+compiler cannot check, and a wrong assertion is a data race Swift 6 no longer
+catches. Make the conformance provable instead:
+
+- Store something `Sendable` rather than the non-`Sendable` object.
+  `ProductCacheTimestamp` keeps a suite name and resolves `UserDefaults` per call.
+- Guard mutable state in a `Mutex` from `Synchronization`, as the test doubles in
+  `ProductCachePolicyTests.swift` do. An actor is the alternative, but it cannot
+  satisfy a synchronous protocol requirement.
+- Check the SDK before assuming a type is unmarked: `NSPersistentContainer` is
+  `NS_SWIFT_SENDABLE`, so `StorageProvider` conforms plainly.
+
+Prefer `Date.ISO8601FormatStyle` over `ISO8601DateFormatter`, which is a
+non-Sendable class.
 
 ## Style the formatter locks in
 
