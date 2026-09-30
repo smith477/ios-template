@@ -9,8 +9,9 @@ struct TemplateApp: App {
     @State private var container: AppContainer
     @State private var router: AppRouter
 
-    // Built once and kept: a view holds its view model with `let` and does not
-    // own its lifetime, so rebuilding these per render would restart their work.
+    // Built once and kept: the root views take their view model as `let` and
+    // do not own its lifetime, so rebuilding these per render would restart
+    // their work.
     @State private var products: ProductViewModel
     @State private var users: UserViewModel
 
