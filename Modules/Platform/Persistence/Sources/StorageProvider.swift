@@ -5,7 +5,7 @@ import Foundation
 
 /// Encapsulates the Core Data stack: `viewContext` for main-thread reads,
 /// `performBackground(_:)` for writes and heavy reads.
-public final class StorageProvider: @unchecked Sendable {
+public final class StorageProvider: Sendable {
     private let persistentContainer: NSPersistentContainer
 
     /// Managed objects fetched here may only be touched on the main thread.
