@@ -16,7 +16,7 @@ struct DetailAfterListTests {
     @Test
     func detailLoadsAfterTheListHasCached() async throws {
         let provider = try StorageProvider.inMemory(modelName: "ios_template")
-        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        let suiteName = UUID().uuidString
         let clock = FixedDateProvider(Date())
 
         func makeRepository() -> ProductDataRepository {
@@ -24,7 +24,7 @@ struct DetailAfterListTests {
                 apiClient: StubClient(),
                 storage: ProductCoreDataStorage(
                     storageProvider: provider,
-                    timestamp: ProductCacheTimestamp(defaults: defaults),
+                    timestamp: ProductCacheTimestamp(suiteName: suiteName),
                     dateProvider: clock
                 ),
                 dateProvider: clock

@@ -22,14 +22,22 @@ public protocol ProductStorage: Sendable {
 /// only; the clock itself is `DateProvider`, so a test can set "now" without
 /// faking the stored value.
 ///
-/// `UserDefaults` is thread-safe but unmarked, so `Sendable` is asserted here
-/// rather than at every use site.
-struct ProductCacheTimestamp: @unchecked Sendable {
-    private let defaults: UserDefaults
+/// Holds a suite name rather than a `UserDefaults`, which is not `Sendable`;
+/// `nil` is the standard defaults.
+struct ProductCacheTimestamp: Sendable {
+    private let suiteName: String?
     private let key = "products.lastSavedAt"
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
+    init(suiteName: String? = nil) {
+        self.suiteName = suiteName
+    }
+
+    private var defaults: UserDefaults {
+        guard let suiteName else { return .standard }
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            fatalError("UserDefaults rejected the suite name \(suiteName)")
+        }
+        return defaults
     }
 
     var lastSavedAt: Date? { defaults.object(forKey: key) as? Date }
