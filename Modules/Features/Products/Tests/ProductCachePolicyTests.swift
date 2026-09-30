@@ -4,21 +4,24 @@ import APIClient
 import AppKit
 import Foundation
 import Persistence
+import Synchronization
 import Testing
 
 @testable import Products
 
 /// Counts calls so a test can tell a cache hit from a refetch.
-private final class CountingApiClient: ProductApiClient, @unchecked Sendable {
-    private(set) var fetchCount = 0
+private final class CountingApiClient: ProductApiClient {
+    private let count = Mutex(0)
     private let products: [Product]
 
     init(products: [Product]) {
         self.products = products
     }
 
+    var fetchCount: Int { count.withLock { $0 } }
+
     func fetchProducts() async throws(APIError) -> [Product] {
-        fetchCount += 1
+        count.withLock { $0 += 1 }
         return products
     }
 }
@@ -26,17 +29,17 @@ private final class CountingApiClient: ProductApiClient, @unchecked Sendable {
 /// A clock that can be moved forward, so a test can age the cache without
 /// waiting. `FixedDateProvider` covers the still-clock case; this covers the
 /// case where time has to pass mid-test.
-private final class MovableDateProvider: DateProvider, @unchecked Sendable {
-    private var current: Date
+private final class MovableDateProvider: DateProvider {
+    private let current: Mutex<Date>
 
     init(_ start: Date) {
-        current = start
+        current = Mutex(start)
     }
 
-    var now: Date { current }
+    var now: Date { current.withLock { $0 } }
 
     func advance(by interval: TimeInterval) {
-        current += interval
+        current.withLock { $0 += interval }
     }
 }
 
