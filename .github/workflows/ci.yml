@@ -57,7 +57,7 @@ jobs:
       # it does not declare would otherwise compile here and break when the
       # module is copied into another project.
       - name: Check for implicit dependencies
-        run: mise exec -- tuist inspect implicit-imports
+        run: mise exec -- tuist inspect dependencies --only implicit
 
       - name: Test
         run: mise exec -- tuist test App --no-selective-testing --device "iPhone 17 Pro"
