@@ -113,7 +113,8 @@ to opt back out.
 
 **No `@unchecked Sendable`**, in shipping code or tests. It asserts safety the
 compiler cannot check, and a wrong assertion is a data race Swift 6 no longer
-catches. Make the conformance provable instead:
+catches. SwiftLint's `no_unchecked_sendable` custom rule makes it an error. Make
+the conformance provable instead:
 
 - Store something `Sendable` rather than the non-`Sendable` object.
   `ProductCacheTimestamp` keeps a suite name and resolves `UserDefaults` per call.
