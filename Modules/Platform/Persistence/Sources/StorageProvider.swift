@@ -2,6 +2,7 @@
 
 import CoreData
 import Foundation
+import Synchronization
 
 /// Encapsulates the Core Data stack: `viewContext` for main-thread reads,
 /// `performBackground(_:)` for writes and heavy reads.
@@ -17,14 +18,31 @@ public final class StorageProvider: Sendable {
     /// so `Bundle.main` will not find it.
     public static var modelBundle: Bundle { .module }
 
+    /// One model per model file for the whole process. When each provider
+    /// loaded its own copy, a test opening an in-memory store beside the test
+    /// host's on-disk one left several entity descriptions claiming
+    /// `ProductEntity`, and `+entity` lookups such as `fetchRequest()` could no
+    /// longer tell which to use.
+    ///
+    /// `NSManagedObjectModel` is not `Sendable`, so a model never leaves the
+    /// lock: only the container built from it does, and that is.
+    private static let models = Mutex<[URL: NSManagedObjectModel]>([:])
+
     public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) {
-        guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd"),
-              let model = NSManagedObjectModel(contentsOf: modelURL)
-        else {
+        guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd") else {
             throw .modelNotFound(name: modelName)
         }
 
-        persistentContainer = NSPersistentContainer(name: modelName, managedObjectModel: model)
+        persistentContainer = try Self.models.withLock { models throws(StorageError) -> NSPersistentContainer in
+            if let model = models[modelURL] {
+                return NSPersistentContainer(name: modelName, managedObjectModel: model)
+            }
+            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+                throw .modelNotFound(name: modelName)
+            }
+            models[modelURL] = model
+            return NSPersistentContainer(name: modelName, managedObjectModel: model)
+        }
 
         if inMemory {
             let description = NSPersistentStoreDescription()
