@@ -23,6 +23,14 @@ final class AppContainer {
     /// The production container. Both failures here leave the app with nothing
     /// to show, so each traps with the reason rather than pretending otherwise.
     static func live() -> AppContainer {
+        #if DEBUG
+            // UI tests launch against fixtures, so a slow or unavailable API
+            // cannot fail them. Compiled out of Release entirely.
+            if ProcessInfo.processInfo.arguments.contains(stubNetworkArgument) {
+                return stubbed()
+            }
+        #endif
+
         guard let baseURL = URL(string: baseURLString) else {
             fatalError("Malformed API base URL: \(baseURLString)")
         }
