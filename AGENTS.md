@@ -10,10 +10,10 @@ the code wins and the doc is what gets corrected.
 
 ## Rules
 
-**Never edit the Xcode project.** `ios-template.xcodeproj` and
-`ios-template.xcworkspace` are generated and gitignored. Targets, dependencies,
-build settings and schemes are edited in `Project.swift`, then regenerated with
-`tuist generate`. Anything changed in Xcode's project editor is lost.
+**Never edit the Xcode project.** The `.xcodeproj` and `.xcworkspace` are
+generated and gitignored. Targets, dependencies, build settings and schemes are
+edited in `Project.swift`, then regenerated with `tuist generate`. Anything
+changed in Xcode's project editor is lost.
 
 **A feature may never import another feature.** App may import every feature and
 platform module. A feature may import platform modules and `APIClient`. Platform

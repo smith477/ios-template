@@ -1,11 +1,11 @@
-// TemplateApp.swift
+// MainApp.swift
 
 import Products
 import SwiftUI
 import Users
 
 @main
-struct TemplateApp: App {
+struct MainApp: App {
     @State private var container: AppContainer
     @State private var router: AppRouter
 

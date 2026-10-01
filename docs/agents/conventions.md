@@ -71,7 +71,7 @@ no-op so previews and tests need no navigation wiring.
 who builds it:
 
 - **Root list views** (`ProductView`, `UserView`) take theirs as
-  `private let viewModel`. `TemplateApp` builds each one once and owns it in
+  `private let viewModel`. `MainApp` builds each one once and owns it in
   `@State` (commit `265c051`), so rebuilding it per render cannot restart its work.
 - **Pushed screens** built by `Products.view` / `Users.view` (`ProductDetailView`,
   `UserProfileView`) hold theirs in `@State private var viewModel`, set from the

@@ -14,6 +14,13 @@ import ProjectDescription
 // targets. Split a feature into layer targets only once it is large enough to
 // earn them; until then the ceremony costs more than it returns.
 
+// The app's identity. `scripts/rename.sh` rewrites these four lines, so every
+// name, bundle ID and URL scheme below is derived from them, never repeated.
+let appName = "ios-template"
+let displayName = "Template"
+let bundlePrefix = "dusan.kovacevic"
+let urlScheme = "template"
+
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
@@ -47,7 +54,7 @@ func platform(
         name: name,
         destinations: destinations,
         product: .staticFramework,
-        bundleId: "dusan.kovacevic.platform.\(name.lowercased())",
+        bundleId: "\(bundlePrefix).platform.\(name.lowercased())",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/Platform/\(name)/Sources/**"],
         dependencies: dependencies,
@@ -60,7 +67,7 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
         name: name,
         destinations: destinations,
         product: .staticFramework,
-        bundleId: "dusan.kovacevic.feature.\(name.lowercased())",
+        bundleId: "\(bundlePrefix).feature.\(name.lowercased())",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/Features/\(name)/Sources/**"],
         dependencies: dependencies
@@ -79,7 +86,7 @@ func tests(
         name: "\(name)Tests",
         destinations: destinations,
         product: .unitTests,
-        bundleId: "dusan.kovacevic.\(name.lowercased()).tests",
+        bundleId: "\(bundlePrefix).\(name.lowercased()).tests",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/\(path)/\(name)/Tests/**"],
         dependencies: [.target(name: name)] + dependencies
@@ -95,7 +102,7 @@ func platformTests(_ name: String, dependencies: [TargetDependency] = []) -> Tar
 }
 
 let project = Project(
-    name: "ios-template",
+    name: appName,
     // One scheme per target fills the picker with entries nobody selects on
     // purpose, including Tuist's internal resource-bundle target. The schemes
     // this project wants are declared at the bottom of this file instead.
@@ -145,21 +152,24 @@ let project = Project(
             destinations: destinations,
             product: .app,
             productName: "App",
-            bundleId: "dusan.kovacevic.ios-template",
+            bundleId: "\(bundlePrefix).\(appName)",
             deploymentTargets: deploymentTargets,
             infoPlist: .extendingDefault(with: [
                 "UILaunchScreen": [:],
+                // The home-screen label. Without it iOS falls back to the
+                // product name, which is `App` for every app built from this.
+                "CFBundleDisplayName": .string(displayName),
                 // Tuist's default plist requires armv7, which no simulator
                 // reports — it hides every simulator from the run destinations.
                 "UIRequiredDeviceCapabilities": ["arm64"],
-                // Deep links: `template://products/7`. Claiming a custom scheme
+                // Deep links: `<urlScheme>://products/7`. Claiming a custom scheme
                 // is first-come on device, so a shipping app wants a name it
                 // owns, or universal links, which prove the association.
                 // `DeepLink` parses what arrives here.
                 "CFBundleURLTypes": [
                     [
-                        "CFBundleURLName": "dusan.kovacevic.ios-template",
-                        "CFBundleURLSchemes": ["template"],
+                        "CFBundleURLName": "\(bundlePrefix).\(appName)",
+                        "CFBundleURLSchemes": [.string(urlScheme)],
                     ],
                 ],
             ]),
@@ -178,7 +188,7 @@ let project = Project(
             name: "AppTests",
             destinations: destinations,
             product: .unitTests,
-            bundleId: "dusan.kovacevic.AppTests",
+            bundleId: "\(bundlePrefix).AppTests",
             deploymentTargets: deploymentTargets,
             sources: ["AppTests/**"],
             dependencies: [
@@ -193,7 +203,7 @@ let project = Project(
             name: "AppUITests",
             destinations: destinations,
             product: .uiTests,
-            bundleId: "dusan.kovacevic.AppUITests",
+            bundleId: "\(bundlePrefix).AppUITests",
             deploymentTargets: deploymentTargets,
             sources: ["AppUITests/**"],
             dependencies: [

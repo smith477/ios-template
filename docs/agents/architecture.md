@@ -117,7 +117,7 @@ coupling is allowed, and it imports both features to do it.
 **`AnyRoute`** is the cross-feature sum type. It lives in App because it names
 every feature, and only the app may. Both `NavigationStack`s register every
 feature's destinations, through the private `navigationDestinations` extension in
-`TemplateApp.swift`, because either stack can show either feature's screens.
+`MainApp.swift`, because either stack can show either feature's screens.
 
 **Deep links** (`App/Router/DeepLink.swift`): `template://<host>/<id>`, host names
 the tab, one optional positive-integer path component names the screen. Parsing is
@@ -186,9 +186,9 @@ Worked example, adding `Orders`:
    `OrderRoute`, `OrderEvent`, and the Domain/Data/Presentation types.
 6. Wire it into `App/`:
    - `case order(OrderRoute)` in `AnyRoute` (`App/Router/AppRouter.swift`).
-   - `import Orders` in `AppRouter.swift` and `TemplateApp.swift`.
+   - `import Orders` in `AppRouter.swift` and `MainApp.swift`.
    - `App/Router/AppRouter+Orders.swift` with `handle(_ event: OrderEvent)`.
-   - The `case` in `navigationDestinations` in `TemplateApp.swift`.
+   - The `case` in `navigationDestinations` in `MainApp.swift`.
    - `extension AppContainer: OrdersDependencies {}` in `AppContainer.swift`.
    - A `DeepLink` host, if the feature is linkable.
 7. `mise exec -- tuist generate`, then build.
@@ -196,13 +196,13 @@ Worked example, adding `Orders`:
 **Does the feature get its own tab?** Steps 1–7 cover a feature reached by pushing
 onto an existing stack — which is what a seller profile does today, and the cheaper
 option. A feature that needs its *own* tab additionally requires, all in
-`App/Router/AppRouter.swift` and `App/TemplateApp.swift`:
+`App/Router/AppRouter.swift` and `App/MainApp.swift`:
 
 - `case orders` in `AppRouter.Tab`, and `var ordersStack: [AnyRoute] = []`.
 - A branch in each of the three switches over `Tab` — `push(_:onto:)`,
   `clearStack(_:)` and `crossTo(_:in:)`. They are exhaustive, so the compiler will
   name every one you miss.
-- In `TemplateApp`: an `@State` view model, its `State(wrappedValue:)` line in
+- In `MainApp`: an `@State` view model, its `State(wrappedValue:)` line in
   `init()`, and a `Tab(...)` holding a `NavigationStack(path: $router.ordersStack)`
   with `.navigationDestinations(container:router:)` attached.
 

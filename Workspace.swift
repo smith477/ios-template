@@ -1,7 +1,7 @@
 import ProjectDescription
 
 // Without this file Tuist synthesises a workspace, and the synthesised one
-// carries two schemes nobody asked for: an all-targets "ios-template-Workspace"
+// carries two schemes nobody asked for: an all-targets "<name>-Workspace"
 // scheme that duplicates App, and a "Generate Project" scheme that shells out
 // to whichever `tuist` is on PATH — not the version mise pins. Declaring the
 // workspace here turns both off. The schemes worth having are the ones in
