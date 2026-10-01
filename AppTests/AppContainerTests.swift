@@ -26,6 +26,19 @@ struct AppContainerTests {
         #expect(store.type == NSInMemoryStoreType)
     }
 
+    /// A test's store and the test host's store share one model. Separate
+    /// copies leave Core Data unable to tell which `ProductEntity` a fetch
+    /// means, which is what the stubbed container's test first ran into.
+    @Test @MainActor
+    func storesShareOneModel() throws {
+        let first = try StorageProvider.inMemory(modelName: "ios_template")
+        let second = try StorageProvider.inMemory(modelName: "ios_template")
+
+        let firstModel = try #require(first.viewContext.persistentStoreCoordinator?.managedObjectModel)
+        let secondModel = try #require(second.viewContext.persistentStoreCoordinator?.managedObjectModel)
+        #expect(firstModel === secondModel)
+    }
+
     /// A feature is satisfied by anything meeting its own protocol, so a test
     /// builds only what that feature needs rather than the whole container.
     @Test @MainActor
