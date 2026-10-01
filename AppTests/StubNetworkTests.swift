@@ -1,7 +1,9 @@
 // StubNetworkTests.swift
 
 import APIClient
+import CoreData
 import Foundation
+import Persistence
 import Testing
 
 @testable import App
@@ -70,6 +72,24 @@ struct StubNetworkTests {
         }
         let response: UsersResponse = try await stubbedClient().send(UserEndpoint.list)
         #expect(response.users.map(\.id).contains(userId))
+    }
+
+    /// What a launch with `-UITestStubNetwork` runs on: an in-memory store, so
+    /// one run inherits no cached products from another, and a client that
+    /// loads the fixtures through the real Products feature.
+    @Test @MainActor
+    func theStubbedContainerLoadsTheFixturesIntoAnInMemoryStore() async throws {
+        let container = AppContainer.stubbed()
+
+        let store = try #require(
+            container.storageProvider.viewContext.persistentStoreCoordinator?.persistentStores.first
+        )
+        #expect(store.type == NSInMemoryStoreType)
+
+        let viewModel = Products.viewModel(container, emit: { _ in })
+        await viewModel.getProducts()
+
+        #expect(Set(viewModel.products.map(\.title)) == ["Stub Widget", "Stub Gadget", "Stub Gizmo"])
     }
 
     private func stubbedClient() -> APIClient {
