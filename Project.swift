@@ -172,6 +172,10 @@ let project = Project(
                         "CFBundleURLSchemes": [.string(urlScheme)],
                     ],
                 ],
+                // The scheme `DeepLink` accepts. Its own key rather than read
+                // back out of CFBundleURLTypes, which SDKs append their own
+                // callback schemes to.
+                "DeepLinkScheme": .string(urlScheme),
             ]),
             sources: ["App/**"],
             resources: ["App/Assets.xcassets"],
