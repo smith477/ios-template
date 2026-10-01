@@ -32,37 +32,40 @@ final class RoutingUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
 
         let app = XCUIApplication()
+        // Fixtures rather than dummyjson.com, so the content below is known
+        // exactly and no wait depends on how fast someone else's API answers.
+        app.launchArguments = ["-UITestStubNetwork"]
         app.launch()
 
-        // First run loads the catalogue from the network.
-        let firstProduct = app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier BEGINSWITH 'product-row-'")
-        ).firstMatch
+        // Tapped by id rather than as the first row: the list is sorted by
+        // title, and the assertions below follow from product 1 specifically.
+        let product = app.descendants(matching: .any)["product-row-1"].firstMatch
         XCTAssertTrue(
-            firstProduct.waitForExistence(timeout: 30),
+            product.waitForExistence(timeout: 10),
             "The product list never loaded."
         )
-        firstProduct.tap()
+        product.tap()
 
         // `seller-row` renders only in the loaded state, so waiting for it
-        // covers both the push and the load. Asserting on the price as well
-        // added nothing but a second dependency on how fast the live API
-        // answers, which is what made this fail on CI.
+        // covers both the push and the load.
         let seller = app.descendants(matching: .any)["seller-row"].firstMatch
         XCTAssertTrue(
-            seller.waitForExistence(timeout: 30),
+            seller.waitForExistence(timeout: 5),
             "Tapping a product did not push a loaded detail screen."
+        )
+        XCTAssertTrue(
+            app.staticTexts["Stub Widget"].firstMatch.exists,
+            "The detail screen did not show the product that was tapped."
         )
 
         seller.tap()
 
-        // Which user appears depends on live data, so the profile is
-        // identified by its fields rather than by name.
+        // Product 1's seller is user 2 in the fixtures.
         XCTAssertTrue(
-            app.staticTexts["Email"].waitForExistence(timeout: 30),
-            "Tapping the seller did not open a user profile."
+            app.staticTexts["Stella Seller"].firstMatch.waitForExistence(timeout: 5),
+            "Tapping the seller did not open that seller's profile."
         )
-        XCTAssertTrue(app.staticTexts["Name"].exists)
+        XCTAssertTrue(app.staticTexts["Email"].exists, "The profile did not show its fields.")
 
         // The point of pushing rather than crossing tabs: the profile sits on
         // the Products stack, so there is a Back button and it leads to the
@@ -73,7 +76,7 @@ final class RoutingUITests: XCTestCase {
         back.tap()
 
         XCTAssertTrue(
-            seller.waitForExistence(timeout: 15),
+            seller.waitForExistence(timeout: 5),
             "Going back from the profile did not return to the product."
         )
     }
