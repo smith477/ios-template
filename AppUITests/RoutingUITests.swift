@@ -24,7 +24,7 @@ final class RoutingUITests: XCTestCase {
     /// dependency on it and the view was never invalidated when `state` left
     /// `.loading`. The push and the `.task` both ran — the screen just kept
     /// drawing its `ProgressView` forever. The root views escaped it only
-    /// because `TemplateApp` keeps their view models in `@State`.
+    /// because `MainApp` keeps their view models in `@State`.
     @MainActor
     func testTappingASellerPushesTheProfile() throws {
         // The runner inherits the simulator's last orientation; landscape

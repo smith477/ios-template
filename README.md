@@ -15,13 +15,13 @@ The Xcode project is **generated** — it is not in source control. After clonin
 ```bash
 mise install                        # installs the pinned Tuist, SwiftLint, SwiftFormat
 mise exec -- tuist install          # resolves Swift Package dependencies
-mise exec -- tuist generate         # generates ios-template.xcworkspace
+mise exec -- tuist generate         # generates the .xcworkspace
 ```
 
 `mise exec --` runs the pinned versions rather than whichever `tuist` is on your
 `PATH`.
 
-Open `ios-template.xcworkspace`.
+Open the generated `.xcworkspace`.
 
 Editing targets, dependencies, or build settings means editing `Project.swift`
 and re-running `tuist generate` — changes made in Xcode's project editor are

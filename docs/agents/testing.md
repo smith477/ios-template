@@ -130,7 +130,7 @@ SwiftUI to track it. `ProductDetailView` and `UserProfileView` held theirs in a
 plain `let`, so no dependency was registered and neither view was invalidated
 when `state` left `.loading` — the screen drew its `ProgressView` forever while
 the push and the `.task` both ran normally. Both now use `@State`. The root
-views were never affected, because `TemplateApp` holds their view models in
+views were never affected, because `MainApp` holds their view models in
 `@State` already.
 
 Worth knowing when a UI test hangs on a screen that looks stuck: check that the
