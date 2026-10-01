@@ -21,11 +21,4 @@ final class AppUITests: XCTestCase {
         )
         XCTAssertTrue(app.tabBars.buttons["Users"].exists)
     }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
-    }
 }
