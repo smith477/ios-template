@@ -13,12 +13,20 @@ final class AppUITests: XCTestCase {
     @MainActor
     func testLaunchesToTheProductsTab() throws {
         let app = XCUIApplication()
+        // Fixtures rather than dummyjson.com; see `AppContainer.stubbed()`.
+        app.launchArguments = ["-UITestStubNetwork"]
         app.launch()
 
+        // Launch is the only wait left: a cold simulator can take several
+        // seconds to start the app, but nothing after it touches the network.
         XCTAssertTrue(
-            app.tabBars.buttons["Products"].waitForExistence(timeout: 30),
+            app.tabBars.buttons["Products"].waitForExistence(timeout: 10),
             "The app did not reach its tab bar."
         )
         XCTAssertTrue(app.tabBars.buttons["Users"].exists)
+        XCTAssertTrue(
+            app.staticTexts["Stub Widget"].waitForExistence(timeout: 5),
+            "The product list did not show the stub fixtures."
+        )
     }
 }
