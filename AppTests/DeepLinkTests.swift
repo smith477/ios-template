@@ -14,7 +14,7 @@ struct DeepLinkTests {
 
     @Test
     func aProductLinkNamesThatProduct() throws {
-        let link = try #require(DeepLink(URL(string: "template://products/7")!))
+        let link = try #require(DeepLink(link("products/7")))
 
         #expect(link.tab == .products)
         #expect(link.route == .product(.detail(id: 7)))
@@ -22,7 +22,7 @@ struct DeepLinkTests {
 
     @Test
     func aUserLinkNamesThatUser() throws {
-        let link = try #require(DeepLink(URL(string: "template://users/3")!))
+        let link = try #require(DeepLink(link("users/3")))
 
         #expect(link.tab == .users)
         #expect(link.route == .user(.profile(id: 3)))
@@ -31,7 +31,7 @@ struct DeepLinkTests {
     /// A link may name a tab without naming a screen in it.
     @Test
     func aBareTabLinkNamesNoRoute() throws {
-        let link = try #require(DeepLink(URL(string: "template://users")!))
+        let link = try #require(DeepLink(link("users")))
 
         #expect(link.tab == .users)
         #expect(link.route == nil)
@@ -41,10 +41,21 @@ struct DeepLinkTests {
     /// the same as the link without one.
     @Test
     func aTrailingSlashIsIgnored() throws {
-        let link = try #require(DeepLink(URL(string: "template://products/")!))
+        let link = try #require(DeepLink(link("products/")))
 
         #expect(link.tab == .products)
         #expect(link.route == nil)
+    }
+
+    /// The scheme `DeepLink` accepts is one iOS actually routes to this app.
+    /// Both come from `urlScheme` in `Project.swift`, but as two Info.plist
+    /// entries; this is what notices if they are ever set apart.
+    @Test
+    func theSchemeIsOneTheAppRegisters() throws {
+        let types = try #require(Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]])
+        let schemes = types.flatMap { $0["CFBundleURLSchemes"] as? [String] ?? [] }
+
+        #expect(schemes.contains(DeepLink.scheme))
     }
 
     /// Another app's scheme is not this app's link, even at a familiar path.
@@ -56,35 +67,35 @@ struct DeepLinkTests {
 
     @Test
     func anUnknownHostIsRejected() {
-        #expect(DeepLink(URL(string: "template://orders/7")!) == nil)
+        #expect(DeepLink(link("orders/7")) == nil)
     }
 
     /// An id that is not a positive number is refused rather than
     /// approximated: ids are server-assigned positives, so anything else is a
     /// malformed link, and following it would only fetch nothing.
     @Test(arguments: [
-        "template://products/7x",
-        "template://products/abc",
-        "template://products/7.5",
-        "template://products/-2",
-        "template://products/0",
+        "products/7x",
+        "products/abc",
+        "products/7.5",
+        "products/-2",
+        "products/0",
     ])
-    func anUnusableIdIsRejected(_ url: String) {
-        #expect(DeepLink(URL(string: url)!) == nil)
+    func anUnusableIdIsRejected(_ path: String) {
+        #expect(DeepLink(link(path)) == nil)
     }
 
     /// A rejected id fails the parse rather than falling back to the tab root,
     /// which would be a destination the link did not name.
     @Test
     func aRejectedIdDoesNotDegradeToTheTabRoot() {
-        #expect(DeepLink(URL(string: "template://users/abc")!) == nil)
+        #expect(DeepLink(link("users/abc")) == nil)
     }
 
     /// A deeper path means something this grammar does not define, so it is
     /// refused rather than read as its prefix.
     @Test
     func anOverlongPathIsRejected() {
-        #expect(DeepLink(URL(string: "template://products/7/reviews")!) == nil)
+        #expect(DeepLink(link("products/7/reviews")) == nil)
     }
 
     // MARK: - Acting on a link
@@ -95,7 +106,7 @@ struct DeepLinkTests {
         let router = AppRouter()
         router.selectedTab = .users
 
-        #expect(router.open(URL(string: "template://products/7")!))
+        #expect(router.open(link("products/7")))
 
         #expect(router.selectedTab == .products)
         #expect(router.productsStack == [.product(.detail(id: 7))])
@@ -111,7 +122,7 @@ struct DeepLinkTests {
         router.handle(.userTapped(id: 8))
         router.handle(.userTapped(id: 9))
 
-        router.open(URL(string: "template://users/3")!)
+        router.open(link("users/3"))
 
         #expect(router.usersStack == [.user(.profile(id: 3))])
         #expect(router.selectedTab == .users)
@@ -125,7 +136,7 @@ struct DeepLinkTests {
         router.selectedTab = .users
         router.handle(.userTapped(id: 8))
 
-        router.open(URL(string: "template://users/3")!)
+        router.open(link("users/3"))
 
         #expect(router.usersStack == [.user(.profile(id: 8)), .user(.profile(id: 3))])
         #expect(router.selectedTab == .users)
@@ -138,7 +149,7 @@ struct DeepLinkTests {
         router.handle(.productTapped(id: 1))
         router.handle(.productTapped(id: 2))
 
-        router.open(URL(string: "template://products")!)
+        router.open(link("products"))
 
         #expect(router.selectedTab == .products)
         #expect(router.productsStack.isEmpty)
@@ -149,9 +160,9 @@ struct DeepLinkTests {
     func aTabLinkIsIdempotent() {
         let router = AppRouter()
 
-        router.open(URL(string: "template://users")!)
+        router.open(link("users"))
         router.handle(.userTapped(id: 4))
-        router.open(URL(string: "template://users")!)
+        router.open(link("users"))
 
         #expect(router.usersStack.isEmpty)
         #expect(router.selectedTab == .users)
@@ -163,10 +174,17 @@ struct DeepLinkTests {
         let router = AppRouter()
         router.handle(.productTapped(id: 1))
 
-        #expect(router.open(URL(string: "template://orders/7")!) == false)
+        #expect(router.open(link("orders/7")) == false)
 
         #expect(router.productsStack == [.product(.detail(id: 1))])
         #expect(router.usersStack.isEmpty)
         #expect(router.selectedTab == .products)
     }
+}
+
+/// A link in this app's own scheme, so the tests follow a rename of the app
+/// rather than pinning the template's scheme.
+@MainActor
+private func link(_ path: String) -> URL {
+    URL(string: "\(DeepLink.scheme)://\(path)")!
 }

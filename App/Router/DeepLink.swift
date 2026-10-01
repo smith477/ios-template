@@ -6,12 +6,13 @@ import Users
 
 /// A destination named by a URL from outside the app.
 ///
-/// The grammar, rooted at the `template` scheme:
+/// The grammar, rooted at the app's own scheme (`urlScheme` in
+/// `Project.swift`):
 ///
-///     template://products          the Products tab
-///     template://products/7        product 7
-///     template://users             the Users tab
-///     template://users/3           user 3
+///     <scheme>://products          the Products tab
+///     <scheme>://products/7        product 7
+///     <scheme>://users             the Users tab
+///     <scheme>://users/3           user 3
 ///
 /// Unknown hosts, unparsable ids and extra path components are rejected rather
 /// than approximated: a link that half-works lands the user somewhere they did
@@ -27,9 +28,19 @@ struct DeepLink: Hashable {
         self.route = route
     }
 
+    /// The scheme this app answers to. Read from Info.plist rather than
+    /// written here, so renaming the app is one line in `Project.swift` and no
+    /// change in Swift.
+    static let scheme: String = {
+        guard let scheme = Bundle.main.object(forInfoDictionaryKey: "DeepLinkScheme") as? String, !scheme.isEmpty else {
+            fatalError("Info.plist is missing DeepLinkScheme")
+        }
+        return scheme
+    }()
+
     /// Parses `url`, or returns `nil` if it does not name a destination.
     init?(_ url: URL) {
-        guard url.scheme == "template" else { return nil }
+        guard url.scheme == Self.scheme else { return nil }
 
         let components = url.pathComponents.filter { $0 != "/" }
         guard components.count <= 1 else { return nil }
@@ -44,7 +55,7 @@ struct DeepLink: Hashable {
             id = nil
         }
 
-        // `template://products/7` puts `products` in the host, not the path.
+        // `<scheme>://products/7` puts `products` in the host, not the path.
         switch url.host() {
         case "products":
             self.init(tab: .products, route: id.map { .product(.detail(id: $0)) })

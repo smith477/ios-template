@@ -119,12 +119,14 @@ every feature, and only the app may. Both `NavigationStack`s register every
 feature's destinations, through the private `navigationDestinations` extension in
 `MainApp.swift`, because either stack can show either feature's screens.
 
-**Deep links** (`App/Router/DeepLink.swift`): `template://<host>/<id>`, host names
-the tab, one optional positive-integer path component names the screen. Parsing is
-strict — unknown host, unparsable or non-positive id, or more than one path
-component all return `nil` rather than degrading to the tab root, because a link
-that half-works lands the user somewhere they did not ask for. `.onOpenURL` is
-attached outside the `TabView` so a link naming an unselected tab still works.
+**Deep links** (`App/Router/DeepLink.swift`): `<scheme>://<host>/<id>`, where the
+scheme is `urlScheme` in `Project.swift`, read at runtime from the `DeepLinkScheme`
+Info.plist key. Host names the tab, one optional positive-integer path component
+names the screen. Parsing is strict — unknown host, unparsable or non-positive id,
+or more than one path component all return `nil` rather than degrading to the tab
+root, because a link that half-works lands the user somewhere they did not ask for.
+`.onOpenURL` is attached outside the `TabView` so a link naming an unselected tab
+still works.
 
 ## Data layer
 
