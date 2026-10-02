@@ -24,11 +24,12 @@ let urlScheme = "template"
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
-// Tests run on iPhone 17 Pro. `tuist test` otherwise picks whichever
+// Tests run on iPhone 18 Pro locally, and on iPhone 17 Pro in CI, whose
+// Xcode 26 image has no 18 Pro. `tuist test` otherwise picks whichever
 // simulator happens to be booted, and a device on an older screen geometry
 // puts UI-test taps in the wrong place:
 //
-//     tuist test App --device "iPhone 17 Pro"
+//     tuist test App --device "iPhone 18 Pro"
 //
 // The CI workflow passes the same flag.
 

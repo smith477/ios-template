@@ -105,16 +105,16 @@ do not "fix" it.
 ## Running them
 
 ```bash
-mise exec -- tuist test App --device "iPhone 17 Pro"            # everything
-mise exec -- tuist test ProductsTests --device "iPhone 17 Pro"  # one bundle
+mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"            # everything
+mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"  # one bundle
 ```
 
 Bundles: `AppTests`, `AppUITests`, `ProductsTests`, `AppKitTests`. Run the bundle
 covering what changed while iterating; run `App` before handing work over.
 
-`--device "iPhone 17 Pro"` is required. Without it `tuist test` picks whichever
+`--device "iPhone 18 Pro"` is required. Without it `tuist test` picks whichever
 simulator is booted, and a different screen geometry puts UI-test taps in the
-wrong place.
+wrong place. CI uses iPhone 17 Pro, the newest its Xcode 26 image ships.
 
 Run `mise exec -- tuist generate` first if `Project.swift` changed.
 
