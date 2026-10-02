@@ -44,6 +44,9 @@ Before asking anything, exhaust the sources that already hold the answer:
 - **The tests.** `AppTests/`, `Modules/*/*/Tests/` — they encode expected
   behaviour, especially around routing and caching.
 - **The issue,** if there is one: `gh issue view <n>`.
+- **Outside practice,** when a choice turns on a platform or tool convention rather
+  than this repo — Apple's guidance, a documented Tuist or SwiftPM pattern. Search
+  it before asking, and put what you found, with links, in the briefing.
 
 Only what remains after that is a real question. Finish all of this before the
 first question, so no question changes under the user while they answer it.

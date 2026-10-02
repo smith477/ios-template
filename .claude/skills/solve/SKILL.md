@@ -31,6 +31,10 @@ issue to fetch — that is normal here, not a reason to stop and ask for one.
 
 ## Before you start
 
+Skills load from the current checkout. Run `git fetch` and
+`git diff --stat HEAD origin/main -- .claude/skills`; if it shows anything, say so
+first, since this run would follow outdated rules.
+
 Give a **brief** step-by-step of what solve will do for this work — a short
 numbered list, not an essay. Cover the sequence: read scope → branch → grill →
 plan → build one phase at a time → retro. Then stop and wait for the owner to confirm
@@ -135,6 +139,10 @@ Enter plan mode and produce the implementation plan.
 2. State each phase's **demo** — what the owner can see in the simulator, or which
    test proves it — and which earlier phase it builds on. Order them so the
    frontier moves one phase at a time.
+
+   For each acceptance criterion, name the check that keeps proving it — a test or
+   a CI step — not only a one-off demo. Tests assert the contract, not today's
+   values, so they still pass after an adopter changes them.
 
 3. Label every phase **mechanical** or **judgement**. The label decides what gets
    delegated in Phase 5.
