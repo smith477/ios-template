@@ -27,6 +27,37 @@ Editing targets, dependencies, or build settings means editing `Project.swift`
 and re-running `tuist generate` — changes made in Xcode's project editor are
 overwritten.
 
+## Make it yours
+
+One script turns the template into your app:
+
+```bash
+scripts/rename.sh "Acme Shop" com.acme acme
+mise exec -- tuist install && mise exec -- tuist generate
+```
+
+- `"Acme Shop"` is the name on the home screen. Its slug, `acme-shop`, names the
+  project, the workspace and the app's bundle ID, `com.acme.acme-shop`.
+- `com.acme` prefixes every bundle ID.
+- `acme` is the deep-link scheme: `acme://products/7`.
+
+The script rewrites the four constants at the top of `Project.swift`, the names in
+`Workspace.swift` and `Tuist/Package.swift`, and this README's title; everything
+else is derived from those. It prints each change, can be re-run, and stops without
+writing anything if a file no longer looks the way it expects. After it:
+
+- Commit `Tuist/Package.resolved` too: `tuist install` rewrites its `originHash`
+  for the new package name.
+- Delete the old generated `.xcodeproj` and `.xcworkspace`.
+- Point `API_BASE_URL` at your backend (see [Configuration](#configuration)).
+
+The Core Data model keeps its name, `ios_template`: it is internal and never shown
+to users. A custom URL scheme is first-come on a device, so pick one you own; for
+links that prove they belong to your app, Apple recommends universal links.
+
+CI renames a copy to Acme on every run, so the script is known to work against the
+current code.
+
 ## Commands
 
 ```bash
