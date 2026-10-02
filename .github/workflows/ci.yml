@@ -27,10 +27,36 @@ jobs:
         run: mise exec -- swiftlint lint --strict
 
   test:
-    name: Build and test
+    name: Build and test (${{ matrix.variant }})
     runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: template
+            scheme: App
+          # Proves scripts/rename.sh still turns the current code into an app
+          # that builds, passes its tests and keeps none of the template's
+          # identity. AppTests covers the deep links and the container; the UI
+          # tests would only repeat the template run.
+          - variant: renamed
+            scheme: AppTests
     steps:
       - uses: actions/checkout@v4
+
+      - name: Rename to Acme
+        if: matrix.variant == 'renamed'
+        run: scripts/rename.sh Acme com.acme acme
+
+      # `ios_template`, the Core Data model name, is the known exception: the
+      # script leaves it alone, and it does not match `ios-template`.
+      - name: Check for leftover identifiers
+        if: matrix.variant == 'renamed'
+        run: |
+          if git grep -n -e 'dusan\.kovacevic' -e 'ios-template' -e 'template://' -e '"template"' -e TemplateApp -- ':!.github' ':!.claude'; then
+            echo "The template's identity survived the rename (above)." >&2
+            exit 1
+          fi
 
       - uses: jdx/mise-action@v2
 
@@ -48,24 +74,27 @@ jobs:
           echo "version=$(xcodebuild -version | tr -s ' \n' '-' | sed 's/-$//')" >> "$GITHUB_OUTPUT"
 
       # Package checkouts change only when the resolved versions or the pinned
-      # Tuist do, so those two files are the whole key.
+      # Tuist do, so those two files are the key, kept per variant because the
+      # renamed one resolves under a different package name.
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
           path: Tuist/.build
-          key: tuist-build-${{ runner.os }}-${{ hashFiles('Tuist/Package.resolved', 'mise.toml') }}
-          restore-keys: tuist-build-${{ runner.os }}-
+          key: tuist-build-${{ runner.os }}-${{ matrix.variant }}-${{ hashFiles('Tuist/Package.resolved', 'mise.toml') }}
+          restore-keys: tuist-build-${{ runner.os }}-${{ matrix.variant }}-
 
       # Build products are only reusable by the Xcode that made them, hence
       # the version in the key; it comes from the step above, so this must
-      # stay after it. A new key is written only when the Xcode version or a
-      # dependency changes, so what this mostly saves is the package builds.
+      # stay after it. The variant is in the key too, because the renamed
+      # project names its products differently. A new key is written only when
+      # the Xcode version or a dependency changes, so what this mostly saves is
+      # the package builds.
       - name: Cache DerivedData
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/DerivedData
-          key: derived-data-${{ runner.os }}-${{ steps.xcode.outputs.version }}-${{ hashFiles('Tuist/Package.resolved', 'mise.toml') }}
-          restore-keys: derived-data-${{ runner.os }}-${{ steps.xcode.outputs.version }}-
+          key: derived-data-${{ runner.os }}-${{ matrix.variant }}-${{ steps.xcode.outputs.version }}-${{ hashFiles('Tuist/Package.resolved', 'mise.toml') }}
+          restore-keys: derived-data-${{ runner.os }}-${{ matrix.variant }}-${{ steps.xcode.outputs.version }}-
 
       # Resolves the Swift packages into Tuist/.build, which is gitignored and
       # so absent on a fresh checkout.
@@ -85,5 +114,5 @@ jobs:
       # iPhone 17 Pro, not the 18 Pro local runs use: the Xcode 26 image ships no 18 Pro.
       - name: Test
         run: >-
-          mise exec -- tuist test App --no-selective-testing --device "iPhone 17 Pro"
+          mise exec -- tuist test ${{ matrix.scheme }} --no-selective-testing --device "iPhone 17 Pro"
           --derived-data-path "${{ runner.temp }}/DerivedData"
