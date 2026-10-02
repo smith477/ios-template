@@ -50,6 +50,11 @@ writing anything if a file no longer looks the way it expects. After it:
   for the new package name.
 - Delete the old generated `.xcodeproj` and `.xcworkspace`.
 - Point `API_BASE_URL` at your backend (see [Configuration](#configuration)).
+- Keep `App/PrivacyInfo.xcprivacy` true to what the app does. It declares one
+  required-reason API, `UserDefaults` for the product cache's timestamp
+  (`CA92.1`), no tracking and no collected data. Update it whenever you add an SDK,
+  call another [required-reason API](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api),
+  or send user data to your backend.
 
 The Core Data model keeps its name, `ios_template`: it is internal and never shown
 to users. A custom URL scheme is first-come on a device, so pick one you own; for

@@ -182,7 +182,9 @@ let project = Project(
                 "APIBaseURL": "$(API_BASE_URL)",
             ]),
             sources: ["App/**"],
-            resources: ["App/Assets.xcassets"],
+            // The privacy manifest declares what the app and its SDKs do. The
+            // README says what it covers and when it has to change.
+            resources: ["App/Assets.xcassets", "App/PrivacyInfo.xcprivacy"],
             dependencies: [
                 .target(name: "Products"),
                 .target(name: "Users"),
