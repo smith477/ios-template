@@ -176,6 +176,9 @@ let project = Project(
                 // back out of CFBundleURLTypes, which SDKs append their own
                 // callback schemes to.
                 "DeepLinkScheme": .string(urlScheme),
+                // Expanded per build configuration from `API_BASE_URL` below,
+                // so `AppContainer` reads the host rather than spelling it.
+                "APIBaseURL": "$(API_BASE_URL)",
             ]),
             sources: ["App/**"],
             resources: ["App/Assets.xcassets"],
@@ -186,7 +189,15 @@ let project = Project(
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
-            settings: .settings(base: appSettings)
+            // The backend each build talks to. Point Debug at staging and
+            // Release at production here; no Swift changes are needed.
+            settings: .settings(
+                base: appSettings,
+                configurations: [
+                    .debug(name: .debug, settings: ["API_BASE_URL": "https://dummyjson.com"]),
+                    .release(name: .release, settings: ["API_BASE_URL": "https://dummyjson.com"]),
+                ]
+            )
         ),
         .target(
             name: "AppTests",
