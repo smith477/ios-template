@@ -58,4 +58,13 @@ struct AppContainerTests {
         // that ignoring them has to be written down.
         _ = Products.viewModel(stub, emit: { _ in })
     }
+
+    /// The host comes from `API_BASE_URL` through Info.plist. An `https` URL
+    /// with a host proves the build setting was expanded rather than arriving
+    /// as the literal `$(API_BASE_URL)`, without pinning which host it is.
+    @Test @MainActor
+    func theAPIBaseURLIsExpandedFromTheBuildSettings() {
+        #expect(AppContainer.apiBaseURL.scheme == "https")
+        #expect(AppContainer.apiBaseURL.host()?.isEmpty == false)
+    }
 }

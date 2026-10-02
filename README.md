@@ -40,6 +40,14 @@ booted, and a different screen size puts UI-test taps in the wrong place. Xcode 
 ships no iPhone 17 Pro simulator; create one once with
 `xcrun simctl create "iPhone 17 Pro" com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`.
 
+## Configuration
+
+The API host is a build setting, not code. `API_BASE_URL` is set per build
+configuration on the App target in `Project.swift`, reaches the app as the
+`APIBaseURL` Info.plist key, and is read by `AppContainer.apiBaseURL`. Both Debug
+and Release point at `https://dummyjson.com`; change those two values to give each
+its own backend, then run `tuist generate`.
+
 ## Contributing
 
 [AGENTS.md](AGENTS.md) holds the rules for this repo, for people and agents alike,

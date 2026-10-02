@@ -31,21 +31,27 @@ final class AppContainer {
             }
         #endif
 
-        guard let baseURL = URL(string: baseURLString) else {
-            fatalError("Malformed API base URL: \(baseURLString)")
-        }
-
         do {
             return AppContainer(
                 storageProvider: try StorageProvider(modelName: "ios_template"),
-                apiClient: APIClient(baseURL: baseURL)
+                apiClient: APIClient(baseURL: apiBaseURL)
             )
         } catch {
             fatalError("Could not open the Core Data store: \(error)")
         }
     }
 
-    private static let baseURLString = "https://dummyjson.com"
+    /// The backend for this build configuration: `API_BASE_URL` in
+    /// `Project.swift`, expanded into Info.plist at build time. A value that
+    /// is missing, or arrives as the unexpanded `$(API_BASE_URL)`, has no
+    /// host, so it traps here rather than failing every request later.
+    static let apiBaseURL: URL = {
+        let value = Bundle.main.object(forInfoDictionaryKey: "APIBaseURL") as? String
+        guard let value, let url = URL(string: value), url.scheme != nil, url.host()?.isEmpty == false else {
+            fatalError("Info.plist APIBaseURL is missing or malformed: \(value ?? "nil")")
+        }
+        return url
+    }()
 }
 
 extension AppContainer: ProductsDependencies {}
