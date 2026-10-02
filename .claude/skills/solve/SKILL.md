@@ -36,6 +36,9 @@ numbered list, not an essay. Cover the sequence: read scope → branch → grill
 plan → build one phase at a time → retro. Then stop and wait for the owner to confirm
 before doing anything else.
 
+If another session is already working in this checkout, as in a comparison run, do
+this one in a worktree, so neither can build on the other's uncommitted edits.
+
 ## Phase 1: Read the scope
 
 1. **With an issue number**, fetch it:
@@ -92,8 +95,9 @@ Invoke the [grill-me](../grill-me/SKILL.md) skill with the Skill tool
 (`skill: "grill-me"`). It takes no arguments — carry the candidate questions from
 Phase 1 into it yourself, since it runs in this same conversation and can see them.
 
-One judgement-call question at a time, each with options, the tradeoff in terms of
-this codebase, and a recommendation; the owner decides. Facts the code or
+An orientation first, then one judgement-call question at a time, each briefed with
+the current state and what each option would change, and carrying a
+recommendation; the owner decides. Facts the code or
 `docs/agents/` already settle are looked up, not asked. Settled decisions are not
 reopened.
 
@@ -157,7 +161,11 @@ Enter plan mode and produce the implementation plan.
 Approving the plan approves the plan, not the build. Each phase is built and
 reviewed on its own.
 
-1. Build **exactly one phase**, then stop and hand it to the owner for review. Do
+1. Before building each phase, run `git status` and `git log -1`. If HEAD or the
+   working tree differs from what the plan was written against, or from what the
+   last phase left, stop and say what changed; do not build on it.
+
+   Build **exactly one phase**, then stop and hand it to the owner for review. Do
    not begin the next phase, even when the current one looks done and the next is
    obvious. The owner says when to continue.
 
@@ -172,14 +180,24 @@ reviewed on its own.
      and to **stop rather than widen scope**. Review what comes back before
      reporting it — a delegated phase is still your phase.
 
-3. **Verify before handing off.** A single bundle is quick, so run it:
+3. **Verify before handing off.** Run the checks that need no simulator yourself:
 
    ```bash
    mise exec -- tuist generate                                     # if Project.swift changed
-   mise exec -- tuist test <Bundle> --device "iPhone 17 Pro"
    mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
    mise exec -- tuist inspect dependencies --only implicit         # if the module graph changed
    ```
+
+   Tests, and anything else on the simulator, are the owner's to run. Hand over
+   each command in its own `bash` block with what a pass looks like, and wait for
+   their result before calling the phase verified:
+
+   ```bash
+   mise exec -- tuist test <Bundle> --no-selective-testing --device "iPhone 18 Pro"
+   ```
+
+   `--no-selective-testing` is not optional: without it, a re-run with nothing
+   changed prints "has no tests to run", which reads like a pass.
 
    Never claim a build or test passed unless it was actually run. If something
    fails, paste the last meaningful error rather than "tests failed". If a command
