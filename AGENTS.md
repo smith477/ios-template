@@ -41,17 +41,18 @@ without asking first.
 ```bash
 mise install && mise exec -- tuist install && mise exec -- tuist generate
 mise exec -- tuist build
-mise exec -- tuist test App --device "iPhone 17 Pro"
-mise exec -- tuist test ProductsTests --device "iPhone 17 Pro"
+mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"
+mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"
 mise exec -- tuist inspect dependencies --only implicit
 mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
 ```
 
 `tuist generate` follows any `Project.swift` change, before building.
 
-`--device "iPhone 17 Pro"` is not optional: `tuist test` otherwise picks whichever
-simulator happens to be booted, and an older screen geometry puts UI-test taps in
-the wrong place. `Project.swift` says so at the top.
+`--device` is not optional: `tuist test` otherwise picks whichever simulator
+happens to be booted, and an older screen geometry puts UI-test taps in the wrong
+place. Run locally on iPhone 18 Pro, which Xcode 27 ships; CI runs iPhone 17 Pro
+because its Xcode 26 image has no 18 Pro. `Project.swift` says so at the top.
 
 ## Commits
 

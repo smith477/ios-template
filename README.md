@@ -32,13 +32,13 @@ overwritten.
 ```bash
 mise exec -- tuist generate                           # regenerate the project after changing Project.swift
 mise exec -- tuist build                              # build
-mise exec -- tuist test App --device "iPhone 17 Pro"  # run tests
+mise exec -- tuist test App --device "iPhone 18 Pro"  # run tests
 ```
 
 `--device` is required: without it `tuist test` uses whichever simulator is
-booted, and a different screen size puts UI-test taps in the wrong place. Xcode 27
-ships no iPhone 17 Pro simulator; create one once with
-`xcrun simctl create "iPhone 17 Pro" com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`.
+booted, and a different screen size puts UI-test taps in the wrong place. Use
+iPhone 18 Pro on Xcode 27. On Xcode 26, which has no 18 Pro, use iPhone 17 Pro, as
+CI does.
 
 ## Configuration
 

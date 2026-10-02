@@ -82,6 +82,7 @@ jobs:
         run: mise exec -- tuist inspect dependencies --only implicit
 
       # A fixed DerivedData path so the cache step above can find it.
+      # iPhone 17 Pro, not the 18 Pro local runs use: the Xcode 26 image ships no 18 Pro.
       - name: Test
         run: >-
           mise exec -- tuist test App --no-selective-testing --device "iPhone 17 Pro"
