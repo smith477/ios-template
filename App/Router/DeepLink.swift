@@ -6,17 +6,12 @@ import Users
 
 /// A destination named by a URL from outside the app.
 ///
-/// The grammar, rooted at the app's own scheme (`urlScheme` in
-/// `Project.swift`):
+///     <scheme>://products      the Products tab
+///     <scheme>://products/7    product 7
+///     <scheme>://users         the Users tab
+///     <scheme>://users/3       user 3
 ///
-///     <scheme>://products          the Products tab
-///     <scheme>://products/7        product 7
-///     <scheme>://users             the Users tab
-///     <scheme>://users/3           user 3
-///
-/// Unknown hosts, unparsable ids and extra path components are rejected rather
-/// than approximated: a link that half-works lands the user somewhere they did
-/// not ask for, which is worse than one that visibly does nothing.
+/// Anything else is rejected rather than approximated, so a link never half-works.
 struct DeepLink: Hashable {
     let tab: AppRouter.Tab
 
@@ -28,9 +23,7 @@ struct DeepLink: Hashable {
         self.route = route
     }
 
-    /// The scheme this app answers to. Read from Info.plist rather than
-    /// written here, so renaming the app is one line in `Project.swift` and no
-    /// change in Swift.
+    /// The scheme this app answers to, read from Info.plist's `DeepLinkScheme`.
     static let scheme: String = {
         guard let scheme = Bundle.main.object(forInfoDictionaryKey: "DeepLinkScheme") as? String, !scheme.isEmpty else {
             fatalError("Info.plist is missing DeepLinkScheme")

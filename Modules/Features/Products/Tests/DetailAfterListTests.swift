@@ -8,9 +8,8 @@ import Testing
 
 @testable import Products
 
-/// Reproduces the app's real sequence: the list screen loads through one
-/// repository, then the detail screen reads the same store through a second
-/// repository built independently.
+/// The list loads through one repository, then the detail reads the same store
+/// through another, as in the app.
 @MainActor
 struct DetailAfterListTests {
     @Test

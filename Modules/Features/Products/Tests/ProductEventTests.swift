@@ -5,8 +5,8 @@ import Testing
 
 @testable import Products
 
-/// Covers what a feature emits. Feature view models hold no router, so their
-/// navigation intent is assertable without a stack, a view, or a test double.
+/// View models hold no router, so their events are assertable without a stack
+/// or a view.
 @MainActor
 struct FeatureEventTests {
     @Test
@@ -19,8 +19,7 @@ struct FeatureEventTests {
         #expect(events == [.productTapped(id: 42)])
     }
 
-    /// Asserts the event, not the id: the seller is a placeholder for an API
-    /// field that does not exist yet.
+    /// Asserts the event, not the id: the seller is a placeholder.
     @Test
     func tappingTheSellerEmitsSellerTapped() async {
         var events: [ProductEvent] = []
@@ -36,8 +35,6 @@ struct FeatureEventTests {
         }
     }
 
-    /// The placeholder seller varies between products and is stable for any
-    /// one product.
     @Test
     func sellersVaryByProductAndAreStable() async {
         var first: [ProductEvent] = []
@@ -65,7 +62,6 @@ struct FeatureEventTests {
         return viewModel
     }
 
-    /// Tapping the seller before the product loads emits nothing.
     @Test
     func tappingTheSellerBeforeLoadingEmitsNothing() {
         var events: [ProductEvent] = []
@@ -80,8 +76,6 @@ struct FeatureEventTests {
         #expect(events.isEmpty)
     }
 
-    /// Omitting `emit` discards events without failing. The two view models
-    /// differ only in whether `emit` was passed.
     @Test
     func omittingEmitDropsEventsSilently() {
         var wired: [ProductEvent] = []

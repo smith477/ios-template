@@ -10,9 +10,8 @@ import Testing
 @testable import Products
 @testable import Users
 
-/// The stub network the UI tests run against. The fixtures stand in for the
-/// live API's contract, so they are decoded through the real response types
-/// and fetched through the real clients rather than checked by eye.
+/// Decodes the fixtures through the real response types and fetches them
+/// through the real clients.
 struct StubNetworkTests {
     @Test
     func theProductsFixtureDecodesThroughTheResponseType() throws {
@@ -44,8 +43,7 @@ struct StubNetworkTests {
         #expect(response.id == id)
     }
 
-    /// What `<scheme>://products/50` opens: a product the list never returned,
-    /// fetched by id through the real repository, client and stub.
+    /// A product outside the list, fetched by id through the real data layer.
     @Test @MainActor
     func productFiftyLoadsThroughTheStub() async throws {
         let viewModel = try stubbedDetail(id: 50)
@@ -60,8 +58,6 @@ struct StubNetworkTests {
         #expect(product.title == "Stub Fifty")
     }
 
-    /// An id the stub has no fixture for answers 404, which the detail screen
-    /// shows as not found rather than as an error.
     @Test @MainActor
     func anUnknownProductIsNotFound() async throws {
         let viewModel = try stubbedDetail(id: 999)
@@ -81,8 +77,8 @@ struct StubNetworkTests {
         #expect(response.users.map(\.firstName) == ["Stella", "Sam", "Sasha"])
     }
 
-    /// A path the stub does not serve answers 404 rather than reaching the
-    /// network, so a new endpoint fails visibly in a stubbed run.
+    /// A new endpoint then fails visibly in a stubbed run rather than reaching the
+    /// network.
     @Test
     func anUnknownPathAnswersNotFound() async {
         await #expect(throws: APIError.notFound) {
@@ -90,9 +86,7 @@ struct StubNetworkTests {
         }
     }
 
-    /// Every product's seller resolves to a fixture user, so tapping the
-    /// seller in a stubbed run opens a profile rather than "not found". Read
-    /// from the emitted event because the seller rule is private to Products.
+    /// Read from the emitted event, because the seller rule is private to Products.
     @Test(arguments: [1, 2, 3]) @MainActor
     func everyProductsSellerIsAFixtureUser(productId: Int) async throws {
         var events: [ProductEvent] = []
@@ -112,9 +106,6 @@ struct StubNetworkTests {
         #expect(response.users.map(\.id).contains(userId))
     }
 
-    /// What a launch with `-UITestStubNetwork` runs on: an in-memory store, so
-    /// one run inherits no cached products from another, and a client that
-    /// loads the fixtures through the real Products feature.
     @Test @MainActor
     func theStubbedContainerLoadsTheFixturesIntoAnInMemoryStore() async throws {
         let container = AppContainer.stubbed()
@@ -130,8 +121,8 @@ struct StubNetworkTests {
         #expect(Set(viewModel.products.map(\.title)) == ["Stub Widget", "Stub Gadget", "Stub Gizmo"])
     }
 
-    /// A detail screen over the real data layer: the stub for the network, an
-    /// empty in-memory store, and a list record no other test shares.
+    /// A detail view model over the stub, an empty in-memory store and its own
+    /// list record.
     @MainActor
     private func stubbedDetail(id: Int) throws -> ProductDetailViewModel {
         let repository = ProductDataRepository(
@@ -154,7 +145,7 @@ private struct UnknownEndpoint: Endpoint {
     let method = HTTPMethod.GET
 }
 
-/// Always fetches, so the detail view model sees exactly what the stub served.
+/// A repository that always fetches, so the view model sees what the stub served.
 private struct FetchingProductRepository: ProductRepository {
     let client: ProductApiClient
 

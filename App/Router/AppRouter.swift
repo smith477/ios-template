@@ -18,11 +18,8 @@ final class AppRouter {
 
     var selectedTab: Tab = .products
 
-    /// One stack per tab, so each keeps its own depth across tab switches. A
-    /// stack may hold routes from any feature.
-    ///
-    /// Typed arrays rather than `NavigationPath`, which erases its contents and
-    /// so cannot be asserted against beyond its depth.
+    /// One stack per tab, each holding routes from any feature. Typed arrays
+    /// rather than `NavigationPath`, whose erased contents tests cannot inspect.
     var productsStack: [AnyRoute] = []
     var usersStack: [AnyRoute] = []
 
@@ -47,12 +44,11 @@ final class AppRouter {
         }
     }
 
-    /// Shows `route` in `tab`, selecting that tab first. For destinations the
-    /// user asked for outright, such as a deep link.
+    /// Selects `tab` and shows `route` there, for a destination the user asked
+    /// for outright, such as a deep link.
     ///
-    /// Crossing into an unselected tab **replaces** its stack, discarding any
-    /// flow in progress there — safe only while that stack holds no unsaved
-    /// input. Routing to the selected tab pushes instead.
+    /// Replaces an unselected tab's stack, discarding any flow in progress there;
+    /// on the selected tab it pushes instead.
     func crossTo(_ route: AnyRoute, in tab: Tab) {
         guard tab != selectedTab else {
             push(route, onto: tab)

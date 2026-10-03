@@ -6,9 +6,7 @@ import SwiftUI
 public enum Users {
     /// Builds the view model backing `UserView`.
     ///
-    /// - Parameters:
-    ///   - dependencies: Platform services this feature needs.
-    ///   - emit: Receives this feature's events, normally `AppRouter.handle`.
+    /// - Parameter emit: Receives this feature's events, normally `AppRouter.handle`.
     @MainActor
     public static func viewModel(
         _ dependencies: some UsersDependencies,
@@ -19,8 +17,8 @@ public enum Users {
 
     /// Builds the view for one of this feature's routes.
     ///
-    /// - Parameter emit: Unused by the screens that exist today, and taken
-    ///   anyway so that adding one that emits does not change this signature.
+    /// - Parameter emit: Receives this feature's events. No screen emits yet; it is
+    ///   taken so one can without changing this signature.
     @MainActor
     public static func view(
         _ route: UserRoute,

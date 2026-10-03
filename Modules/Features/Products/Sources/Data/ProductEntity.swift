@@ -85,9 +85,8 @@ extension ProductEntity {
         brand = product.brand
         thumbnail = product.thumbnail
 
-        // Only the rows that actually changed are touched. Deleting every child
-        // and recreating it churns the store on each refresh, and leaves a
-        // window where a product has no images.
+        // Only changed rows are touched: recreating every child churns the store and
+        // briefly leaves a product with no images.
         syncImages(product.images, in: context)
         syncTags(product.tags, in: context)
 

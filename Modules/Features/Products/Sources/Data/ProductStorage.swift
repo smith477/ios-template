@@ -5,30 +5,23 @@ import CoreData
 import Foundation
 import Persistence
 
-/// Defines local storage operations for Product entities.
+/// Local storage for products and the list they belong to.
 public protocol ProductStorage: Sendable {
-    /// The products the last `save(_:)` was given, sorted by title — the list
-    /// as the API last returned it, not every row in the store.
+    /// Returns the products the last `save(_:)` was given, sorted by title.
     func getAll() async throws(StorageError) -> [Product]
     func get(id: Int) async throws(StorageError) -> Product?
-    /// Saves the list: writes the rows, then records them as the list.
+    /// Saves `products` as the list: writes their rows, then records them.
     func save(_ products: [Product]) async throws(StorageError)
-    /// Writes one product's row without touching the list or its age, so
-    /// opening a product neither adds it to the list nor makes a stale list
-    /// look fresh.
+    /// Writes one product's row without changing the list or its age.
     func upsert(_ product: Product) async throws(StorageError)
     func delete(id: Int) async throws(StorageError)
     func deleteAll() async throws(StorageError)
 
-    /// When `save(_:)` last completed — the cache's own age, unlike
-    /// `Meta.updatedAt`, which comes from the API and describes the product.
+    /// Returns when `save(_:)` last completed: the cache's age, not the product's.
     func lastSavedAt() async -> Date?
 }
 
-/// Records the list as last saved: when, and which products it held. The
-/// store keeps every product it has seen, so the ids are what tell the list's
-/// rows apart from ones cached for another reason. The clock itself is
-/// `DateProvider`, so a test can set "now" without faking the stored value.
+/// The list as last saved: when, and which product ids it held.
 ///
 /// Holds a suite name rather than a `UserDefaults`, which is not `Sendable`;
 /// `nil` is the standard defaults.
@@ -51,8 +44,7 @@ struct ProductListRecord: Sendable {
 
     var lastSavedAt: Date? { defaults.object(forKey: savedAtKey) as? Date }
 
-    /// Empty for a record written before ids were kept, which reads as an
-    /// empty list and so as a cache miss: an upgraded install refetches once.
+    /// Empty for a record from before ids were kept, which reads as a cache miss.
     var ids: [Int] { defaults.array(forKey: idsKey) as? [Int] ?? [] }
 
     func markSaved(ids: [Int], at date: Date) {

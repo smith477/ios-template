@@ -4,7 +4,7 @@ import CoreData
 import Foundation
 import Synchronization
 
-/// Encapsulates the Core Data stack: `viewContext` for main-thread reads,
+/// The Core Data stack: `viewContext` for main-thread reads,
 /// `performBackground(_:)` for writes and heavy reads.
 public final class StorageProvider: Sendable {
     private let persistentContainer: NSPersistentContainer
@@ -18,14 +18,9 @@ public final class StorageProvider: Sendable {
     /// so `Bundle.main` will not find it.
     public static var modelBundle: Bundle { .module }
 
-    /// One model per model file for the whole process. When each provider
-    /// loaded its own copy, a test opening an in-memory store beside the test
-    /// host's on-disk one left several entity descriptions claiming
-    /// `ProductEntity`, and `+entity` lookups such as `fetchRequest()` could no
-    /// longer tell which to use.
-    ///
-    /// `NSManagedObjectModel` is not `Sendable`, so a model never leaves the
-    /// lock: only the container built from it does, and that is.
+    /// One model per model file for the whole process: separate copies leave Core
+    /// Data unable to resolve `ProductEntity`. Models stay inside the lock because
+    /// `NSManagedObjectModel` is not `Sendable`.
     private static let models = Mutex<[URL: NSManagedObjectModel]>([:])
 
     public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) {
@@ -64,8 +59,8 @@ public final class StorageProvider: Sendable {
         persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
 
-    /// Executes `block` on a private background context. Changes are not saved
-    /// automatically — call `context.save()` inside the closure.
+    /// Runs `block` on a private background context. Changes are saved only by
+    /// calling `context.save()` inside it.
     public func performBackground<T: Sendable>(
         _ block: @escaping @Sendable (NSManagedObjectContext) throws -> T
     ) async throws -> T {
@@ -76,7 +71,7 @@ public final class StorageProvider: Sendable {
         }
     }
 
-    /// A fresh, isolated in-memory store for unit testing.
+    /// Returns a fresh in-memory store, for tests.
     public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) -> StorageProvider {
         try StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
     }

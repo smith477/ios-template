@@ -2,7 +2,7 @@
 
 import Foundation
 
-/// Errors that can occur during local storage operations.
+/// An error from a local storage operation.
 public enum StorageError: Error, Sendable {
     case notFound
     case modelNotFound(name: String)

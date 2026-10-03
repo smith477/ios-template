@@ -41,8 +41,8 @@ public struct ProductView: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
-                // Must be inside the label: `.plain` hit-tests the label's own
-                // shape, so outside the Button the row's gaps ignore taps.
+                // `.plain` hit-tests the label's own shape, so outside the label the gaps ignore
+                // taps.
                 .contentShape(.rect)
             }
             .buttonStyle(.plain)

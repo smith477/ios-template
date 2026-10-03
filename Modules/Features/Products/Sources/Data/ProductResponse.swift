@@ -53,9 +53,7 @@ struct MetaResponse: Decodable {
     let barcode: String
     let qrCode: String
 
-    /// `ISO8601DateFormatter` is a class and not `Sendable`, so a shared
-    /// instance would be a data race once decoding happens off the main actor.
-    /// The format style is a value type and safe to share.
+    /// A format style rather than `ISO8601DateFormatter`, which is not `Sendable`.
     private static let dateStyle = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
 
     func toDomain() -> Meta {

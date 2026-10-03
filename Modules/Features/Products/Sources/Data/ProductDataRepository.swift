@@ -31,9 +31,8 @@ final class ProductDataRepository: ProductRepository {
             let products = try await apiClient.fetchProducts()
             try await storage.save(products)
         } catch {
-            // A failed refresh should not empty the screen: fall back to
-            // whatever is cached, and only surface the error if there is
-            // nothing to show.
+            // A failed refresh falls back to the cache, and only throws when the cache is
+            // empty.
             let cached = try await storage.getAll()
             if cached.isEmpty { throw error }
             return cached
@@ -41,8 +40,7 @@ final class ProductDataRepository: ProductRepository {
         return try await storage.getAll()
     }
 
-    /// Freshness is the list's: a product has no age of its own, so a cached
-    /// row is served while the list is fresh. Saving it leaves the list alone.
+    /// Serves a cached row while the list is fresh: a product has no age of its own.
     func getProduct(id: Int, policy: CachePolicy) async throws -> Product? {
         if case let .cacheFirst(maxAge) = policy, await isCacheFresh(maxAge: maxAge),
            let cached = try await storage.get(id: id) {
@@ -53,13 +51,11 @@ final class ProductDataRepository: ProductRepository {
         do {
             product = try await apiClient.fetchProduct(id: id)
         } catch .notFound {
-            // The API's answer, not a failed request: the product is gone,
-            // so its cached copy must not be served in its place.
+            // A 404 means the product is gone, so its cached copy is not served.
             try await storage.delete(id: id)
             return nil
         } catch {
-            // As for the list: a failed refresh falls back to the cached
-            // copy, and only surfaces the error when there is none.
+            // As for the list, a failed refresh falls back to the cached copy.
             if let cached = try await storage.get(id: id) { return cached }
             throw error
         }

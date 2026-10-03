@@ -3,9 +3,8 @@
 import SwiftUI
 
 public struct ProductDetailView: View {
-    /// `@State`, not `let`: SwiftUI only tracks an `@Observable` object read
-    /// through a property wrapper, and a pushed screen that holds its view
-    /// model in a plain `let` never redraws when `state` changes.
+    /// Creates the screen. The view model is held in `@State`, without which
+    /// SwiftUI never redraws a pushed screen.
     @State private var viewModel: ProductDetailViewModel
 
     public init(viewModel: ProductDetailViewModel) {
@@ -53,8 +52,8 @@ public struct ProductDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// `backgroundExtensionEffect` mirrors and blurs the image outwards rather
-    /// than leaving a hard edge under the navigation bar's glass.
+    /// `backgroundExtensionEffect` blurs the image out under the navigation bar
+    /// rather than leaving a hard edge.
     private func hero(_ product: Product) -> some View {
         ProductImage(url: product.thumbnail)
             .frame(height: 280)

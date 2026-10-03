@@ -2,13 +2,11 @@
 
 import SwiftUI
 
-/// A product image loaded from its URL, with a placeholder while it loads and
-/// wherever there is no usable URL — the domain model maps a missing image
-/// to `""`.
+/// A product image loaded from its URL, with a placeholder while loading or when
+/// the URL is empty.
 ///
-/// - Note: `AsyncImage` caches no further than `URLSession`'s small default,
-///   so a long list refetches while scrolling. Left for whoever adopts this
-///   template to replace with their own image cache.
+/// - Note: `AsyncImage` caches only in `URLSession`'s small default cache; an app
+///   with long lists wants its own image cache.
 struct ProductImage: View {
     let url: String
     var contentMode: ContentMode = .fill

@@ -7,7 +7,6 @@ import Users
 
 @testable import App
 
-/// Covers how the app turns events into stack changes.
 @MainActor
 struct AppRouterTests {
     @Test
@@ -21,9 +20,7 @@ struct AppRouterTests {
         #expect(router.selectedTab == .products)
     }
 
-    /// A Products event resolves to another feature's screen, on the Products
-    /// stack: the seller sits above the product rather than in the Users tab,
-    /// so Back returns to the product.
+    /// Back then returns to the product rather than leaving the Products tab.
     @Test
     func aSellerTapPushesTheProfileOntoTheProductsStack() {
         let router = AppRouter()
@@ -35,7 +32,6 @@ struct AppRouterTests {
         #expect(router.selectedTab == .products)
     }
 
-    /// Opening a seller leaves the Users tab as the user left it.
     @Test
     func aSellerTapDoesNotDisturbTheUsersTab() {
         let router = AppRouter()
@@ -48,7 +44,6 @@ struct AppRouterTests {
         #expect(router.selectedTab == .products)
     }
 
-    /// Each tab keeps its own stack.
     @Test
     func tabsKeepSeparateStacks() {
         let router = AppRouter()
@@ -60,7 +55,6 @@ struct AppRouterTests {
         #expect(router.usersStack == [.user(.profile(id: 2))])
     }
 
-    /// Crossing into an unselected tab replaces whatever it was showing.
     @Test
     func crossingIntoABusyTabReplacesItsStack() {
         let router = AppRouter()
@@ -73,8 +67,6 @@ struct AppRouterTests {
         #expect(router.selectedTab == .users)
     }
 
-    /// Routing to the selected tab pushes rather than replacing, preserving
-    /// the visible back stack. A deep link into the selected tab reaches this.
     @Test
     func crossingIntoTheCurrentTabPushesInsteadOfReplacing() {
         let router = AppRouter()
@@ -86,7 +78,6 @@ struct AppRouterTests {
         #expect(router.usersStack == [.user(.profile(id: 8)), .user(.profile(id: 3))])
     }
 
-    /// Repeated taps before a push renders do not stack the same screen.
     @Test
     func repeatedTapsDoNotStackTheSameScreen() {
         let router = AppRouter()
@@ -97,7 +88,6 @@ struct AppRouterTests {
         #expect(router.productsStack == [.product(.detail(id: 4))])
     }
 
-    /// Only consecutive duplicates are suppressed.
     @Test
     func theSameScreenCanRecurLaterInAStack() {
         let router = AppRouter()
@@ -113,7 +103,7 @@ struct AppRouterTests {
         ])
     }
 
-    /// Stacks survive encoding, as state restoration will require.
+    /// State restoration needs stacks to encode.
     @Test
     func routesRoundTripThroughCoding() throws {
         let stack: [AnyRoute] = [.product(.detail(id: 4)), .user(.profile(id: 9))]
@@ -124,7 +114,6 @@ struct AppRouterTests {
         #expect(decoded == stack)
     }
 
-    /// Routes differing only by id are distinct stack entries.
     @Test
     func differentProductsAreDistinctEntries() {
         let router = AppRouter()

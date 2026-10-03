@@ -1,21 +1,10 @@
 import ProjectDescription
 
-// The dependency rules this manifest enforces:
-//
-//   App       may import every feature and platform module. It is the only
-//             place where features are wired together.
-//   Feature   may import platform modules and APIClient.
-//             A feature may never import another feature — that is the one
-//             boundary worth a target, because it is what keeps a feature
-//             copyable into another project.
-//   Platform  imports nothing from this project. It knows no feature.
-//
-// Layers inside a feature (Domain / Data / Presentation) are folders, not
-// targets. Split a feature into layer targets only once it is large enough to
-// earn them; until then the ceremony costs more than it returns.
+// App may import any module. A feature may import Platform modules and APIClient,
+// never another feature. Platform imports nothing here. See docs/agents/architecture.md.
 
-// The app's identity. `scripts/rename.sh` rewrites these four lines, so every
-// name, bundle ID and URL scheme below is derived from them, never repeated.
+// The app's identity, rewritten by `scripts/rename.sh`. Every name, bundle ID and
+// URL scheme below derives from these lines.
 let appName = "ios-template"
 let displayName = "Template"
 let bundlePrefix = "dusan.kovacevic"
@@ -24,24 +13,12 @@ let urlScheme = "template"
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
-// Tests run on iPhone 18 Pro locally, and on iPhone 17 Pro in CI, whose
-// Xcode 26 image has no 18 Pro. `tuist test` otherwise picks whichever
-// simulator happens to be booted, and a device on an older screen geometry
-// puts UI-test taps in the wrong place:
-//
-//     tuist test App --device "iPhone 18 Pro"
-//
-// The CI workflow passes the same flag.
-
 let baseSettings: SettingsDictionary = [
     "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
 ].swiftVersion("6.0")
 
-// MainActor-by-default is a property of UI code, not of the project. Applied
-// project-wide it lands on Domain types, storage and repositories — none of
-// which touch the main actor — and every one of them then needs `nonisolated`
-// to opt back out. Feature Presentation code carries its own `@MainActor`, and
-// SwiftUI's `View` already supplies it, so only the App target takes it here.
+// App target only: project-wide, MainActor-by-default would force `nonisolated`
+// onto every Domain and Data type.
 let appSettings: SettingsDictionary = [
     "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
 ]
@@ -75,9 +52,8 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
     )
 }
 
-// A module's tests live beside it and use @testable, so a module needs no
-// public surface for the sake of being tested. Tests that span modules — the
-// container, routing — belong to the App target instead.
+// Tests live beside their module and use `@testable`, so nothing is made public
+// for a test. Tests that span modules belong to AppTests.
 func tests(
     for name: String,
     at path: String,
@@ -104,9 +80,8 @@ func platformTests(_ name: String, dependencies: [TargetDependency] = []) -> Tar
 
 let project = Project(
     name: appName,
-    // One scheme per target fills the picker with entries nobody selects on
-    // purpose, including Tuist's internal resource-bundle target. The schemes
-    // this project wants are declared at the bottom of this file instead.
+    // Automatic schemes add one per framework and resource bundle; the wanted
+    // schemes are declared at the bottom instead.
     options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
@@ -157,33 +132,27 @@ let project = Project(
             deploymentTargets: deploymentTargets,
             infoPlist: .extendingDefault(with: [
                 "UILaunchScreen": [:],
-                // The home-screen label. Without it iOS falls back to the
-                // product name, which is `App` for every app built from this.
+                // Without it the home screen shows the product name, `App`.
                 "CFBundleDisplayName": .string(displayName),
-                // Tuist's default plist requires armv7, which no simulator
-                // reports — it hides every simulator from the run destinations.
+                // Tuist's default requires armv7, which hides every simulator
+                // from the run destinations.
                 "UIRequiredDeviceCapabilities": ["arm64"],
-                // Deep links: `<urlScheme>://products/7`. Claiming a custom scheme
-                // is first-come on device, so a shipping app wants a name it
-                // owns, or universal links, which prove the association.
-                // `DeepLink` parses what arrives here.
+                // A custom scheme is first-come on device: a shipping app wants a
+                // name it owns, or universal links.
                 "CFBundleURLTypes": [
                     [
                         "CFBundleURLName": "\(bundlePrefix).\(appName)",
                         "CFBundleURLSchemes": [.string(urlScheme)],
                     ],
                 ],
-                // The scheme `DeepLink` accepts. Its own key rather than read
-                // back out of CFBundleURLTypes, which SDKs append their own
-                // callback schemes to.
+                // Read by `DeepLink`. A key of its own, because SDKs append their
+                // callback schemes to CFBundleURLTypes.
                 "DeepLinkScheme": .string(urlScheme),
-                // Expanded per build configuration from `API_BASE_URL` below,
-                // so `AppContainer` reads the host rather than spelling it.
+                // Expanded per build configuration from `API_BASE_URL` below.
                 "APIBaseURL": "$(API_BASE_URL)",
             ]),
             sources: ["App/**"],
-            // The privacy manifest declares what the app and its SDKs do. The
-            // README says what it covers and when it has to change.
+            // The README says when PrivacyInfo.xcprivacy has to change.
             resources: ["App/Assets.xcassets", "App/PrivacyInfo.xcprivacy"],
             dependencies: [
                 .target(name: "Products"),
@@ -192,8 +161,8 @@ let project = Project(
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
-            // The backend each build talks to. Point Debug at staging and
-            // Release at production here; no Swift changes are needed.
+            // The backend per build: point Debug at staging and Release at
+            // production here.
             settings: .settings(
                 base: appSettings,
                 configurations: [
@@ -230,7 +199,7 @@ let project = Project(
         ),
     ],
     schemes: [
-        // Everything: what CI runs, and the scheme to pick when running the app.
+        // Runs the app and every test bundle; what CI runs.
         .scheme(
             name: "App",
             shared: true,
@@ -239,10 +208,7 @@ let project = Project(
             runAction: .runAction(executable: "App")
         ),
 
-        // One scheme per test bundle, so a module's tests can be run on their
-        // own from the scheme picker without waiting for the rest. Declared
-        // rather than generated: automatic schemes would also add one for
-        // every framework and for Tuist's internal resource-bundle target.
+        // One scheme per test bundle, to run a module's tests on their own.
         testScheme("ProductsTests"),
         testScheme("AppKitTests"),
         testScheme("AppTests"),

@@ -3,11 +3,8 @@
 import Foundation
 import Identity
 
-/// A review left on a product.
-///
-/// The reviewer is an `Identity.User` rather than a type of this feature's
-/// own: Products and Users both need to describe the same person, which is
-/// what moved `User` out into Platform. Neither feature imports the other.
+/// A review left on a product. The reviewer is `Identity.User`, the type the
+/// Users feature shares.
 public struct ProductReview: Identifiable, Sendable {
     public let id: Int
     public let rating: Int
