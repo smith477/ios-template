@@ -50,11 +50,17 @@ public struct Log: Sendable {
             return
         }
         // Domain and code say what failed; the description can quote data or paths.
-        let nsError = error as NSError
-        let (domain, code, detail) = (nsError.domain, nsError.code, nsError.localizedDescription)
-        logger.log(
-            level: level,
-            "\(text, privacy: .public): \(domain, privacy: .public) \(code, privacy: .public) \(detail, privacy: .private)"
-        )
+        let chain = [error, Self.cause(of: error)].compactMap(\.self).map { $0 as NSError }
+        let codes = chain.map { "\($0.domain) \($0.code)" }.joined(separator: " caused by ")
+        let detail = error.localizedDescription
+        logger.log(level: level, "\(text, privacy: .public): \(codes, privacy: .public) \(detail, privacy: .private)")
+    }
+
+    /// The error an enum case wraps, as `StorageError.saveFailed(_:)` wraps Core
+    /// Data's: bridged alone, a Swift enum gives only its type and case number.
+    private static func cause(of error: any Error) -> (any Error)? {
+        let mirror = Mirror(reflecting: error)
+        guard mirror.displayStyle == .enum else { return nil }
+        return mirror.children.first?.value as? any Error
     }
 }
