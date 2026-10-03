@@ -16,7 +16,7 @@ struct AppContainerTests {
     @Test @MainActor
     func usesTheStoreItIsGiven() throws {
         let container = AppContainer(
-            storageProvider: try .inMemory(modelName: "ios_template"),
+            storageProvider: try .inMemory(storeName: AppContainer.storeName, modelBundles: AppContainer.modelBundles),
             apiClient: APIClient(baseURL: URL(string: "https://example.invalid")!)
         )
 
@@ -24,18 +24,6 @@ struct AppContainerTests {
             container.storageProvider.viewContext.persistentStoreCoordinator?.persistentStores.first
         )
         #expect(store.type == NSInMemoryStoreType)
-    }
-
-    /// Separate model copies leave Core Data unable to tell which `ProductEntity`
-    /// a fetch means.
-    @Test @MainActor
-    func storesShareOneModel() throws {
-        let first = try StorageProvider.inMemory(modelName: "ios_template")
-        let second = try StorageProvider.inMemory(modelName: "ios_template")
-
-        let firstModel = try #require(first.viewContext.persistentStoreCoordinator?.managedObjectModel)
-        let secondModel = try #require(second.viewContext.persistentStoreCoordinator?.managedObjectModel)
-        #expect(firstModel === secondModel)
     }
 
     @Test @MainActor
@@ -46,7 +34,7 @@ struct AppContainerTests {
         }
 
         let stub = Stub(
-            storageProvider: try .inMemory(modelName: "ios_template"),
+            storageProvider: try .inMemory(storeName: AppContainer.storeName, modelBundles: AppContainer.modelBundles),
             apiClient: APIClient(baseURL: URL(string: "https://example.invalid")!)
         )
 

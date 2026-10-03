@@ -18,26 +18,20 @@ public final class StorageProvider: Sendable {
     /// so `Bundle.main` will not find it.
     public static var modelBundle: Bundle { .module }
 
-    /// One model per model file for the whole process: separate copies leave Core
-    /// Data unable to resolve `ProductEntity`. Models stay inside the lock because
-    /// `NSManagedObjectModel` is not `Sendable`.
-    private static let models = Mutex<[URL: NSManagedObjectModel]>([:])
+    /// One merged model per set of bundles for the whole process: separate copies
+    /// leave Core Data unable to tell which entity a managed-object class belongs
+    /// to. Models stay inside the lock because `NSManagedObjectModel` is not
+    /// `Sendable`.
+    private static let models = Mutex<[Set<URL>: NSManagedObjectModel]>([:])
 
-    public init(modelName: String, inMemory: Bool = false, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) {
-        guard let modelURL = bundle.url(forResource: modelName, withExtension: "momd") else {
-            throw .modelNotFound(name: modelName)
-        }
-
-        persistentContainer = try Self.models.withLock { models throws(StorageError) -> NSPersistentContainer in
-            if let model = models[modelURL] {
-                return NSPersistentContainer(name: modelName, managedObjectModel: model)
-            }
-            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
-                throw .modelNotFound(name: modelName)
-            }
-            models[modelURL] = model
-            return NSPersistentContainer(name: modelName, managedObjectModel: model)
-        }
+    /// Opens the store `storeName` over the merged models of `modelBundles`.
+    ///
+    /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelConflict`
+    ///   when two models define the same entity, `.storeLoadFailed` when the
+    ///   store cannot open.
+    public init(storeName: String, modelBundles: [Bundle], inMemory: Bool = false) throws(StorageError) {
+        let model = try Self.model(merging: modelBundles)
+        persistentContainer = NSPersistentContainer(name: storeName, managedObjectModel: model)
 
         if inMemory {
             let description = NSPersistentStoreDescription()
@@ -72,7 +66,45 @@ public final class StorageProvider: Sendable {
     }
 
     /// Returns a fresh in-memory store, for tests.
-    public static func inMemory(modelName: String, bundle: Bundle = StorageProvider.modelBundle) throws(StorageError) -> StorageProvider {
-        try StorageProvider(modelName: modelName, inMemory: true, bundle: bundle)
+    public static func inMemory(storeName: String, modelBundles: [Bundle]) throws(StorageError) -> StorageProvider {
+        try StorageProvider(storeName: storeName, modelBundles: modelBundles, inMemory: true)
+    }
+
+    private static func model(merging bundles: [Bundle]) throws(StorageError) -> NSManagedObjectModel {
+        try models.withLock { models throws(StorageError) -> NSManagedObjectModel in
+            let key = Set(bundles.map(\.bundleURL))
+            if let model = models[key] {
+                return model
+            }
+
+            var parts: [NSManagedObjectModel] = []
+            for bundle in bundles {
+                let urls = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) ?? []
+                guard !urls.isEmpty else {
+                    throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
+                }
+                for url in urls {
+                    guard let model = NSManagedObjectModel(contentsOf: url) else {
+                        throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
+                    }
+                    parts.append(model)
+                }
+            }
+
+            // Merging two entities of one name either drops one silently or raises
+            // an Objective-C exception, so a clash is caught here instead.
+            var seen: Set<String> = []
+            for name in parts.flatMap(\.entities).compactMap(\.name) {
+                guard seen.insert(name).inserted else {
+                    throw .modelConflict(entity: name)
+                }
+            }
+
+            guard let model = NSManagedObjectModel(byMerging: parts) else {
+                fatalError("Core Data could not merge the models of \(key.map(\.lastPathComponent).sorted())")
+            }
+            models[key] = model
+            return model
+        }
     }
 }

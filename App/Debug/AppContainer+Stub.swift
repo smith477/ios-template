@@ -21,7 +21,7 @@
 
             do {
                 return AppContainer(
-                    storageProvider: try .inMemory(modelName: "ios_template"),
+                    storageProvider: try .inMemory(storeName: storeName, modelBundles: modelBundles),
                     apiClient: APIClient(baseURL: baseURL, session: StubURLProtocol.session())
                 )
             } catch {

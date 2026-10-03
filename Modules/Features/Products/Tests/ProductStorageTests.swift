@@ -85,7 +85,7 @@ struct ProductStorageTests {
     /// A timestamp with no ids, as written before ids were kept.
     @Test
     func aRecordWithNoIdsReadsAsEmpty() async throws {
-        let provider = try StorageProvider.inMemory(modelName: "ios_template")
+        let provider = try makeStorageProvider()
         let writer = ProductCoreDataStorage(
             storageProvider: provider,
             listRecord: ProductListRecord(suiteName: UUID().uuidString)

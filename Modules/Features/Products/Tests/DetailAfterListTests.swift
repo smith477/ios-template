@@ -14,7 +14,7 @@ import Testing
 struct DetailAfterListTests {
     @Test
     func detailLoadsAfterTheListHasCached() async throws {
-        let provider = try StorageProvider.inMemory(modelName: "ios_template")
+        let provider = try makeStorageProvider()
         let suiteName = UUID().uuidString
         let clock = FixedDateProvider(Date())
 
