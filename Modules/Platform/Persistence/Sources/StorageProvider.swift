@@ -77,34 +77,44 @@ public final class StorageProvider: Sendable {
                 return model
             }
 
-            var parts: [NSManagedObjectModel] = []
-            for bundle in bundles {
-                let urls = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) ?? []
-                guard !urls.isEmpty else {
-                    throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
-                }
-                for url in urls {
-                    guard let model = NSManagedObjectModel(contentsOf: url) else {
-                        throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
-                    }
-                    parts.append(model)
-                }
-            }
-
-            // Merging two entities of one name either drops one silently or raises
-            // an Objective-C exception, so a clash is caught here instead.
-            var seen: Set<String> = []
-            for name in parts.flatMap(\.entities).compactMap(\.name) {
-                guard seen.insert(name).inserted else {
-                    throw .modelConflict(entity: name)
-                }
-            }
-
-            guard let model = NSManagedObjectModel(byMerging: parts) else {
-                fatalError("Core Data could not merge the models of \(key.map(\.lastPathComponent).sorted())")
-            }
+            // Each bundle's own model must be gone before the merged one is used:
+            // while it lives it also claims its entities' classes, and Core Data
+            // can no longer tell which entity an `init(context:)` means.
+            let model = try autoreleasepool {
+                Result { () throws(StorageError) in try merge(bundles) }
+            }.get()
             models[key] = model
             return model
         }
+    }
+
+    private static func merge(_ bundles: [Bundle]) throws(StorageError) -> NSManagedObjectModel {
+        var parts: [NSManagedObjectModel] = []
+        for bundle in bundles {
+            let urls = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) ?? []
+            guard !urls.isEmpty else {
+                throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
+            }
+            for url in urls {
+                guard let model = NSManagedObjectModel(contentsOf: url) else {
+                    throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
+                }
+                parts.append(model)
+            }
+        }
+
+        // Merging two entities of one name either drops one silently or raises
+        // an Objective-C exception, so a clash is caught here instead.
+        var seen: Set<String> = []
+        for name in parts.flatMap(\.entities).compactMap(\.name) {
+            guard seen.insert(name).inserted else {
+                throw .modelConflict(entity: name)
+            }
+        }
+
+        guard let model = NSManagedObjectModel(byMerging: parts) else {
+            fatalError("Core Data could not merge the models of \(bundles.map(\.bundleURL.lastPathComponent))")
+        }
+        return model
     }
 }
