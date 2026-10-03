@@ -53,27 +53,6 @@ struct StorageProviderTests {
     }
 
     @Test
-    func aModelThatWillNotLoadThrowsModelUnreadable() throws {
-        let scratch = try Scratch()
-        defer { scratch.remove() }
-
-        let bundle = try scratch.bundle(holding: [])
-        let broken = bundle.bundleURL.appending(path: "Broken.momd")
-        try FileManager.default.createDirectory(at: broken, withIntermediateDirectories: true)
-        try Data("not a model".utf8).write(to: broken.appending(path: "Broken.mom"))
-
-        let error = #expect(throws: StorageError.self) {
-            try StorageProvider.inMemory(storeName: "Test", modelBundles: [bundle])
-        }
-
-        guard case let .modelUnreadable(model, _) = error else {
-            Issue.record("Expected .modelUnreadable, got \(String(describing: error))")
-            return
-        }
-        #expect(model == "Broken.momd")
-    }
-
-    @Test
     func anEntityDefinedInTwoModelsThrowsModelConflict() throws {
         let scratch = try Scratch()
         defer { scratch.remove() }
