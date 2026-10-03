@@ -2,14 +2,12 @@
 
 import SwiftUI
 
-/// The feature's entry point. The repository, storage and client backing it
-/// stay internal to this module.
+/// The feature's entry point; its repository, storage and client stay internal.
 public enum Products {
     /// Builds the view model backing `ProductView`.
     ///
-    /// - Parameter emit: Receives this feature's events, normally
-    ///   `AppRouter.handle`. Required here, unlike on the view model
-    ///   initialisers, because a composed screen that drops its events is a bug.
+    /// - Parameter emit: Receives this feature's events, normally `AppRouter.handle`.
+    ///   Required here, because a composed screen that drops its events is a bug.
     @MainActor
     public static func viewModel(
         _ dependencies: some ProductsDependencies,
@@ -18,7 +16,7 @@ public enum Products {
         ProductViewModel(repository: repository(dependencies), emit: emit)
     }
 
-    /// Turns a route back into a screen without exposing the repository.
+    /// Builds the view for one of this feature's routes.
     @MainActor
     public static func view(
         _ route: ProductRoute,

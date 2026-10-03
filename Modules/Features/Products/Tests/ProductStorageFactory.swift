@@ -6,8 +6,7 @@ import Persistence
 
 @testable import Products
 
-/// Storage backed by an in-memory store and a throwaway `UserDefaults` suite,
-/// so neither the rows nor the list record of one test reach the next.
+/// Returns storage over an in-memory store and a throwaway list record.
 func makeStorage(
     dateProvider: DateProvider = SystemDateProvider()
 ) throws(StorageError) -> ProductCoreDataStorage {

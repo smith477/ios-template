@@ -34,11 +34,9 @@ The suite type name need not match the file name: `RoutingTests.swift` holds
 
 ## Where tests live
 
-From `Project.swift`:
-
-> A module's tests live beside it and use `@testable`, so a module needs no public
-> surface for the sake of being tested. Tests that span modules — the container,
-> routing — belong to the App target instead.
+A module's tests live beside it and use `@testable`, so a module needs no public
+surface for the sake of being tested. Tests that span modules — the container,
+routing — belong to the App target instead.
 
 So: `Modules/Features/Products/Tests/` for anything inside Products;
 `AppTests/` for the container, routing, and deep links.

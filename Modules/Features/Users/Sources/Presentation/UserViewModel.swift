@@ -16,10 +16,10 @@ public final class UserViewModel {
     public private(set) var users: [User] = []
     public private(set) var loadingState: UserLoadingState = .loading
 
-    /// - Parameters:
-    ///   - repository: Source of the user list.
-    ///   - emit: Receives user actions. Defaults to discarding them; see
-    ///     `ProductViewModel.init(repository:emit:)`.
+    /// Creates a view model over `repository`.
+    ///
+    /// - Parameter emit: Receives user actions; discarded by default, for previews
+    ///   and tests.
     public init(
         repository: UserRepository,
         emit: @escaping (UserEvent) -> Void = { _ in }

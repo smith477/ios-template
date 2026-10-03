@@ -9,9 +9,8 @@ struct MainApp: App {
     @State private var container: AppContainer
     @State private var router: AppRouter
 
-    // Built once and kept: the root views take their view model as `let` and
-    // do not own its lifetime, so rebuilding these per render would restart
-    // their work.
+    // Built once: the root views hold these as `let`, so rebuilding them per
+    // render would restart their loads.
     @State private var products: ProductViewModel
     @State private var users: UserViewModel
 
@@ -52,9 +51,8 @@ struct MainApp: App {
 }
 
 private extension View {
-    /// Registers every feature's routes on a navigation stack. Both stacks
-    /// register all destinations because either can show either feature's
-    /// screens — a product's seller opens a user profile.
+    /// Registers every feature's routes. Either stack can show either feature,
+    /// as a product's seller opens a user profile.
     func navigationDestinations(container: AppContainer, router: AppRouter) -> some View {
         navigationDestination(for: AnyRoute.self) { route in
             switch route {

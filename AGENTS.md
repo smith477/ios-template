@@ -4,9 +4,8 @@ An iOS app template: Tuist-generated project, Swift 6, iOS 26, iPhone and iPad.
 `App/` is the only place features are wired together. `Modules/Platform/*` and
 `Modules/Features/*` are static frameworks.
 
-Most decisions here are already explained in a comment next to the code that
-makes them. The code is the source of truth: where it and these docs disagree,
-the code wins and the doc is what gets corrected.
+The code is the source of truth: where it and these docs disagree, the code wins
+and the doc is what gets corrected.
 
 ## Rules
 
@@ -30,8 +29,9 @@ broke. Test targets disable these rules; shipping code does not get an exemption
 
 **`import AppKit` means this project's Platform module**, not Apple's framework.
 
-**Comments explain why, never what.** A comment that restates the code is noise
-to delete.
+**Comments explain why, never what, in a sentence or two.** A one-sentence `///`
+summary on public API, no history or process. The full standard is in
+`docs/agents/conventions.md`.
 
 **Do not add a dependency** — Swift package, test framework, or otherwise —
 without asking first.
@@ -52,7 +52,7 @@ mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
 `--device` is not optional: `tuist test` otherwise picks whichever simulator
 happens to be booted, and an older screen geometry puts UI-test taps in the wrong
 place. Run locally on iPhone 18 Pro, which Xcode 27 ships; CI runs iPhone 17 Pro
-because its Xcode 26 image has no 18 Pro. `Project.swift` says so at the top.
+because its Xcode 26 image has no 18 Pro.
 
 ## Commits
 

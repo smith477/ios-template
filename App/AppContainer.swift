@@ -8,9 +8,7 @@ import Users
 
 /// Owns the platform dependencies and hands them to features.
 ///
-/// Deliberately not a singleton: tests construct their own container with an
-/// in-memory store. Each feature declares what it needs as its own protocol,
-/// and this type conforms to all of them.
+/// Not a singleton, so a test can build one over an in-memory store.
 final class AppContainer {
     let storageProvider: StorageProvider
     let apiClient: APIClient
@@ -20,12 +18,11 @@ final class AppContainer {
         self.apiClient = apiClient
     }
 
-    /// The production container. Both failures here leave the app with nothing
-    /// to show, so each traps with the reason rather than pretending otherwise.
+    /// The production container. Traps if the store cannot open, since the app
+    /// has nothing to show without it.
     static func live() -> AppContainer {
         #if DEBUG
-            // UI tests launch against fixtures, so a slow or unavailable API
-            // cannot fail them. Compiled out of Release entirely.
+            // UI tests run against fixtures. Compiled out of Release.
             if ProcessInfo.processInfo.arguments.contains(stubNetworkArgument) {
                 return stubbed()
             }
@@ -41,10 +38,8 @@ final class AppContainer {
         }
     }
 
-    /// The backend for this build configuration: `API_BASE_URL` in
-    /// `Project.swift`, expanded into Info.plist at build time. A value that
-    /// is missing, or arrives as the unexpanded `$(API_BASE_URL)`, has no
-    /// host, so it traps here rather than failing every request later.
+    /// The backend for this build, from Info.plist's `APIBaseURL`. Traps on a
+    /// missing or unexpanded value rather than failing every request later.
     static let apiBaseURL: URL = {
         let value = Bundle.main.object(forInfoDictionaryKey: "APIBaseURL") as? String
         guard let value, let url = URL(string: value), url.scheme != nil, url.host()?.isEmpty == false else {

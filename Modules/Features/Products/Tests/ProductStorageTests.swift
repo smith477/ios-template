@@ -28,9 +28,8 @@ struct ProductStorageTests {
         )
     }
 
-    /// Saving the same product twice used to delete every image and tag row and
-    /// recreate them. With the cascade rules pointing child to parent, that
-    /// deletion took the product with it.
+    /// The cascade rules point child to parent, so deleting children on save would
+    /// take the product with them.
     @Test
     func repeatedSavesKeepTheProduct() async throws {
         let storage = try makeStorage()
@@ -46,8 +45,6 @@ struct ProductStorageTests {
         #expect(stored.first?.tags.count == 2)
     }
 
-    /// Children that disappear from the payload are removed; children that stay
-    /// are left alone rather than deleted and rebuilt.
     @Test
     func updateDiffsChildren() async throws {
         let storage = try makeStorage()
@@ -60,8 +57,6 @@ struct ProductStorageTests {
         #expect(stored.images == ["two.jpg"])
     }
 
-    /// Money is stored as a decimal, so a price that is not representable in
-    /// binary floating point survives the round trip exactly.
     @Test
     func priceRoundTripsExactly() async throws {
         let storage = try makeStorage()
@@ -72,9 +67,7 @@ struct ProductStorageTests {
         #expect(stored.price == Decimal(string: "19.99")!)
     }
 
-    /// The list is what the last list save held, not every row the store has
-    /// seen: a product the API stopped returning leaves the list, though its
-    /// row stays cached.
+    /// Their rows stay cached; only the list forgets them.
     @Test
     func aListSaveDropsProductsTheNextListOmits() async throws {
         let storage = try makeStorage()
@@ -86,9 +79,7 @@ struct ProductStorageTests {
         #expect(try await storage.get(id: 2) != nil)
     }
 
-    /// A record written before ids were kept has a timestamp but no list, so
-    /// it reads as empty — which the repository treats as a miss — rather
-    /// than serving every cached row.
+    /// A timestamp with no ids, as written before ids were kept.
     @Test
     func aRecordWithNoIdsReadsAsEmpty() async throws {
         let provider = try StorageProvider.inMemory(modelName: "ios_template")

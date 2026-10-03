@@ -9,7 +9,7 @@ import Testing
 
 @testable import Products
 
-/// Counts calls so a test can tell a cache hit from a refetch.
+/// Counts fetches, to tell a cache hit from a refetch.
 private final class CountingApiClient: ProductApiClient {
     private let count = Mutex(0)
     private let products: [Product]
@@ -32,8 +32,7 @@ private final class CountingApiClient: ProductApiClient {
     }
 }
 
-/// Counts row reads, so a test can tell how many times a request went to the
-/// store. Everything else passes straight through to the real storage.
+/// Counts row reads; everything else passes through to the real storage.
 private final class CountingStorage: ProductStorage {
     private let reads = Mutex(0)
     private let base: ProductStorage
@@ -75,9 +74,7 @@ private final class CountingStorage: ProductStorage {
     }
 }
 
-/// A clock that can be moved forward, so a test can age the cache without
-/// waiting. `FixedDateProvider` covers the still-clock case; this covers the
-/// case where time has to pass mid-test.
+/// A clock that can be moved forward mid-test.
 private final class MovableDateProvider: DateProvider {
     private let current: Mutex<Date>
 
@@ -108,8 +105,6 @@ struct ProductCachePolicyTests {
         )
     }
 
-    /// Two reads inside `maxAge` hit the network once. The second is served
-    /// from the cache.
     @Test
     func cacheFirstServesFromCacheWhileFresh() async throws {
         let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
@@ -128,9 +123,6 @@ struct ProductCachePolicyTests {
         #expect(api.fetchCount == 1)
     }
 
-    /// Once the cache is older than `maxAge`, the next read refetches. This is
-    /// the case the wall clock could not test — it would have meant sleeping
-    /// for an hour.
     @Test
     func cacheFirstRefetchesOnceStale() async throws {
         let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
@@ -149,7 +141,6 @@ struct ProductCachePolicyTests {
         #expect(api.fetchCount == 2)
     }
 
-    /// `.reload` ignores a fresh cache entirely.
     @Test
     func reloadAlwaysRefetches() async throws {
         let clock = FixedDateProvider(Date(timeIntervalSince1970: 1_000_000))
@@ -167,8 +158,6 @@ struct ProductCachePolicyTests {
         #expect(api.fetchCount == 2)
     }
 
-    /// The freshness check must not read the rows it is about to serve: a
-    /// cache hit is one trip to the store, not two.
     @Test
     func aFreshCacheHitReadsStorageOnce() async throws {
         let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
@@ -190,9 +179,6 @@ struct ProductCachePolicyTests {
         #expect(products.map(\.id) == [1])
     }
 
-    /// A fresh timestamp over an empty store is a miss: the emptiness check
-    /// moved out of the freshness check, and must still send this to the
-    /// network rather than serve an empty catalogue.
     @Test
     func aFreshTimestampOverAnEmptyStoreFetches() async throws {
         let clock = FixedDateProvider(Date(timeIntervalSince1970: 1_000_000))

@@ -4,15 +4,15 @@ Read before adding or changing a module, feature, or route.
 
 ## Layers
 
-From the top of `Project.swift`, which is where this rule is enforced:
+Enforced by the target dependencies in `Project.swift`:
 
->     App       may import every feature and platform module. It is the only
->               place where features are wired together.
->     Feature   may import platform modules and APIClient.
->               A feature may never import another feature — that is the one
->               boundary worth a target, because it is what keeps a feature
->               copyable into another project.
->     Platform  imports nothing from this project. It knows no feature.
+    App       may import every feature and platform module. It is the only
+              place where features are wired together.
+    Feature   may import platform modules and APIClient.
+              A feature may never import another feature — that is the one
+              boundary worth a target, because it is what keeps a feature
+              copyable into another project.
+    Platform  imports nothing from this project. It knows no feature.
 
 Domain, Data and Presentation are **folders inside a feature, not targets**. Split
 a feature into layer targets only once it is large enough to earn them; until then
@@ -23,10 +23,9 @@ and in CI.
 
 ## What goes in Platform
 
-From `Modules/Platform/Identity/Sources/User.swift`:
-
-> Admission rule for Platform modules: a type moves here once a *second*
-> feature needs it, never in anticipation. Value types only.
+A type moves into Platform once a *second* feature needs it, never in
+anticipation. Value types only. `User` moved there because Products' reviews and
+the Users feature both describe the same person.
 
 Existing Platform modules: `Identity` (the `User` value type), `AppKit`
 (`DateProvider`), `Persistence` (the Core Data stack). There is deliberately no
@@ -84,11 +83,8 @@ Then the three folders:
 
 ## Routing
 
-**Events describe what happened, not what should happen next.** From
-`ProductEvent.swift`:
-
-> Cases describe what happened, not what should happen next: `sellerTapped`
-> rather than `showUser`. The feature reports; the app decides where it leads.
+**Events describe what happened, not what should happen next:** `sellerTapped`
+rather than `showUser`. The feature reports; the app decides where it leads.
 
 A view model takes `emit: (Event) -> Void` and calls it. It has no router, no
 navigation state, and no knowledge of any other feature.

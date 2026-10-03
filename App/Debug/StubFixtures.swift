@@ -1,27 +1,18 @@
 // StubFixtures.swift
 
 #if DEBUG
-    /// The responses `StubURLProtocol` serves, trimmed from real dummyjson.com
-    /// payloads so they decode through the same response types the live API does.
+    /// The response bodies `StubURLProtocol` serves, trimmed from real API payloads.
     ///
-    /// Swift strings rather than bundled JSON files, so `#if DEBUG` keeps them out
-    /// of a Release build with no resource rules to maintain. Names are stable and
-    /// recognisable, for UI tests to assert exact text.
-    ///
-    /// The users are 2–4 because a product's seller is derived as
-    /// `product.id % 30 + 1`, so products 1–3 sell through users 2–4. Image URLs
-    /// are empty so `ProductImage` draws its placeholder without a network request.
+    /// Users are 2–4 because products 1–3 derive their sellers as `id % 30 + 1`.
+    /// Image URLs are empty so no image is requested.
     nonisolated enum StubFixtures {
-        /// What `/products` serves: products 1–3. Composed from the same bodies
-        /// `/products/{id}` serves, so the list and a detail cannot drift apart.
+        /// The `/products` body: products 1–3, built from the by-id bodies.
         static let products = """
         { "products": [\([widget, gadget, gizmo].joined(separator: ","))] }
         """
 
-        /// What `/products/{id}` serves, by id. Product 50 is in no list: it stands
-        /// in for a product past the API's first page, reachable only by id, which
-        /// is what `<scheme>://products/50` exercises. Its seller, user 21, is not a
-        /// fixture, so nothing taps it.
+        /// The `/products/{id}` bodies. Product 50 is in no list, standing in for a
+        /// product past the API's first page.
         static let product: [Int: String] = [1: widget, 2: gadget, 3: gizmo, 50: fifty]
 
         private static let widget = """

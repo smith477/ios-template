@@ -14,19 +14,32 @@ imports. No Xcode boilerplate, no copyright, no author, no date:
 import Foundation
 ```
 
-**Comments explain why, never what.** A comment restating the code is deleted —
-that was the whole of commit `a74a5cf`. `///` doc comments go on public API and on
-tests whose purpose is not obvious from the name. Comments are hand-wrapped at a
-natural break, which is why SwiftFormat's `wrapSingleLineComments` is off.
+Comments follow the
+[Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/#write-doc-comment)
+and the [Google Swift Style Guide](https://google.github.io/swift/#comments):
 
-Where a decision is non-obvious, the comment says what it costs or what it
-prevents:
+1. **Public API** gets a `///` summary: one sentence fragment ending in a period —
+   a verb phrase for a method, a noun phrase for a type or property. Add
+   `- Parameters:`, `- Returns:` and `- Throws:` only when the summary does not
+   cover them.
+2. **Internal and private declarations** get a doc comment only when the name and
+   signature leave a real question.
+3. **`//` in code** states a non-obvious *why* in one or two lines, never a *what*.
+4. **No history or process.** No "used to", "was really", commit hashes, issue
+   numbers, bug stories or decision narratives; those belong in `git log` and the
+   PR.
+5. **Tests** state the scenario in the function name. Add a comment only when the
+   name cannot carry it.
+6. **Length:** a summary plus about two lines. An explanation longer than that
+   belongs in `docs/agents/`.
 
 ```swift
-// Must be inside the label: `.plain` hit-tests the label's own
-// shape, so outside the Button the row's gaps ignore taps.
+// `.plain` hit-tests the label's own shape, so outside the label the gaps ignore taps.
 .contentShape(.rect)
 ```
+
+Comments are hand-wrapped at a natural break, which is why SwiftFormat's
+`wrapSingleLineComments` is off.
 
 `todo` is deliberately not a SwiftLint violation — a TODO is a note, not a defect.
 

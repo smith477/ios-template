@@ -9,9 +9,8 @@ import Testing
 
 @testable import Products
 
-/// Serves the products it holds by id, answers 404 for any other, or fails
-/// every request with `failure`. Counts by-id fetches so a test can tell a
-/// cache hit from a refetch.
+/// Serves its products by id, answers 404 for any other, or fails with
+/// `failure`. Counts by-id fetches.
 private final class ByIdApiClient: ProductApiClient {
     private let count = Mutex(0)
     private let products: [Product]
@@ -55,10 +54,8 @@ struct ProductByIdTests {
         )
     }
 
-    /// A list holding `listed`, saved at `savedAt`, then read through a
-    /// repository whose clock — and whose storage's clock — is `secondsLater`
-    /// on. That ages the list without waiting, and means any write the
-    /// repository wrongly stamps lands at a different time from the list's.
+    /// A list of `listed` saved at `savedAt`, read through a repository and storage
+    /// whose clock is `secondsLater` on, so a stray stamp would show.
     private func makeRepository(
         api: ByIdApiClient,
         listed: [Product] = [],
@@ -95,8 +92,6 @@ struct ProductByIdTests {
         #expect(api.fetchCount == 0)
     }
 
-    /// Product 50 is outside the list, so the first read fetches it and the
-    /// second is served from the row that fetch cached.
     @Test
     func aProductOutsideTheListIsFetchedOnceThenCached() async throws {
         let api = ByIdApiClient(products: [makeProduct(id: 50)])
@@ -125,8 +120,6 @@ struct ProductByIdTests {
         #expect(api.fetchCount == 1)
     }
 
-    /// A 404 is the API saying the product is gone, so the stale copy is
-    /// deleted rather than served in its place.
     @Test
     func aNotFoundDeletesTheCachedRowAndReturnsNil() async throws {
         let api = ByIdApiClient()
@@ -159,8 +152,6 @@ struct ProductByIdTests {
         }
     }
 
-    /// Opening a product neither adds it to the list nor makes the list look
-    /// freshly saved: the list's ids and age are the list fetch's alone.
     @Test
     func aByIdSaveLeavesTheListAlone() async throws {
         let api = ByIdApiClient(products: [makeProduct(id: 50)])

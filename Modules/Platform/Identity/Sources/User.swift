@@ -3,9 +3,6 @@
 import Foundation
 
 /// A person, as more than one feature understands them.
-///
-/// Admission rule for Platform modules: a type moves here once a *second*
-/// feature needs it, never in anticipation. Value types only.
 public struct User: Identifiable, Sendable, Hashable {
     public let id: Int
     public let firstName: String

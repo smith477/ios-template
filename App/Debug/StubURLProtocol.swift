@@ -3,26 +3,21 @@
 #if DEBUG
     import Foundation
 
-    /// Answers the app's requests from `StubFixtures` instead of the network, so the
-    /// UI tests do not go red when dummyjson.com is slow or down.
+    /// A URL protocol that answers the app's requests from `StubFixtures`.
     ///
-    /// Routes on the path alone, because the app sends no query items. A request it
-    /// does not know answers 404: a new endpoint then fails visibly in a stubbed run
-    /// rather than quietly reaching for the network.
-    ///
-    /// The file is DEBUG-only, fixtures included, so none of it reaches a Release
-    /// build. `nonisolated` because `URLSession` calls a protocol off the main
-    /// actor, which the App target otherwise defaults to.
+    /// Routes on the path alone, and answers 404 for a path it does not know, so a
+    /// new endpoint fails visibly rather than reaching the network. `nonisolated`
+    /// because `URLSession` calls it off the main actor.
     nonisolated class StubURLProtocol: URLProtocol {
-        /// A session answered entirely by this protocol. Ephemeral, so no response
-        /// is cached to disk between runs.
+        /// An ephemeral session answered entirely by this protocol.
         static func session() -> URLSession {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.protocolClasses = [StubURLProtocol.self]
             return URLSession(configuration: configuration)
         }
 
-        /// The fixture body for a request, or `nil` for one the stub does not serve.
+        /// Returns the fixture body for a request, or `nil` for one the stub does
+        /// not serve.
         static func fixture(method: String, path: String) -> String? {
             guard method == "GET" else { return nil }
 
@@ -33,8 +28,8 @@
             }
         }
 
-        /// `/products/{id}`, for an id with a fixture. Any other id answers 404,
-        /// as the live API does for a product it does not have.
+        /// Returns the body for `/products/{id}`, or `nil` for an id without a
+        /// fixture.
         private static func productFixture(path: String) -> String? {
             let components = path.split(separator: "/")
             guard components.count == 2, components[0] == "products",

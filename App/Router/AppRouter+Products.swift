@@ -3,8 +3,8 @@
 import Products
 import Users
 
-/// Maps `ProductEvent` to navigation. Imports `Users` because a product's
-/// seller is a user — cross-feature coupling belongs here, not in the module.
+/// Maps `ProductEvent` to navigation. Imports `Users` because a product's seller
+/// is a user, and cross-feature coupling belongs here.
 extension AppRouter {
     func handle(_ event: ProductEvent) {
         switch event {
