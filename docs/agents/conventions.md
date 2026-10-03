@@ -197,6 +197,14 @@ arguments and collections, trailing commas always, `self` removed where implicit
 attributes on the previous line for functions and types but the same line for
 stored properties.
 
+## Shared code
+
+When the same job appears at more than one call site, write one generic API for it,
+not a function per call site, and put it where every caller can reach it (Platform
+once a second module needs it). Names the code already knows — the module, a type —
+are derived (`#fileID`, `String(describing: Self.self)`), never retyped as string
+literals.
+
 ## Logging
 
 Every module logs through `Log` from `Platform/Diagnostics`, held by the type that
@@ -210,7 +218,8 @@ Its category is the module's name, read from `#fileID`, and its subsystem is the
 app's bundle ID: one Console filter catches the app, and the category narrows it to
 a module. Nothing is written by hand, so a copied or renamed module needs no edit.
 
-`Log.swift` is the only file that imports `os`; never use `Logger` directly. `os`
+`Log.swift` is the only file that imports `os`; never use `Logger` directly.
+SwiftLint's `log_through_diagnostics` custom rule makes either an error. `os`
 applies privacy only where a message is written, so `Log` takes no message string.
 Event text is a `StaticString` and values are `Int`s, both public; an error logs its
 domain and code publicly and its description privately. Nothing a user or server

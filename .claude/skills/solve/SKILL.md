@@ -65,7 +65,9 @@ this one in a worktree, so neither can build on the other's uncommitted edits.
    acceptance criteria, and what is explicitly out. Name **where it lands** — which
    module under `Modules/Features/` or `Modules/Platform/`, or `App/` — and whether
    it needs a `Project.swift` change, which implies a new target, a scheme entry
-   and `tuist generate`.
+   and `tuist generate`. If the issue bundles tasks that can ship on their own,
+   say so in the read-back and offer one ticket per task before branching; the
+   owner prefers small tickets.
 
 4. Surface anything ambiguous as a candidate grilling question, but **do not ask
    yet**. Facts come from the code and the docs, never from the owner. When the
@@ -146,7 +148,9 @@ Enter plan mode and produce the implementation plan.
    frontier moves one phase at a time.
 
    For each acceptance criterion, name the check that keeps proving it — a test or
-   a CI step — not only a one-off demo. Tests assert the contract, not today's
+   a CI step — not only a one-off demo, unless all there is to assert is a
+   framework's behaviour; then the demo is the check, and the plan says why
+   (`testing.md`, "What not to test"). Tests assert the contract, not today's
    values, so they still pass after an adopter changes them.
 
 3. Label every phase **mechanical** or **judgement**. The label decides what gets
@@ -244,7 +248,10 @@ reviewed on its own.
    once the checks in step 3 that you can run pass, commit the phase and push the
    branch (`git push -u origin <branch>` the first time), then hand it over. The
    commit is a subject line only — imperative, no body, no trailers. The owner
-   reviews the pushed commit, and a fix from that review lands as its own commit.
+   reviews the pushed commit. A fix from that review is pushed as its own commit,
+   so the owner sees what changed, then squashed into the phase's commit and
+   pushed with `--force-with-lease` before the next phase starts: each phase
+   stays one commit.
    This covers the work branch only: pushing to `main`, merging, or opening a PR
    still waits for the owner's word.
 
