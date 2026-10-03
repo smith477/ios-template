@@ -25,8 +25,8 @@ final class AppContainer {
     /// Every feature's Core Data model, merged into the one store.
     static let modelBundles: [Bundle] = [Products.modelBundle, Users.modelBundle]
 
-    /// The production container. Traps if the store cannot open, since the app
-    /// has nothing to show without it.
+    /// The production container. Traps only if the store will not open even empty,
+    /// since the app has nothing to show without it.
     static func live() -> AppContainer {
         #if DEBUG
             // UI tests run against fixtures. Compiled out of Release.
@@ -37,7 +37,9 @@ final class AppContainer {
 
         do {
             return AppContainer(
-                storageProvider: try StorageProvider(storeName: storeName, modelBundles: modelBundles),
+                // Every feature's rows come from the network, so a store that will
+                // not open is started over rather than migrated.
+                storageProvider: try .cache(storeName: storeName, modelBundles: modelBundles),
                 apiClient: APIClient(baseURL: apiBaseURL)
             )
         } catch {

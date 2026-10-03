@@ -19,7 +19,7 @@ public struct UserProfileView: View {
             case let .loaded(user):
                 profile(user)
             case .notFound:
-                ContentUnavailableView("Not found", systemImage: "person.slash")
+                ContentUnavailableView(String(localized: "Not found", bundle: .module), systemImage: "person.slash")
             case let .error(error):
                 Text(error.localizedDescription)
             }
@@ -31,8 +31,8 @@ public struct UserProfileView: View {
 
     private func profile(_ user: User) -> some View {
         List {
-            LabeledContent("Name", value: user.fullName)
-            LabeledContent("Email", value: user.email)
+            LabeledContent(String(localized: "Name", bundle: .module), value: user.fullName)
+            LabeledContent(String(localized: "Email", bundle: .module), value: user.email)
         }
         .navigationTitle(user.fullName)
         .navigationBarTitleDisplayMode(.inline)

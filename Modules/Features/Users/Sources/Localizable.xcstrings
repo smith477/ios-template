@@ -1,0 +1,15 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Email" : {
+      "extractionState" : "manual"
+    },
+    "Name" : {
+      "extractionState" : "manual"
+    },
+    "Not found" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.0"
+}

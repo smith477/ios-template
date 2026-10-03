@@ -117,14 +117,7 @@ struct StorageProviderTests {
 
         let versioned = try scratch.bundle(holding: ["Versioned"])
         let other = try scratch.bundle(holding: ["Second"])
-        let storeName = UUID().uuidString
-        let directory = NSPersistentContainer.defaultDirectoryURL()
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        defer {
-            for suffix in ["", "-wal", "-shm"] {
-                try? FileManager.default.removeItem(at: directory.appending(path: "\(storeName).sqlite\(suffix)"))
-            }
-        }
+        let storeName = scratch.storeName
 
         // Written as the previous release would have: version 1, merged, on disk.
         try autoreleasepool {
@@ -154,6 +147,41 @@ struct StorageProviderTests {
     }
 
     @Test
+    func cacheStartsEmptyOverAStoreThatWillNotOpen() throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let bundle = try scratch.bundle(holding: ["First"])
+        try Data("not a store".utf8).write(to: scratch.storeURL)
+        #expect(throws: StorageError.self) {
+            try StorageProvider(storeName: scratch.storeName, modelBundles: [bundle])
+        }
+
+        let provider = try StorageProvider.cache(storeName: scratch.storeName, modelBundles: [bundle])
+
+        let rows = try provider.viewContext.count(for: NSFetchRequest<NSManagedObject>(entityName: "FirstEntity"))
+        #expect(rows == 0)
+    }
+
+    @Test
+    func cacheKeepsTheRowsOfAStoreThatOpens() throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let bundle = try scratch.bundle(holding: ["First"])
+        try autoreleasepool {
+            let provider = try StorageProvider(storeName: scratch.storeName, modelBundles: [bundle])
+            _ = NSEntityDescription.insertNewObject(forEntityName: "FirstEntity", into: provider.viewContext)
+            try provider.viewContext.save()
+        }
+
+        let provider = try StorageProvider.cache(storeName: scratch.storeName, modelBundles: [bundle])
+
+        let rows = try provider.viewContext.count(for: NSFetchRequest<NSManagedObject>(entityName: "FirstEntity"))
+        #expect(rows == 1)
+    }
+
+    @Test
     func performBackgroundReturnsTheBlocksValue() async throws {
         let scratch = try Scratch()
         defer { scratch.remove() }
@@ -178,13 +206,24 @@ struct StorageProviderTests {
     }
 
     /// Throwaway bundles for one test, each holding copies of the named test
-    /// models, so no test shares another's cached model by accident. Removed when
-    /// the test ends: nothing asks the model cache for their paths again.
+    /// models, so no test shares another's cached model by accident, and a store
+    /// name of its own. Removed when the test ends: nothing asks the model cache
+    /// for their paths again.
     private struct Scratch {
         let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let storeName = UUID().uuidString
+
+        /// Where `NSPersistentContainer` puts the on-disk store named `storeName`.
+        var storeURL: URL {
+            NSPersistentContainer.defaultDirectoryURL().appending(path: "\(storeName).sqlite")
+        }
 
         init() throws {
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: NSPersistentContainer.defaultDirectoryURL(),
+                withIntermediateDirectories: true
+            )
         }
 
         func bundle(holding models: [String]) throws -> Bundle {
@@ -199,6 +238,10 @@ struct StorageProviderTests {
 
         func remove() {
             try? FileManager.default.removeItem(at: root)
+            for suffix in ["", "-wal", "-shm"] {
+                let file = NSPersistentContainer.defaultDirectoryURL().appending(path: "\(storeName).sqlite\(suffix)")
+                try? FileManager.default.removeItem(at: file)
+            }
         }
     }
 }

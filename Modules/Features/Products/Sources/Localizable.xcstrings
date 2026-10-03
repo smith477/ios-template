@@ -1,0 +1,12 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Not found" : {
+      "extractionState" : "manual"
+    },
+    "Seller" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.0"
+}

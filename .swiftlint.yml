@@ -119,3 +119,12 @@ custom_rules:
       - string
     message: "Log through Diagnostics' Log (private static let log = Log()); only Log.swift imports os."
     severity: error
+  feature_strings_from_module:
+    name: "Feature strings from the module's bundle"
+    regex: '\b(Text|Label|Button|Link|Toggle|TextField|SecureField|Picker|Section|LabeledContent|ContentUnavailableView|Tab|navigationTitle)\(\s*"'
+    included: 'Modules/Features/.*/Sources/.*\.swift'
+    excluded_match_kinds:
+      - comment
+      - doccomment
+    message: "A literal here is looked up in the app's bundle, not the feature's: pass String(localized: \"...\", bundle: .module)."
+    severity: error
