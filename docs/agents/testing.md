@@ -4,7 +4,8 @@ Read before writing or changing tests.
 
 ## Which framework
 
-**Swift Testing** for all unit tests — `AppTests`, `ProductsTests`, `AppKitTests`.
+**Swift Testing** for all unit tests — `AppTests`, `ProductsTests`, `AppKitTests`,
+`PersistenceTests`.
 `import Testing`, `struct` suites (not classes), `@Test` functions, `#expect`,
 `try #require`, `Issue.record`, `@Test(arguments:)` for parameterised cases. Put
 `@MainActor` on the suite struct when it touches view models or the router.
@@ -65,8 +66,8 @@ A nested rule block replaces the root's whole block rather than merging into it,
 so `ignore_comment_only_lines` has to be restated or comment lines start counting.
 `type_body_length` and `function_body_length` are left out and come from the root.
 
-`Users`, `Identity` and `Persistence` have no test targets yet. Adding one means
-a `featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a
+`Users` and `Identity` have no test targets yet. Adding one means a
+`featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a
 `testScheme(...)`, and the bundle name in the `App` scheme's `testAction`.
 
 ## Test doubles
@@ -124,8 +125,9 @@ mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"     
 mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"  # one bundle
 ```
 
-Bundles: `AppTests`, `AppUITests`, `ProductsTests`, `AppKitTests`. Run the bundle
-covering what changed while iterating; run `App` before handing work over.
+Bundles: `AppTests`, `AppUITests`, `ProductsTests`, `AppKitTests`,
+`PersistenceTests`. Run the bundle covering what changed while iterating; run `App`
+before handing work over.
 
 `--device "iPhone 18 Pro"` is required. Without it `tuist test` picks whichever
 simulator is booted, and a different screen geometry puts UI-test taps in the
