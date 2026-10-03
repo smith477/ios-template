@@ -25,7 +25,6 @@ struct ProductResponse: Decodable {
     let warrantyInformation: String
     let shippingInformation: String
     let availabilityStatus: String
-    let reviews: [ReviewResponse]
     let returnPolicy: String
     let minimumOrderQuantity: Int
     let meta: MetaResponse
@@ -37,14 +36,6 @@ struct DimensionsResponse: Decodable {
     let width: Double
     let height: Double
     let depth: Double
-}
-
-struct ReviewResponse: Decodable {
-    let rating: Int
-    let comment: String
-    let date: String
-    let reviewerName: String
-    let reviewerEmail: String
 }
 
 struct MetaResponse: Decodable {

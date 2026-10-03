@@ -8,7 +8,7 @@ import Persistence
 
 /// Returns a fresh in-memory store over the model this feature uses.
 func makeStorageProvider() throws(StorageError) -> StorageProvider {
-    try .inMemory(storeName: "ProductsTests", modelBundles: [StorageProvider.modelBundle])
+    try .inMemory(storeName: "ProductsTests", modelBundles: [Products.modelBundle])
 }
 
 /// Returns storage over an in-memory store and a throwaway list record.

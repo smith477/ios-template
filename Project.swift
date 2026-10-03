@@ -40,7 +40,11 @@ func platform(
     )
 }
 
-func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
+func feature(
+    _ name: String,
+    dependencies: [TargetDependency] = [],
+    coreDataModels: [CoreDataModel] = []
+) -> Target {
     .target(
         name: name,
         destinations: destinations,
@@ -48,7 +52,8 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
         bundleId: "\(bundlePrefix).feature.\(name.lowercased())",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/Features/\(name)/Sources/**"],
-        dependencies: dependencies
+        dependencies: dependencies,
+        coreDataModels: coreDataModels
     )
 }
 
@@ -103,10 +108,12 @@ let project = Project(
         feature(
             "Products",
             dependencies: [
-                .target(name: "Identity"),
                 .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
+            ],
+            coreDataModels: [
+                .coreDataModel("Modules/Features/Products/Sources/Products.xcdatamodeld"),
             ]
         ),
         feature(
