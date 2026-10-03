@@ -36,13 +36,16 @@ second-consumer rule, not before.
 shape, deliberately simpler — copy Products when the new feature needs caching or
 a detail screen, Users when it does not.
 
-Two files sit at the module root:
+Two files sit at the module root, plus `<Feature>.xcdatamodeld` when the feature
+persists anything (see Core Data below):
 
 **`<Feature>.swift`** — a `public enum` namespace that is the feature's *only*
 public factory. The repository, storage and client stay internal:
 
 ```swift
 public enum Products {
+    public static var modelBundle: Bundle { .module }
+
     @MainActor
     public static func viewModel(
         _ dependencies: some ProductsDependencies,
@@ -148,13 +151,40 @@ two features are at different maturity levels on purpose.
 `func getAll() async throws(StorageError) -> [Product]`,
 `func fetchProducts() async throws(APIError) -> [Product]`.
 
-**Core Data**: the stack is `StorageProvider` in `Platform/Persistence`; the
-models belong to the features. Each ships `<Feature>.xcdatamodeld` in its own
-resource bundle and exposes it as `<Feature>.modelBundle` (`.module`) — `Bundle.main`
-will not find it, and a project that gets this wrong crashes at launch.
-`AppContainer.modelBundles` lists the bundles, and `StorageProvider` merges them
-into one store named `App`. `StorageProvider.inMemory(storeName:modelBundles:)` is
-the test factory.
+**Core Data**: the stack is `StorageProvider` in `Platform/Persistence`, and it
+knows no entity. Each feature that persists owns its model:
+`Sources/<Feature>.xcdatamodeld`, declared with `coreDataModels:` on its
+`feature(...)` target, with internal entity classes. Tuist puts the model in the
+feature's own resource bundle, which the feature exposes as `<Feature>.modelBundle`
+(`.module`) — `Bundle.main` will not find it, and a project that gets this wrong
+crashes at launch.
+
+The app assembles the store. `AppContainer.modelBundles` lists every feature's
+bundle, and `StorageProvider(storeName:modelBundles:)` merges their models into one
+store named `AppContainer.storeName` (`App`). `StorageProvider.inMemory(...)`, with
+the same parameters, is the test factory: a feature's tests pass only their own
+bundle, `AppTests` pass `AppContainer.modelBundles`.
+
+The merge relies on two things:
+
+- **Entity names are unique across features.** Two models that define one entity
+  throw `.modelConflict(entity:)`; Core Data's own merge would drop one silently or
+  crash. Name entities after their feature (`ProductTagsEntity`, not `TagsEntity`).
+- **One bundle list per process.** `StorageProvider` keeps one merged model per set
+  of bundles. Two different sets that share an entity give Core Data two
+  descriptions claiming one class, and it logs "Multiple NSEntityDescriptions
+  claim…" because `init(context:)` can no longer tell which it means.
+
+**Changing a model.** Core Data compares an existing store with the merged model
+entity by entity, so a change to one feature's entities touches only that feature's
+model. Once a version has shipped, add a model version to the feature's
+`.xcdatamodeld` (Editor ▸ Add Model Version), make it current, and keep the change
+one lightweight migration can infer — a new entity, a new optional attribute, a
+rename with a renaming ID. The store migrates itself on the next launch; the old
+version stays in the bundle beside the new one. During development, deleting the
+app resets the store instead: it is a cache, so the next load refetches. A change
+lightweight migration cannot infer fails to open the store, and `AppContainer.live()`
+traps.
 
 **Networking** is the external `APIClient` package: an actor with
 `send<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(APIError) -> T`.
@@ -182,19 +212,25 @@ Worked example, adding `Orders`:
    existing feature — a new test directory needs one.
 2. In `Project.swift`, add `feature("Orders", dependencies: [...])` and
    `featureTests("Orders", dependencies: [...])` to `targets`. Use the existing
-   `feature(...)` helper; do not hand-write a `.target(...)`.
+   `feature(...)` helper; do not hand-write a `.target(...)`. If Orders persists,
+   create `Sources/Orders.xcdatamodeld` and pass it as
+   `coreDataModels: [.coreDataModel("Modules/Features/Orders/Sources/Orders.xcdatamodeld")]`.
 3. Add `.target(name: "Orders")` to the App target's dependencies, and to
    `AppTests` if app-level tests touch it.
 4. Add `"OrdersTests"` to the `App` scheme's `testAction`, and a
    `testScheme("OrdersTests")` alongside the others.
-5. Write `Orders.swift` (the entry-point enum), `OrdersDependencies.swift`,
-   `OrderRoute`, `OrderEvent`, and the Domain/Data/Presentation types.
+5. Write `Orders.swift` (the entry-point enum, with
+   `public static var modelBundle: Bundle { .module }` if it persists),
+   `OrdersDependencies.swift`, `OrderRoute`, `OrderEvent`, and the
+   Domain/Data/Presentation types.
 6. Wire it into `App/`:
    - `case order(OrderRoute)` in `AnyRoute` (`App/Router/AppRouter.swift`).
    - `import Orders` in `AppRouter.swift` and `MainApp.swift`.
    - `App/Router/AppRouter+Orders.swift` with `handle(_ event: OrderEvent)`.
    - The `case` in `navigationDestinations` in `MainApp.swift`.
    - `extension AppContainer: OrdersDependencies {}` in `AppContainer.swift`.
+   - `Orders.modelBundle` in `AppContainer.modelBundles`, if it persists. Nothing
+     in Platform changes.
    - A `DeepLink` host, if the feature is linkable.
 7. `mise exec -- tuist generate`, then build.
 
