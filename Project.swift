@@ -100,6 +100,7 @@ let project = Project(
         feature(
             "Products",
             dependencies: [
+                .target(name: "Diagnostics"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],

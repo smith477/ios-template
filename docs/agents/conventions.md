@@ -197,6 +197,41 @@ arguments and collections, trailing commas always, `self` removed where implicit
 attributes on the previous line for functions and types but the same line for
 stored properties.
 
+## Logging
+
+Every module logs through `Log` from `Platform/Diagnostics`, held by the type that
+logs:
+
+```swift
+private static let log = Log()
+```
+
+Its category is the module's name, read from `#fileID`, and its subsystem is the
+app's bundle ID: one Console filter catches the app, and the category narrows it to
+a module. Nothing is written by hand, so a copied or renamed module needs no edit.
+
+`Log.swift` is the only file that imports `os`; never use `Logger` directly. `os`
+applies privacy only where a message is written, so `Log` takes no message string.
+Event text is a `StaticString` and values are `Int`s, both public; an error logs its
+domain and code publicly and its description privately. Nothing a user or server
+wrote reaches the log in the clear.
+
+Pick the level by what the user experiences:
+
+- **`error`** — a failure the user sees, or one no caller will log again.
+- **`notice`** — a failure the app absorbed, such as a refresh served from the cache.
+- **`debug`** — a routine decision: a cache hit, a fetch. Kept in memory only, so it
+  costs nothing in production; Xcode's console shows it, Console.app only with
+  *Include Debug Messages*.
+
+Log a failure once, where it is handled. `StorageProvider.performBackground` logs
+every Core Data failure, so storage types and repositories rethrow those without
+logging them. A repository logs its network failures and cache decisions;
+`ProductDataRepository` is the example.
+
+Logging has no tests: the safety is in `Log`'s parameter types, and what a flow
+logs is checked in Console.
+
 ## Errors
 
 Typed throws in the data layer: `async throws(StorageError)`,
