@@ -44,7 +44,7 @@ struct StubNetworkTests {
         #expect(response.id == id)
     }
 
-    /// What `template://products/50` opens: a product the list never returned,
+    /// What `<scheme>://products/50` opens: a product the list never returned,
     /// fetched by id through the real repository, client and stub.
     @Test @MainActor
     func productFiftyLoadsThroughTheStub() async throws {
