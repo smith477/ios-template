@@ -19,8 +19,11 @@ final class ProductDataRepository: ProductRepository {
     }
 
     func getProducts(policy: CachePolicy) async throws -> [Product] {
-        if case let .cacheFirst(maxAge) = policy, try await isCacheFresh(maxAge: maxAge) {
-            return try await storage.getAll()
+        // One read serves both the emptiness check and the result: a fresh
+        // timestamp over an empty store is a miss, not an empty catalogue.
+        if case let .cacheFirst(maxAge) = policy, await isCacheFresh(maxAge: maxAge) {
+            let cached = try await storage.getAll()
+            if !cached.isEmpty { return cached }
         }
 
         do {
@@ -37,9 +40,8 @@ final class ProductDataRepository: ProductRepository {
         return try await storage.getAll()
     }
 
-    private func isCacheFresh(maxAge: Duration) async throws -> Bool {
+    private func isCacheFresh(maxAge: Duration) async -> Bool {
         guard let lastSaved = await storage.lastSavedAt() else { return false }
-        guard try await !storage.getAll().isEmpty else { return false }
         return dateProvider.now.timeIntervalSince(lastSaved) < Double(maxAge.components.seconds)
     }
 }

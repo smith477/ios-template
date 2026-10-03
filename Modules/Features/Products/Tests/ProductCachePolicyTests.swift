@@ -26,6 +26,45 @@ private final class CountingApiClient: ProductApiClient {
     }
 }
 
+/// Counts row reads, so a test can tell how many times a request went to the
+/// store. Everything else passes straight through to the real storage.
+private final class CountingStorage: ProductStorage {
+    private let reads = Mutex(0)
+    private let base: ProductStorage
+
+    init(_ base: ProductStorage) {
+        self.base = base
+    }
+
+    var readCount: Int { reads.withLock { $0 } }
+
+    func getAll() async throws(StorageError) -> [Product] {
+        reads.withLock { $0 += 1 }
+        return try await base.getAll()
+    }
+
+    func get(id: Int) async throws(StorageError) -> Product? {
+        reads.withLock { $0 += 1 }
+        return try await base.get(id: id)
+    }
+
+    func save(_ products: [Product]) async throws(StorageError) {
+        try await base.save(products)
+    }
+
+    func delete(id: Int) async throws(StorageError) {
+        try await base.delete(id: id)
+    }
+
+    func deleteAll() async throws(StorageError) {
+        try await base.deleteAll()
+    }
+
+    func lastSavedAt() async -> Date? {
+        await base.lastSavedAt()
+    }
+}
+
 /// A clock that can be moved forward, so a test can age the cache without
 /// waiting. `FixedDateProvider` covers the still-clock case; this covers the
 /// case where time has to pass mid-test.
@@ -116,5 +155,50 @@ struct ProductCachePolicyTests {
         _ = try await repository.getProducts(policy: .reload)
 
         #expect(api.fetchCount == 2)
+    }
+
+    /// The freshness check must not read the rows it is about to serve: a
+    /// cache hit is one trip to the store, not two.
+    @Test
+    func aFreshCacheHitReadsStorageOnce() async throws {
+        let clock = MovableDateProvider(Date(timeIntervalSince1970: 1_000_000))
+        let api = CountingApiClient(products: [makeProduct()])
+        let storage = try CountingStorage(makeStorage(dateProvider: clock))
+        let repository = ProductDataRepository(
+            apiClient: api,
+            storage: storage,
+            dateProvider: clock
+        )
+
+        _ = try await repository.getProducts(policy: .cacheFirst(maxAge: .seconds(3600)))
+        clock.advance(by: 60)
+        let readsBeforeHit = storage.readCount
+        let products = try await repository.getProducts(policy: .cacheFirst(maxAge: .seconds(3600)))
+
+        #expect(storage.readCount - readsBeforeHit == 1)
+        #expect(api.fetchCount == 1)
+        #expect(products.map(\.id) == [1])
+    }
+
+    /// A fresh timestamp over an empty store is a miss: the emptiness check
+    /// moved out of the freshness check, and must still send this to the
+    /// network rather than serve an empty catalogue.
+    @Test
+    func aFreshTimestampOverAnEmptyStoreFetches() async throws {
+        let clock = FixedDateProvider(Date(timeIntervalSince1970: 1_000_000))
+        let api = CountingApiClient(products: [makeProduct()])
+        let storage = try makeStorage(dateProvider: clock)
+        try await storage.save([])
+        #expect(await storage.lastSavedAt() != nil)
+        let repository = ProductDataRepository(
+            apiClient: api,
+            storage: storage,
+            dateProvider: clock
+        )
+
+        let products = try await repository.getProducts(policy: .cacheFirst(maxAge: .seconds(3600)))
+
+        #expect(api.fetchCount == 1)
+        #expect(products.map(\.id) == [1])
     }
 }
