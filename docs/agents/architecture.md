@@ -26,10 +26,9 @@ and in CI.
 A type moves into Platform once a *second* feature needs it, never in
 anticipation. Value types only.
 
-Existing Platform modules: `Identity` (the `User` value type), `AppKit`
-(`DateProvider`), `Persistence` (the Core Data stack). There is deliberately no
-design-system module — shared UI would become one on the same second-consumer
-rule, not before.
+Existing Platform modules: `AppKit` (`DateProvider`), `Persistence` (the Core
+Data stack). There is deliberately no design-system module — shared UI would
+become one on the same second-consumer rule, not before.
 
 ## Feature anatomy
 
@@ -150,10 +149,9 @@ two features are at different maturity levels on purpose.
 `func fetchProducts() async throws(APIError) -> [Product]`.
 
 **Core Data**: the stack is `StorageProvider` in `Platform/Persistence`; the
-models belong to the features. Products ships `Products.xcdatamodeld` in its own
-resource bundle and exposes it as `Products.modelBundle` (`.module`) — `Bundle.main`
-will not find it, and a project that gets this wrong crashes at launch. Users'
-entity is still in Persistence's `ios_template` model, `StorageProvider.modelBundle`.
+models belong to the features. Each ships `<Feature>.xcdatamodeld` in its own
+resource bundle and exposes it as `<Feature>.modelBundle` (`.module`) — `Bundle.main`
+will not find it, and a project that gets this wrong crashes at launch.
 `AppContainer.modelBundles` lists the bundles, and `StorageProvider` merges them
 into one store named `App`. `StorageProvider.inMemory(storeName:modelBundles:)` is
 the test factory.

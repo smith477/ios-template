@@ -14,10 +14,6 @@ public final class StorageProvider: Sendable {
         persistentContainer.viewContext
     }
 
-    /// The model ships in this module's resource bundle rather than the app's,
-    /// so `Bundle.main` will not find it.
-    public static var modelBundle: Bundle { .module }
-
     /// One merged model per set of bundles for the whole process: separate copies
     /// leave Core Data unable to tell which entity a managed-object class belongs
     /// to. Models stay inside the lock because `NSManagedObjectModel` is not

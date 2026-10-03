@@ -2,7 +2,6 @@
 
 import APIClient
 import Foundation
-import Identity
 
 protocol UserApiClient: Sendable {
     func fetchUsers() async throws(APIError) -> [User]

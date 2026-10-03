@@ -1,7 +1,6 @@
 // UserProfileViewModel.swift
 
 import Foundation
-import Identity
 
 public enum UserProfileState {
     case loading

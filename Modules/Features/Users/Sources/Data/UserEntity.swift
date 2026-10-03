@@ -2,7 +2,6 @@
 
 import CoreData
 import Foundation
-import Identity
 
 @objc(UserEntity)
 final class UserEntity: NSManagedObject {

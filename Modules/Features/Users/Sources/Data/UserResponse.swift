@@ -1,7 +1,6 @@
 // UserResponse.swift
 
 import Foundation
-import Identity
 
 struct UsersResponse: Decodable {
     let users: [UserResponse]

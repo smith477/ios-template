@@ -48,8 +48,6 @@ jobs:
         if: matrix.variant == 'renamed'
         run: scripts/rename.sh Acme com.acme acme
 
-      # `ios_template`, the Core Data model name, is the known exception: the
-      # script leaves it alone, and it does not match `ios-template`.
       - name: Check for leftover identifiers
         if: matrix.variant == 'renamed'
         run: |

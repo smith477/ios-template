@@ -23,11 +23,7 @@ let appSettings: SettingsDictionary = [
     "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
 ]
 
-func platform(
-    _ name: String,
-    dependencies: [TargetDependency] = [],
-    coreDataModels: [CoreDataModel] = []
-) -> Target {
+func platform(_ name: String, dependencies: [TargetDependency] = []) -> Target {
     .target(
         name: name,
         destinations: destinations,
@@ -35,8 +31,7 @@ func platform(
         bundleId: "\(bundlePrefix).platform.\(name.lowercased())",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/Platform/\(name)/Sources/**"],
-        dependencies: dependencies,
-        coreDataModels: coreDataModels
+        dependencies: dependencies
     )
 }
 
@@ -96,14 +91,8 @@ let project = Project(
     options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
-        platform("Identity"),
         platform("AppKit"),
-        platform(
-            "Persistence",
-            coreDataModels: [
-                .coreDataModel("Modules/Platform/Persistence/Sources/ios_template.xcdatamodeld"),
-            ]
-        ),
+        platform("Persistence"),
 
         feature(
             "Products",
@@ -119,10 +108,12 @@ let project = Project(
         feature(
             "Users",
             dependencies: [
-                .target(name: "Identity"),
                 .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
+            ],
+            coreDataModels: [
+                .coreDataModel("Modules/Features/Users/Sources/Users.xcdatamodeld"),
             ]
         ),
 
