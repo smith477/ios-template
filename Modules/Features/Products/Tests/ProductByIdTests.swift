@@ -39,21 +39,6 @@ struct ProductByIdTests {
     private let savedAt = Date(timeIntervalSince1970: 1_000_000)
     private let maxAge = Duration.seconds(3600)
 
-    private func makeProduct(id: Int) -> Product {
-        Product(
-            id: id,
-            title: "Product \(id)",
-            description: "",
-            category: "",
-            price: 9.99,
-            tags: [],
-            brand: nil,
-            meta: Meta(createdAt: Date(), updatedAt: Date()),
-            thumbnail: "",
-            images: []
-        )
-    }
-
     /// A list of `listed` saved at `savedAt`, read through a repository and storage
     /// whose clock is `secondsLater` on, so a stray stamp would show.
     private func makeRepository(
@@ -83,8 +68,8 @@ struct ProductByIdTests {
 
     @Test
     func aCachedProductIsServedWhileTheListIsFresh() async throws {
-        let api = ByIdApiClient(products: [makeProduct(id: 1)])
-        let (repository, _) = try await makeRepository(api: api, listed: [makeProduct(id: 1)])
+        let api = ByIdApiClient(products: [.fixture(id: 1)])
+        let (repository, _) = try await makeRepository(api: api, listed: [.fixture(id: 1)])
 
         let product = try await repository.getProduct(id: 1, policy: .cacheFirst(maxAge: maxAge))
 
@@ -94,8 +79,8 @@ struct ProductByIdTests {
 
     @Test
     func aProductOutsideTheListIsFetchedOnceThenCached() async throws {
-        let api = ByIdApiClient(products: [makeProduct(id: 50)])
-        let (repository, storage) = try await makeRepository(api: api, listed: [makeProduct(id: 1)])
+        let api = ByIdApiClient(products: [.fixture(id: 50)])
+        let (repository, storage) = try await makeRepository(api: api, listed: [.fixture(id: 1)])
 
         let first = try await repository.getProduct(id: 50, policy: .cacheFirst(maxAge: maxAge))
         let second = try await repository.getProduct(id: 50, policy: .cacheFirst(maxAge: maxAge))
@@ -108,10 +93,10 @@ struct ProductByIdTests {
 
     @Test
     func aStaleListRefetchesTheProduct() async throws {
-        let api = ByIdApiClient(products: [makeProduct(id: 1)])
+        let api = ByIdApiClient(products: [.fixture(id: 1)])
         let (repository, _) = try await makeRepository(
             api: api,
-            listed: [makeProduct(id: 1)],
+            listed: [.fixture(id: 1)],
             secondsLater: 3601
         )
 
@@ -123,7 +108,7 @@ struct ProductByIdTests {
     @Test
     func aNotFoundDeletesTheCachedRowAndReturnsNil() async throws {
         let api = ByIdApiClient()
-        let (repository, storage) = try await makeRepository(api: api, listed: [makeProduct(id: 1)])
+        let (repository, storage) = try await makeRepository(api: api, listed: [.fixture(id: 1)])
 
         let product = try await repository.getProduct(id: 1, policy: .reload)
 
@@ -135,7 +120,7 @@ struct ProductByIdTests {
     @Test
     func aFailedRefreshFallsBackToTheCachedRow() async throws {
         let api = ByIdApiClient(failure: .networkError("offline"))
-        let (repository, _) = try await makeRepository(api: api, listed: [makeProduct(id: 1)])
+        let (repository, _) = try await makeRepository(api: api, listed: [.fixture(id: 1)])
 
         let product = try await repository.getProduct(id: 1, policy: .reload)
 
@@ -154,8 +139,8 @@ struct ProductByIdTests {
 
     @Test
     func aByIdSaveLeavesTheListAlone() async throws {
-        let api = ByIdApiClient(products: [makeProduct(id: 50)])
-        let (repository, storage) = try await makeRepository(api: api, listed: [makeProduct(id: 1)])
+        let api = ByIdApiClient(products: [.fixture(id: 50)])
+        let (repository, storage) = try await makeRepository(api: api, listed: [.fixture(id: 1)])
 
         _ = try await repository.getProduct(id: 50, policy: .reload)
 
