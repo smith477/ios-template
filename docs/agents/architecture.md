@@ -161,6 +161,8 @@ the test factory. Model name is `ios_template`.
 **Networking** is the external `APIClient` package: an actor with
 `send<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(APIError) -> T`.
 Features declare endpoints as enums conforming to `Endpoint`.
+Its source — for an `APIError` case or an `Endpoint` default — is checked out at
+`Tuist/.build/checkouts/api-client/Sources/APIClient/` after `tuist install`.
 
 ## Dependency injection
 
