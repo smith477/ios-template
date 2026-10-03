@@ -27,6 +27,10 @@ Editing targets, dependencies, or build settings means editing `Project.swift`
 and re-running `tuist generate` — changes made in Xcode's project editor are
 overwritten.
 
+The local cache moved to a new store, `App.sqlite`, when each feature took over its
+own Core Data model. An install from before that starts with an empty cache once
+and refills it from the network.
+
 ## Make it yours
 
 One script turns the template into your app:
