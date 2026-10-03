@@ -57,7 +57,8 @@ func feature(_ name: String, dependencies: [TargetDependency] = []) -> Target {
 func tests(
     for name: String,
     at path: String,
-    dependencies: [TargetDependency] = []
+    dependencies: [TargetDependency] = [],
+    coreDataModels: [CoreDataModel] = []
 ) -> Target {
     .target(
         name: "\(name)Tests",
@@ -66,7 +67,8 @@ func tests(
         bundleId: "\(bundlePrefix).\(name.lowercased()).tests",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/\(path)/\(name)/Tests/**"],
-        dependencies: [.target(name: name)] + dependencies
+        dependencies: [.target(name: name)] + dependencies,
+        coreDataModels: coreDataModels
     )
 }
 
@@ -74,8 +76,12 @@ func featureTests(_ name: String, dependencies: [TargetDependency] = []) -> Targ
     tests(for: name, at: "Features", dependencies: dependencies)
 }
 
-func platformTests(_ name: String, dependencies: [TargetDependency] = []) -> Target {
-    tests(for: name, at: "Platform", dependencies: dependencies)
+func platformTests(
+    _ name: String,
+    dependencies: [TargetDependency] = [],
+    coreDataModels: [CoreDataModel] = []
+) -> Target {
+    tests(for: name, at: "Platform", dependencies: dependencies, coreDataModels: coreDataModels)
 }
 
 let project = Project(
@@ -122,7 +128,14 @@ let project = Project(
             ]
         ),
         platformTests("AppKit"),
-        platformTests("Persistence"),
+        // Two small models of its own, so merging is tested without a feature.
+        platformTests(
+            "Persistence",
+            coreDataModels: [
+                .coreDataModel("Modules/Platform/Persistence/Tests/Models/First.xcdatamodeld"),
+                .coreDataModel("Modules/Platform/Persistence/Tests/Models/Second.xcdatamodeld"),
+            ]
+        ),
 
         .target(
             name: "App",

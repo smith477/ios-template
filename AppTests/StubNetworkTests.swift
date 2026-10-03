@@ -131,7 +131,7 @@ struct StubNetworkTests {
         let repository = ProductDataRepository(
             apiClient: ProductAPISessionClient(apiClient: stubbedClient()),
             storage: ProductCoreDataStorage(
-                storageProvider: try .inMemory(modelName: "ios_template"),
+                storageProvider: try .inMemory(storeName: AppContainer.storeName, modelBundles: AppContainer.modelBundles),
                 listRecord: ProductListRecord(suiteName: UUID().uuidString)
             )
         )

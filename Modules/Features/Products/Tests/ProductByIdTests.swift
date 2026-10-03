@@ -46,7 +46,7 @@ struct ProductByIdTests {
         listed: [Product] = [],
         secondsLater: TimeInterval = 60
     ) async throws -> (ProductDataRepository, ProductCoreDataStorage) {
-        let provider = try StorageProvider.inMemory(modelName: "ios_template")
+        let provider = try makeStorageProvider()
         let suiteName = UUID().uuidString
         let now = FixedDateProvider(savedAt.addingTimeInterval(secondsLater))
 

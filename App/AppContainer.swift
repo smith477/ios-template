@@ -18,6 +18,13 @@ final class AppContainer {
         self.apiClient = apiClient
     }
 
+    /// The store's file name. Neutral, so a renamed app leaves nothing of the
+    /// template behind.
+    static let storeName = "App"
+
+    /// Every feature's Core Data model, merged into the one store.
+    static let modelBundles: [Bundle] = [StorageProvider.modelBundle]
+
     /// The production container. Traps if the store cannot open, since the app
     /// has nothing to show without it.
     static func live() -> AppContainer {
@@ -30,7 +37,7 @@ final class AppContainer {
 
         do {
             return AppContainer(
-                storageProvider: try StorageProvider(modelName: "ios_template"),
+                storageProvider: try StorageProvider(storeName: storeName, modelBundles: modelBundles),
                 apiClient: APIClient(baseURL: apiBaseURL)
             )
         } catch {

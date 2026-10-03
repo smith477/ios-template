@@ -5,7 +5,8 @@ import Foundation
 /// An error from a local storage operation.
 public enum StorageError: Error, Sendable {
     case notFound
-    case modelNotFound(name: String)
+    case modelNotFound(bundle: String)
+    case modelConflict(entity: String)
     case storeLoadFailed(Error)
     case saveFailed(Error)
     case fetchFailed(Error)
@@ -17,8 +18,10 @@ extension StorageError: LocalizedError {
         switch self {
         case .notFound:
             "Record not found"
-        case let .modelNotFound(name):
-            "Core Data model '\(name)' is missing from the bundle"
+        case let .modelNotFound(bundle):
+            "No Core Data model in bundle '\(bundle)'"
+        case let .modelConflict(entity):
+            "Two Core Data models define the entity '\(entity)'"
         case let .storeLoadFailed(error):
             "Failed to open the store: \(error.localizedDescription)"
         case let .saveFailed(error):
