@@ -24,10 +24,10 @@ public final class StorageProvider: Sendable {
     ///
     /// Every store in a process must use the same `modelBundles`, in any order.
     ///
-    /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelUnreadable`
-    ///   when one will not load, `.modelConflict` when two models define the same
-    ///   entity, `.conflictingBundleLists` when a bundle is already merged from a
-    ///   different list, `.storeLoadFailed` when the store cannot open.
+    /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelConflict`
+    ///   when two models define the same entity, `.conflictingBundleLists` when a
+    ///   bundle is already merged from a different list, `.storeLoadFailed` when
+    ///   the store cannot open.
     public init(storeName: String, modelBundles: [Bundle], inMemory: Bool = false) throws(StorageError) {
         let model = try Self.model(merging: modelBundles)
         persistentContainer = NSPersistentContainer(name: storeName, managedObjectModel: model)
@@ -103,8 +103,10 @@ public final class StorageProvider: Sendable {
                 throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
             }
             for url in urls {
+                // A compiled model that will not load is a broken build, not a state
+                // the app can recover from.
                 guard let model = NSManagedObjectModel(contentsOf: url) else {
-                    throw .modelUnreadable(model: url.lastPathComponent, bundle: bundle.bundleURL.lastPathComponent)
+                    fatalError("Core Data could not load \(url.lastPathComponent) in \(bundle.bundleURL.lastPathComponent)")
                 }
                 parts.append(model)
             }
