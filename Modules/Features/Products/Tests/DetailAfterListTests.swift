@@ -24,7 +24,7 @@ struct DetailAfterListTests {
                 apiClient: StubClient(),
                 storage: ProductCoreDataStorage(
                     storageProvider: provider,
-                    timestamp: ProductCacheTimestamp(suiteName: suiteName),
+                    listRecord: ProductListRecord(suiteName: suiteName),
                     dateProvider: clock
                 ),
                 dateProvider: clock

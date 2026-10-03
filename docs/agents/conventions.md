@@ -117,7 +117,7 @@ catches. SwiftLint's `no_unchecked_sendable` custom rule makes it an error. Make
 the conformance provable instead:
 
 - Store something `Sendable` rather than the non-`Sendable` object.
-  `ProductCacheTimestamp` keeps a suite name and resolves `UserDefaults` per call.
+  `ProductListRecord` keeps a suite name and resolves `UserDefaults` per call.
 - Guard mutable state in a `Mutex` from `Synchronization`, as the test doubles in
   `ProductCachePolicyTests.swift` do. An actor is the alternative, but it cannot
   satisfy a synchronous protocol requirement.
