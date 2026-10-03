@@ -109,3 +109,13 @@ custom_rules:
       - doccomment
     message: "Comments describe the code as it is now; history belongs in git log and the PR."
     severity: error
+  log_through_diagnostics:
+    name: "Log through Diagnostics"
+    regex: '^import (os|OSLog)$|\bLogger\('
+    excluded: 'Modules/Platform/Diagnostics/Sources/Log\.swift'
+    excluded_match_kinds:
+      - comment
+      - doccomment
+      - string
+    message: "Log through Diagnostics' Log (private static let log = Log()); only Log.swift imports os."
+    severity: error

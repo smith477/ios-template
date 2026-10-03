@@ -14,6 +14,13 @@ Read before writing or changing tests.
 **No snapshot testing**, and no snapshot dependency in the project. Adding one is
 a decision to raise, not a default.
 
+## What not to test
+
+A test proves this project's logic. Do not test what only an Apple framework does —
+that a line reached the log store, that SwiftUI redrew — or what the compiler already
+enforces through types. When an acceptance criterion is only of that kind, its check
+is a one-off demo, and the plan says why.
+
 ## Naming
 
 Test functions are full sentences describing the scenario, with no `test` prefix
