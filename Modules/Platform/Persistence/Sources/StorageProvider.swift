@@ -1,12 +1,15 @@
 // StorageProvider.swift
 
 import CoreData
+import Diagnostics
 import Foundation
 import Synchronization
 
 /// The Core Data stack: `viewContext` for main-thread reads,
 /// `performBackground(_:)` for writes and heavy reads.
 public final class StorageProvider: Sendable {
+    private static let log = Log()
+
     private let persistentContainer: NSPersistentContainer
 
     /// Managed objects fetched here may only be touched on the main thread.
@@ -53,14 +56,20 @@ public final class StorageProvider: Sendable {
     }
 
     /// Runs `block` on a private background context. Changes are saved only by
-    /// calling `context.save()` inside it.
+    /// calling `context.save()` inside it; an error it throws is logged, then rethrown.
     public func performBackground<T: Sendable>(
         _ block: @escaping @Sendable (NSManagedObjectContext) throws -> T
     ) async throws -> T {
         let context = persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         return try await context.perform {
-            try block(context)
+            do {
+                return try block(context)
+            } catch {
+                // Logged here for every feature, so callers never log it again.
+                Self.log.error("Core Data work failed", error: error)
+                throw error
+            }
         }
     }
 
