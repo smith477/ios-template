@@ -36,6 +36,44 @@ struct StubNetworkTests {
         #expect(products.map(\.title) == ["Stub Widget", "Stub Gadget", "Stub Gizmo"])
     }
 
+    @Test(arguments: [1, 2, 3, 50])
+    func eachProductFixtureDecodesById(id: Int) throws {
+        let body = try #require(StubFixtures.product[id])
+        let response = try JSONDecoder().decode(ProductResponse.self, from: Data(body.utf8))
+
+        #expect(response.id == id)
+    }
+
+    /// What `template://products/50` opens: a product the list never returned,
+    /// fetched by id through the real repository, client and stub.
+    @Test @MainActor
+    func productFiftyLoadsThroughTheStub() async throws {
+        let viewModel = try stubbedDetail(id: 50)
+
+        await viewModel.load()
+
+        guard case let .loaded(product) = viewModel.state else {
+            Issue.record("product 50 did not load: \(viewModel.state)")
+            return
+        }
+        #expect(product.id == 50)
+        #expect(product.title == "Stub Fifty")
+    }
+
+    /// An id the stub has no fixture for answers 404, which the detail screen
+    /// shows as not found rather than as an error.
+    @Test @MainActor
+    func anUnknownProductIsNotFound() async throws {
+        let viewModel = try stubbedDetail(id: 999)
+
+        await viewModel.load()
+
+        guard case .notFound = viewModel.state else {
+            Issue.record("expected notFound, got \(viewModel.state)")
+            return
+        }
+    }
+
     @Test
     func theUsersEndpointFetchesTheFixtureThroughTheStub() async throws {
         let response: UsersResponse = try await stubbedClient().send(UserEndpoint.list)
@@ -90,6 +128,20 @@ struct StubNetworkTests {
         await viewModel.getProducts()
 
         #expect(Set(viewModel.products.map(\.title)) == ["Stub Widget", "Stub Gadget", "Stub Gizmo"])
+    }
+
+    /// A detail screen over the real data layer: the stub for the network, an
+    /// empty in-memory store, and a list record no other test shares.
+    @MainActor
+    private func stubbedDetail(id: Int) throws -> ProductDetailViewModel {
+        let repository = ProductDataRepository(
+            apiClient: ProductAPISessionClient(apiClient: stubbedClient()),
+            storage: ProductCoreDataStorage(
+                storageProvider: try .inMemory(modelName: "ios_template"),
+                listRecord: ProductListRecord(suiteName: UUID().uuidString)
+            )
+        )
+        return ProductDetailViewModel(repository: repository, id: id)
     }
 
     private func stubbedClient() -> APIClient {

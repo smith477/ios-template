@@ -29,8 +29,17 @@
             switch path {
             case "/products": return StubFixtures.products
             case "/users": return StubFixtures.users
-            default: return nil
+            default: return productFixture(path: path)
             }
+        }
+
+        /// `/products/{id}`, for an id with a fixture. Any other id answers 404,
+        /// as the live API does for a product it does not have.
+        private static func productFixture(path: String) -> String? {
+            let components = path.split(separator: "/")
+            guard components.count == 2, components[0] == "products",
+                  let id = Int(components[1]) else { return nil }
+            return StubFixtures.product[id]
         }
 
         override static func canInit(with _: URLRequest) -> Bool {

@@ -32,8 +32,7 @@ public final class ProductDetailViewModel {
 
     public func load() async {
         do {
-            let products = try await repository.getProducts()
-            if let product = products.first(where: { $0.id == id }) {
+            if let product = try await repository.getProduct(id: id) {
                 state = .loaded(product)
             } else {
                 state = .notFound
