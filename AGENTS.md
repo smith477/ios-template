@@ -33,6 +33,10 @@ broke. Test targets disable these rules; shipping code does not get an exemption
 summary on public API, no history or process. The full standard is in
 `docs/agents/conventions.md`.
 
+**One primary type per file; split by responsibility, not to fit a limit.** When
+a size limit fires, `docs/agents/conventions.md` says whether to split or to keep
+the file whole with a reasoned `swiftlint:disable`.
+
 **Do not add a dependency** — Swift package, test framework, or otherwise —
 without asking first.
 
