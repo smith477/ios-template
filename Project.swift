@@ -122,6 +122,7 @@ let project = Project(
             ]
         ),
         platformTests("AppKit"),
+        platformTests("Persistence"),
 
         .target(
             name: "App",
@@ -204,13 +205,14 @@ let project = Project(
             name: "App",
             shared: true,
             buildAction: .buildAction(targets: ["App"]),
-            testAction: .targets(["AppTests", "ProductsTests", "AppKitTests", "AppUITests"]),
+            testAction: .targets(["AppTests", "ProductsTests", "AppKitTests", "PersistenceTests", "AppUITests"]),
             runAction: .runAction(executable: "App")
         ),
 
         // One scheme per test bundle, to run a module's tests on their own.
         testScheme("ProductsTests"),
         testScheme("AppKitTests"),
+        testScheme("PersistenceTests"),
         testScheme("AppTests"),
         testScheme("AppUITests"),
     ]
