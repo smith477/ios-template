@@ -196,6 +196,9 @@ reviewed on its own.
      -destination 'generic/platform=iOS Simulator' -quiet   # compiles the app and every test bundle; boots no simulator
    mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
    mise exec -- tuist inspect dependencies --only implicit         # if the module graph changed
+   git grep -n -e 'dusan\.kovacevic' -e 'ios-template' -e 'template://' -e '"template"' -e TemplateApp \
+     -- ':!.github' ':!.claude' ':!Project.swift' ':!Workspace.swift' ':!Tuist/Package.swift' ':!README.md' ':!scripts'
+     # CI's leftover-identity check, minus the files rename.sh rewrites; must print nothing
    ```
 
    A phase is not handed over uncompiled.
