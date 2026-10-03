@@ -6,3 +6,10 @@ disabled_rules:
   - force_unwrapping
   - force_cast
   - force_try
+
+# A nested rule block replaces the root's whole block, so the comment-line setting
+# is restated. Type and function body limits come from the root.
+file_length:
+  warning: 250
+  error: 350
+  ignore_comment_only_lines: true

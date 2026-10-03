@@ -50,11 +50,20 @@ disabled_rules:
   - force_unwrapping
   - force_cast
   - force_try
+
+file_length:
+  warning: 250
+  error: 350
+  ignore_comment_only_lines: true
 ```
 
 A force unwrap in a test fails that test immediately and never ships. A new test
 directory needs this file, or the root config's error-level force rules will fail
 the lint job.
+
+A nested rule block replaces the root's whole block rather than merging into it,
+so `ignore_comment_only_lines` has to be restated or comment lines start counting.
+`type_body_length` and `function_body_length` are left out and come from the root.
 
 `Users`, `Identity` and `Persistence` have no test targets yet. Adding one means
 a `featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a

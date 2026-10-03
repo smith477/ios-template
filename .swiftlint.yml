@@ -46,17 +46,22 @@ line_length:
   ignores_comments: true
   ignores_urls: true
 
-type_body_length:
-  warning: 300
-  error: 400
-
+# Size limits stand in for responsibility, since one_declaration_per_file would
+# split cohesive code into a pile of tiny files. Under --strict the warning value
+# blocks: split the file, or keep it whole with a swiftlint:disable and a reason.
+# docs/agents/conventions.md says which.
 file_length:
-  warning: 500
-  error: 800
+  warning: 300
+  error: 450
+  ignore_comment_only_lines: true
+
+type_body_length:
+  warning: 200
+  error: 300
 
 function_body_length:
-  warning: 60
-  error: 100
+  warning: 50
+  error: 80
 
 # Test names describe a scenario and are long by design.
 identifier_name:
