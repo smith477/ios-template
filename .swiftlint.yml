@@ -77,7 +77,8 @@ nesting:
 
 # Errors, not warnings: a force unwrap in shipping code is a crash with no
 # explanation. Trap deliberately with `fatalError` and say what broke instead.
-# The test bundles relax these in their own nested configs.
+# Only a test file may disable them, file by file; the test directories' nested
+# configs allow it.
 force_unwrapping:
   severity: error
 

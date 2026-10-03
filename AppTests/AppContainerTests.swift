@@ -1,5 +1,8 @@
 // AppContainerTests.swift
 
+// A literal URL that fails to parse should fail the test on the spot.
+// swiftlint:disable force_unwrapping
+
 import APIClient
 import CoreData
 import Foundation

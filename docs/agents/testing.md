@@ -47,24 +47,44 @@ Every `Tests/` directory has a `.swiftlint.yml`:
 ```yaml
 parent_config: ../.swiftlint.yml
 
-disabled_rules:
-  - force_unwrapping
-  - force_cast
-  - force_try
-
 file_length:
   warning: 250
   error: 350
   ignore_comment_only_lines: true
+
+blanket_disable_command:
+  allowed_rules:
+    - file_header
+    - file_length
+    - file_name
+    - file_name_no_space
+    - single_test_class
+    - force_unwrapping
+    - force_cast
+    - force_try
 ```
 
-A force unwrap in a test fails that test immediately and never ships. A new test
-directory needs this file, or the root config's error-level force rules will fail
-the lint job.
+The force rules stay on in tests. A test file that needs one opts out for the whole
+file, between the file-name line and the imports, with the reason above it:
+
+```swift
+// DeepLinkTests.swift
+
+// A literal URL that fails to parse should fail the test on the spot.
+// swiftlint:disable force_unwrapping
+
+import Foundation
+```
+
+The `blanket_disable_command` block is what permits that file-wide disable, and
+only test directories carry it. Lint still accepts a one-line
+`swiftlint:disable:next` anywhere; in shipping code `AGENTS.md` rules that out. A new
+test directory needs this file.
 
 A nested rule block replaces the root's whole block rather than merging into it,
-so `ignore_comment_only_lines` has to be restated or comment lines start counting.
-`type_body_length` and `function_body_length` are left out and come from the root.
+so `ignore_comment_only_lines` and SwiftLint's default `allowed_rules` have to be
+restated. `type_body_length` and `function_body_length` are left out and come from
+the root.
 
 `Users` and `Identity` have no test targets yet. Adding one means a
 `featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a
