@@ -91,6 +91,26 @@ struct StorageProviderTests {
         #expect(entity == "FirstEntity")
     }
 
+    @Test
+    func aSecondListSharingABundleThrowsConflictingBundleLists() throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let first = try scratch.bundle(holding: ["First"])
+        let second = try scratch.bundle(holding: ["Second"])
+        _ = try StorageProvider.inMemory(storeName: "Test", modelBundles: [first])
+
+        let error = #expect(throws: StorageError.self) {
+            try StorageProvider.inMemory(storeName: "Test", modelBundles: [first, second])
+        }
+
+        guard case let .conflictingBundleLists(shared) = error else {
+            Issue.record("Expected .conflictingBundleLists, got \(String(describing: error))")
+            return
+        }
+        #expect(shared == [first.bundleURL.lastPathComponent])
+    }
+
     /// Separate model copies leave Core Data unable to tell which entity a
     /// managed-object class belongs to.
     @Test

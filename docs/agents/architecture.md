@@ -174,9 +174,9 @@ The merge relies on two things:
   throw `.modelConflict(entity:)`; Core Data's own merge would drop one silently or
   crash. Name entities after their feature (`ProductTagsEntity`, not `TagsEntity`).
 - **One bundle list per process.** `StorageProvider` keeps one merged model per set
-  of bundles. Two different sets that share an entity give Core Data two
-  descriptions claiming one class, and it logs "Multiple NSEntityDescriptions
-  claim…" because `init(context:)` can no longer tell which it means.
+  of bundles. Two different sets that share a bundle would give Core Data two
+  descriptions claiming one class, so `init(context:)` could no longer tell which
+  it means; the second set throws `.conflictingBundleLists` instead.
 
 **Changing a model.** Core Data compares an existing store with the merged model
 entity by entity, so a change to one feature's entities touches only that feature's
