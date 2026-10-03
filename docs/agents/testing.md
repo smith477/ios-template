@@ -111,13 +111,14 @@ glob already covers the folder, so it needs no `Project.swift` change.
 
 `Modules/Features/Products/Tests/Support/` is the example to copy:
 `Product.fixture(id:title:)` in `Product+Fixture.swift`, the counting doubles,
-`MovableDateProvider`, and `ProductStorageFactory.swift`, whose free
+`FixedDateProvider`, `MovableDateProvider`, and `ProductStorageFactory.swift`, whose free
 `makeStorage(dateProvider:)` returns storage over an in-memory store and a
 `ProductListRecord(suiteName: UUID().uuidString)`, so neither the rows nor the
 list record of one test reach the next.
 
 Seams that already exist, to use rather than replace: `DateProvider` (inject
-`MovableDateProvider` to age a cache without waiting), `ProductListRecord`
+`FixedDateProvider` to stop the clock, `MovableDateProvider` to age a cache
+without waiting), `ProductListRecord`
 (injectable `UserDefaults` suite name), and the defaulted `emit` closure on view-model
 initialisers.
 

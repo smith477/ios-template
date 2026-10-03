@@ -9,16 +9,5 @@ protocol DateProvider: Sendable {
 
 /// The system clock.
 struct SystemDateProvider: DateProvider {
-    init() {}
-
     var now: Date { Date() }
-}
-
-/// A clock stopped at a fixed instant, for tests.
-struct FixedDateProvider: DateProvider {
-    let now: Date
-
-    init(_ now: Date) {
-        self.now = now
-    }
 }
