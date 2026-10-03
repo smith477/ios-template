@@ -19,7 +19,10 @@ a feature into layer targets only once it is large enough to earn them; until th
 the ceremony costs more than it returns.
 
 `tuist inspect dependencies --only implicit` is what catches a violation, locally
-and in CI.
+and in CI. `scripts/check-feature-copy.sh` proves the result: it builds each
+feature, with its tests, in a scratch project holding nothing but the Platform
+modules and `APIClient`, and fails if the feature needs anything else. CI runs it,
+and it is worth running locally after changing a feature's dependencies.
 
 ## What goes in Platform
 
