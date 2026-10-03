@@ -3,7 +3,7 @@
 import Foundation
 import Testing
 
-@testable import AppKit
+@testable import Products
 
 struct DateProviderTests {
     @Test

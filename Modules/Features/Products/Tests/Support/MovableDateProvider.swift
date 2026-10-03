@@ -1,8 +1,9 @@
 // MovableDateProvider.swift
 
-import AppKit
 import Foundation
 import Synchronization
+
+@testable import Products
 
 /// A clock that can be moved forward mid-test.
 final class MovableDateProvider: DateProvider {

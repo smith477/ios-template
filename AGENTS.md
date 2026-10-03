@@ -28,8 +28,6 @@ SwiftLint errors, not warnings. Trap deliberately with `fatalError` naming what
 broke. A test file may disable them for the whole file, with a reason; shipping
 code gets no exemption.
 
-**`import AppKit` means this project's Platform module**, not Apple's framework.
-
 **Comments explain why, never what, in a sentence or two.** A one-sentence `///`
 summary on public API, no history or process. The full standard is in
 `docs/agents/conventions.md`.

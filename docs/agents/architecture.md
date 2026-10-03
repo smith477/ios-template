@@ -26,9 +26,9 @@ and in CI.
 A type moves into Platform once a *second* feature needs it, never in
 anticipation. Value types only.
 
-Existing Platform modules: `AppKit` (`DateProvider`), `Persistence` (the Core
-Data stack). There is deliberately no design-system module — shared UI would
-become one on the same second-consumer rule, not before.
+The one Platform module is `Persistence`, the Core Data stack. There is
+deliberately no design-system module — shared UI would become one on the same
+second-consumer rule, not before.
 
 ## Feature anatomy
 

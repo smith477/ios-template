@@ -1,7 +1,6 @@
 // ProductDataRepository.swift
 
 import APIClient
-import AppKit
 import Foundation
 
 final class ProductDataRepository: ProductRepository {

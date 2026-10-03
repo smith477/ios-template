@@ -91,13 +91,11 @@ let project = Project(
     options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
-        platform("AppKit"),
         platform("Persistence"),
 
         feature(
             "Products",
             dependencies: [
-                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
@@ -108,7 +106,6 @@ let project = Project(
         feature(
             "Users",
             dependencies: [
-                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
@@ -120,12 +117,10 @@ let project = Project(
         featureTests(
             "Products",
             dependencies: [
-                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ]
         ),
-        platformTests("AppKit"),
         // Two small models of its own, so merging is tested without a feature.
         platformTests(
             "Persistence",
@@ -169,7 +164,6 @@ let project = Project(
             dependencies: [
                 .target(name: "Products"),
                 .target(name: "Users"),
-                .target(name: "AppKit"),
                 .target(name: "Persistence"),
                 .external(name: "APIClient"),
             ],
@@ -216,13 +210,12 @@ let project = Project(
             name: "App",
             shared: true,
             buildAction: .buildAction(targets: ["App"]),
-            testAction: .targets(["AppTests", "ProductsTests", "AppKitTests", "PersistenceTests", "AppUITests"]),
+            testAction: .targets(["AppTests", "ProductsTests", "PersistenceTests", "AppUITests"]),
             runAction: .runAction(executable: "App")
         ),
 
         // One scheme per test bundle, to run a module's tests on their own.
         testScheme("ProductsTests"),
-        testScheme("AppKitTests"),
         testScheme("PersistenceTests"),
         testScheme("AppTests"),
         testScheme("AppUITests"),

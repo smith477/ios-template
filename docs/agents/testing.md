@@ -4,8 +4,7 @@ Read before writing or changing tests.
 
 ## Which framework
 
-**Swift Testing** for all unit tests — `AppTests`, `ProductsTests`, `AppKitTests`,
-`PersistenceTests`.
+**Swift Testing** for all unit tests — `AppTests`, `ProductsTests`, `PersistenceTests`.
 `import Testing`, `struct` suites (not classes), `@Test` functions, `#expect`,
 `try #require`, `Issue.record`, `@Test(arguments:)` for parameterised cases. Put
 `@MainActor` on the suite struct when it touches view models or the router.
@@ -128,7 +127,6 @@ Regular imports alphabetised, then a blank line, then `@testable` last:
 
 ```swift
 import APIClient
-import AppKit
 import Foundation
 import Testing
 
@@ -145,9 +143,8 @@ mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"     
 mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"  # one bundle
 ```
 
-Bundles: `AppTests`, `AppUITests`, `ProductsTests`, `AppKitTests`,
-`PersistenceTests`. Run the bundle covering what changed while iterating; run `App`
-before handing work over.
+Bundles: `AppTests`, `AppUITests`, `ProductsTests`, `PersistenceTests`. Run the
+bundle covering what changed while iterating; run `App` before handing work over.
 
 `--device "iPhone 18 Pro"` is required. Without it `tuist test` picks whichever
 simulator is booted, and a different screen geometry puts UI-test taps in the
