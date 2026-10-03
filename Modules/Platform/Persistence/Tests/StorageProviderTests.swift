@@ -129,6 +129,51 @@ struct StorageProviderTests {
         #expect(oneModel === otherModel)
     }
 
+    /// What `architecture.md` tells adopters to rely on: a shipped store opens
+    /// under a feature's next model version, merged with another feature's model.
+    @Test
+    func aStoreFromThePreviousModelVersionMigratesOnOpen() throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let versioned = try scratch.bundle(holding: ["Versioned"])
+        let other = try scratch.bundle(holding: ["Second"])
+        let storeName = UUID().uuidString
+        let directory = NSPersistentContainer.defaultDirectoryURL()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer {
+            for suffix in ["", "-wal", "-shm"] {
+                try? FileManager.default.removeItem(at: directory.appending(path: "\(storeName).sqlite\(suffix)"))
+            }
+        }
+
+        // Written as the previous release would have: version 1, merged, on disk.
+        try autoreleasepool {
+            let first = versioned.bundleURL.appending(path: "Versioned.momd/V1.mom")
+            let version1 = try #require(NSManagedObjectModel(contentsOf: first))
+            let second = try #require(NSManagedObjectModel(contentsOf: other.bundleURL.appending(path: "Second.momd")))
+            let previous = try #require(NSManagedObjectModel(byMerging: [version1, second]))
+            let container = NSPersistentContainer(name: storeName, managedObjectModel: previous)
+            var loadError: Error?
+            container.loadPersistentStores { _, error in loadError = error }
+            if let loadError {
+                throw loadError
+            }
+            let row = NSEntityDescription.insertNewObject(forEntityName: "VersionedEntity", into: container.viewContext)
+            row.setValue("kept", forKey: "name")
+            try container.viewContext.save()
+            for store in container.persistentStoreCoordinator.persistentStores {
+                try container.persistentStoreCoordinator.remove(store)
+            }
+        }
+
+        let provider = try StorageProvider(storeName: storeName, modelBundles: [versioned, other])
+
+        let rows = try provider.viewContext.fetch(NSFetchRequest<NSManagedObject>(entityName: "VersionedEntity"))
+        #expect(rows.map { $0.value(forKey: "name") as? String } == ["kept"])
+        #expect(rows.first?.entity.attributesByName["note"] != nil)
+    }
+
     @Test
     func performBackgroundReturnsTheBlocksValue() async throws {
         let scratch = try Scratch()

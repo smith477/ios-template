@@ -121,12 +121,14 @@ let project = Project(
                 .external(name: "APIClient"),
             ]
         ),
-        // Two small models of its own, so merging is tested without a feature.
+        // Small models of its own, so merging and migration are tested without a
+        // feature.
         platformTests(
             "Persistence",
             coreDataModels: [
                 .coreDataModel("Modules/Platform/Persistence/Tests/Models/First.xcdatamodeld"),
                 .coreDataModel("Modules/Platform/Persistence/Tests/Models/Second.xcdatamodeld"),
+                .coreDataModel("Modules/Platform/Persistence/Tests/Models/Versioned.xcdatamodeld"),
             ]
         ),
 

@@ -184,7 +184,9 @@ model. Once a version has shipped, add a model version to the feature's
 `.xcdatamodeld` (Editor ▸ Add Model Version), make it current, and keep the change
 one lightweight migration can infer — a new entity, a new optional attribute, a
 rename with a renaming ID. The store migrates itself on the next launch; the old
-version stays in the bundle beside the new one. During development, deleting the
+version stays in the bundle beside the new one. PersistenceTests proves this on the
+simulator: a store written under one version, merged with a second model, opens
+under the next with its rows. During development, deleting the
 app resets the store instead: it is a cache, so the next load refetches. A change
 lightweight migration cannot infer fails to open the store, and `AppContainer.live()`
 traps.
