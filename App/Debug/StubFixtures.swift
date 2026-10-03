@@ -20,7 +20,7 @@
 
         /// What `/products/{id}` serves, by id. Product 50 is in no list: it stands
         /// in for a product past the API's first page, reachable only by id, which
-        /// is what `template://products/50` exercises. Its seller, user 21, is not a
+        /// is what `<scheme>://products/50` exercises. Its seller, user 21, is not a
         /// fixture, so nothing taps it.
         static let product: [Int: String] = [1: widget, 2: gadget, 3: gizmo, 50: fifty]
 
