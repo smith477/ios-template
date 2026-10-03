@@ -139,8 +139,11 @@ protocols with Core Data and URLSession implementations behind them.
 or `.reload`, defaulting to an hour via a protocol extension; pull-to-refresh
 passes `.reload`. A failed refresh falls back to the cache and only rethrows when
 the cache is empty, so a network blip does not empty the screen. Freshness is a
-stored timestamp (`ProductCacheTimestamp`, in `UserDefaults`) compared against an
-injected `DateProvider` — the timestamp is real, the clock is fakeable.
+stored timestamp compared against an injected `DateProvider` — the timestamp is
+real, the clock is fakeable. The timestamp lives in `ProductListRecord`, in
+`UserDefaults`, beside the ids the list last returned: the store keeps every
+product it has fetched, and `getAll()` returns only the list's rows, so a product
+cached for its own screen never joins the list.
 
 `UserDataRepository` is deliberately simpler: cache-if-non-empty, no policy. The
 two features are at different maturity levels on purpose.

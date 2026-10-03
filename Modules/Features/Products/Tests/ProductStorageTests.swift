@@ -71,4 +71,42 @@ struct ProductStorageTests {
         let stored = try #require(try await storage.getAll().first)
         #expect(stored.price == Decimal(string: "19.99")!)
     }
+
+    /// The list is what the last list save held, not every row the store has
+    /// seen: a product the API stopped returning leaves the list, though its
+    /// row stays cached.
+    @Test
+    func aListSaveDropsProductsTheNextListOmits() async throws {
+        let storage = try makeStorage()
+
+        try await storage.save([makeProduct(id: 1, title: "A"), makeProduct(id: 2, title: "B")])
+        try await storage.save([makeProduct(id: 1, title: "A")])
+
+        #expect(try await storage.getAll().map(\.id) == [1])
+        #expect(try await storage.get(id: 2) != nil)
+    }
+
+    /// A record written before ids were kept has a timestamp but no list, so
+    /// it reads as empty — which the repository treats as a miss — rather
+    /// than serving every cached row.
+    @Test
+    func aRecordWithNoIdsReadsAsEmpty() async throws {
+        let provider = try StorageProvider.inMemory(modelName: "ios_template")
+        let writer = ProductCoreDataStorage(
+            storageProvider: provider,
+            listRecord: ProductListRecord(suiteName: UUID().uuidString)
+        )
+        try await writer.save([makeProduct(id: 1)])
+
+        let legacySuite = UUID().uuidString
+        let legacyDefaults = try #require(UserDefaults(suiteName: legacySuite))
+        legacyDefaults.set(Date(), forKey: "products.lastSavedAt")
+        let reader = ProductCoreDataStorage(
+            storageProvider: provider,
+            listRecord: ProductListRecord(suiteName: legacySuite)
+        )
+
+        #expect(await reader.lastSavedAt() != nil)
+        #expect(try await reader.getAll().isEmpty)
+    }
 }

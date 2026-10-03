@@ -78,11 +78,11 @@ private final class CountingApiClient: ProductApiClient {
 Shared *factories* are the exception, and go in a file with no `@Test` in it —
 `Modules/Features/Products/Tests/ProductStorageFactory.swift` exposes a free
 `makeStorage(dateProvider:)` returning storage over an in-memory store and a
-`ProductCacheTimestamp(suiteName: UUID().uuidString)`, so neither the rows nor the
-cache timestamp of one test reach the next.
+`ProductListRecord(suiteName: UUID().uuidString)`, so neither the rows nor the
+list record of one test reach the next.
 
 Seams that already exist, to use rather than replace: `DateProvider` (inject
-`MovableDateProvider` to age a cache without waiting), `ProductCacheTimestamp`
+`MovableDateProvider` to age a cache without waiting), `ProductListRecord`
 (injectable `UserDefaults` suite name), and the defaulted `emit` closure on view-model
 initialisers.
 
