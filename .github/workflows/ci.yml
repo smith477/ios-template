@@ -26,6 +26,16 @@ jobs:
       - name: SwiftLint
         run: mise exec -- swiftlint lint --strict
 
+      # The production checklist names the file behind each claim, so a rename
+      # that leaves a README link dangling fails here, not in a reader's browser.
+      - name: README links resolve
+        run: |
+          missing=0
+          while read -r target; do
+            [ -e "$target" ] || { echo "README.md links to a missing path: $target" >&2; missing=1; }
+          done < <(grep -oE '\]\([^)#]+' README.md | cut -c3- | grep -vE '^[a-z]+:')
+          exit $missing
+
   # A feature is copyable only if it builds with nothing but Platform and
   # APIClient beside it; the full project cannot show that, since every module
   # is present there.
