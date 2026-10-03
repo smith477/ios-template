@@ -42,8 +42,20 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Writes the scratch manifest. Deployment target, Swift version and the import
-# visibility check mirror `Project.swift`; keep them in step with it.
+# The settings every target shares, copied from Project.swift so the scratch
+# project builds the way the real one does.
+shared_settings="$(
+    grep -E '^let (deploymentTargets|destinations): ' Project.swift
+    awk '/^let baseSettings: /,/^\]/' Project.swift
+)"
+for name in deploymentTargets destinations baseSettings; do
+    if ! printf '%s\n' "$shared_settings" | grep -q "^let $name: "; then
+        echo "Project.swift no longer declares \`let $name\`; update $0 to match." >&2
+        exit 1
+    fi
+done
+
+# Writes the scratch manifest.
 write_manifest() {
     local feature="$1" has_tests="$2"
     local platform_targets="" platform_deps="" models="" test_target="" scheme_targets
@@ -64,10 +76,10 @@ write_manifest() {
     if [ "$has_tests" = yes ]; then
         test_target="        .target(
             name: \"${feature}Tests\",
-            destinations: [.iPhone, .iPad],
+            destinations: destinations,
             product: .unitTests,
             bundleId: \"copycheck.${feature}Tests\",
-            deploymentTargets: .iOS(\"26.0\"),
+            deploymentTargets: deploymentTargets,
             sources: [\"Modules/Features/$feature/Tests/**\"],
             dependencies: [.target(name: \"$feature\"), ${platform_deps}.external(name: \"APIClient\")]
         ),
@@ -78,13 +90,15 @@ write_manifest() {
     cat > Project.swift <<EOF
 import ProjectDescription
 
+${shared_settings}
+
 func target(_ name: String, at path: String, dependencies: [TargetDependency], coreDataModels: [CoreDataModel] = []) -> Target {
     .target(
         name: name,
-        destinations: [.iPhone, .iPad],
+        destinations: destinations,
         product: .staticFramework,
         bundleId: "copycheck.\(name)",
-        deploymentTargets: .iOS("26.0"),
+        deploymentTargets: deploymentTargets,
         sources: ["\(path)/Sources/**"],
         dependencies: dependencies,
         coreDataModels: coreDataModels
@@ -94,7 +108,7 @@ func target(_ name: String, at path: String, dependencies: [TargetDependency], c
 let project = Project(
     name: "FeatureCopy",
     options: .options(automaticSchemesOptions: .disabled),
-    settings: .settings(base: ["SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES"].swiftVersion("6.0")),
+    settings: .settings(base: baseSettings),
     targets: [
 ${platform_targets}        target(
             "$feature",
