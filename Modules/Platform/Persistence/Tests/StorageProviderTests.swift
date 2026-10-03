@@ -11,7 +11,10 @@ struct StorageProviderTests {
 
     @Test
     func inMemoryOpensAnInMemoryStore() throws {
-        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [bundle(holding: ["First"])])
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [scratch.bundle(holding: ["First"])])
 
         let store = try #require(provider.viewContext.persistentStoreCoordinator?.persistentStores.first)
         #expect(store.type == NSInMemoryStoreType)
@@ -19,9 +22,12 @@ struct StorageProviderTests {
 
     @Test
     func modelsFromTwoBundlesMergeIntoOneStore() throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
         let provider = try StorageProvider.inMemory(
             storeName: "Test",
-            modelBundles: [bundle(holding: ["First"]), bundle(holding: ["Second"])]
+            modelBundles: [scratch.bundle(holding: ["First"]), scratch.bundle(holding: ["Second"])]
         )
 
         let model = try #require(provider.viewContext.persistentStoreCoordinator?.managedObjectModel)
@@ -30,7 +36,10 @@ struct StorageProviderTests {
 
     @Test
     func aBundleWithoutAModelThrowsModelNotFound() throws {
-        let empty = try bundle(holding: [])
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let empty = try scratch.bundle(holding: [])
 
         let error = #expect(throws: StorageError.self) {
             try StorageProvider.inMemory(storeName: "Test", modelBundles: [empty])
@@ -45,7 +54,10 @@ struct StorageProviderTests {
 
     @Test
     func anEntityDefinedInTwoModelsThrowsModelConflict() throws {
-        let bundles = try [bundle(holding: ["First"]), bundle(holding: ["First"])]
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let bundles = try [scratch.bundle(holding: ["First"]), scratch.bundle(holding: ["First"])]
 
         let error = #expect(throws: StorageError.self) {
             try StorageProvider.inMemory(storeName: "Test", modelBundles: bundles)
@@ -62,8 +74,11 @@ struct StorageProviderTests {
     /// managed-object class belongs to.
     @Test
     func storesOverTheSameBundlesShareOneModel() throws {
-        let first = try bundle(holding: ["First"])
-        let second = try bundle(holding: ["Second"])
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let first = try scratch.bundle(holding: ["First"])
+        let second = try scratch.bundle(holding: ["Second"])
 
         let one = try StorageProvider.inMemory(storeName: "Test", modelBundles: [first, second])
         let other = try StorageProvider.inMemory(storeName: "Test", modelBundles: [second, first])
@@ -75,7 +90,10 @@ struct StorageProviderTests {
 
     @Test
     func performBackgroundReturnsTheBlocksValue() async throws {
-        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [bundle(holding: ["First"])])
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [scratch.bundle(holding: ["First"])])
 
         let value = try await provider.performBackground { _ in 42 }
 
@@ -84,22 +102,38 @@ struct StorageProviderTests {
 
     @Test
     func performBackgroundRethrowsTheBlocksError() async throws {
-        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [bundle(holding: ["First"])])
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+
+        let provider = try StorageProvider.inMemory(storeName: "Test", modelBundles: [scratch.bundle(holding: ["First"])])
 
         await #expect(throws: Failure()) {
             try await provider.performBackground { _ -> Int in throw Failure() }
         }
     }
 
-    /// A fresh bundle holding copies of the named test models, so each test picks
-    /// its own combination and none shares another's cached model by accident.
-    private func bundle(holding models: [String]) throws -> Bundle {
-        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        for name in models {
-            let source = try #require(Bundle.module.url(forResource: name, withExtension: "momd"))
-            try FileManager.default.copyItem(at: source, to: directory.appending(path: "\(name).momd"))
+    /// Throwaway bundles for one test, each holding copies of the named test
+    /// models, so no test shares another's cached model by accident. Removed when
+    /// the test ends: nothing asks the model cache for their paths again.
+    private struct Scratch {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+
+        init() throws {
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         }
-        return try #require(Bundle(url: directory))
+
+        func bundle(holding models: [String]) throws -> Bundle {
+            let directory = root.appending(path: UUID().uuidString)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            for name in models {
+                let source = try #require(Bundle.module.url(forResource: name, withExtension: "momd"))
+                try FileManager.default.copyItem(at: source, to: directory.appending(path: "\(name).momd"))
+            }
+            return try #require(Bundle(url: directory))
+        }
+
+        func remove() {
+            try? FileManager.default.removeItem(at: root)
+        }
     }
 }
