@@ -6,20 +6,20 @@ import Foundation
 // MARK: - ProductEntity
 
 @objc(ProductEntity)
-public class ProductEntity: NSManagedObject {
-    @NSManaged public var id: Int32
-    @NSManaged public var title: String
-    @NSManaged public var productDescription: String?
-    @NSManaged public var category: String?
-    @NSManaged public var price: NSDecimalNumber
-    @NSManaged public var brand: String?
-    @NSManaged public var thumbnail: String?
-    @NSManaged public var images: Set<ProductImagesEntity>
-    @NSManaged public var meta: MetaEntity?
-    @NSManaged public var tags: Set<ProductTagsEntity>
+final class ProductEntity: NSManagedObject {
+    @NSManaged var id: Int32
+    @NSManaged var title: String?
+    @NSManaged var productDescription: String?
+    @NSManaged var category: String?
+    @NSManaged var price: NSDecimalNumber
+    @NSManaged var brand: String?
+    @NSManaged var thumbnail: String?
+    @NSManaged var images: Set<ProductImagesEntity>
+    @NSManaged var meta: MetaEntity?
+    @NSManaged var tags: Set<ProductTagsEntity>
 }
 
-public extension ProductEntity {
+extension ProductEntity {
     @nonobjc
     class func fetchRequest() -> NSFetchRequest<ProductEntity> {
         NSFetchRequest<ProductEntity>(entityName: "ProductEntity")
@@ -64,7 +64,7 @@ extension ProductEntity {
     func toDomain() -> Product {
         Product(
             id: Int(id),
-            title: title,
+            title: title ?? "",
             description: productDescription ?? "",
             category: category ?? "",
             price: price as Decimal,
@@ -142,15 +142,15 @@ extension ProductEntity {
 // MARK: - MetaEntity
 
 @objc(MetaEntity)
-public class MetaEntity: NSManagedObject {
-    @NSManaged public var createdAt: Date?
-    @NSManaged public var updatedAt: Date?
-    @NSManaged public var product: ProductEntity?
+final class MetaEntity: NSManagedObject {
+    @NSManaged var createdAt: Date?
+    @NSManaged var updatedAt: Date?
+    @NSManaged var product: ProductEntity?
 }
 
 extension MetaEntity {
     @nonobjc
-    public class func fetchRequest() -> NSFetchRequest<MetaEntity> {
+    class func fetchRequest() -> NSFetchRequest<MetaEntity> {
         NSFetchRequest<MetaEntity>(entityName: "MetaEntity")
     }
 
@@ -162,12 +162,12 @@ extension MetaEntity {
 // MARK: - ProductImagesEntity
 
 @objc(ProductImagesEntity)
-public class ProductImagesEntity: NSManagedObject {
-    @NSManaged public var image: String?
-    @NSManaged public var product: ProductEntity?
+final class ProductImagesEntity: NSManagedObject {
+    @NSManaged var image: String?
+    @NSManaged var product: ProductEntity?
 }
 
-public extension ProductImagesEntity {
+extension ProductImagesEntity {
     @nonobjc
     class func fetchRequest() -> NSFetchRequest<ProductImagesEntity> {
         NSFetchRequest<ProductImagesEntity>(entityName: "ProductImagesEntity")
@@ -177,12 +177,12 @@ public extension ProductImagesEntity {
 // MARK: - ProductTagsEntity
 
 @objc(ProductTagsEntity)
-public class ProductTagsEntity: NSManagedObject {
-    @NSManaged public var tag: String?
-    @NSManaged public var product: ProductEntity?
+final class ProductTagsEntity: NSManagedObject {
+    @NSManaged var tag: String?
+    @NSManaged var product: ProductEntity?
 }
 
-public extension ProductTagsEntity {
+extension ProductTagsEntity {
     @nonobjc
     class func fetchRequest() -> NSFetchRequest<ProductTagsEntity> {
         NSFetchRequest<ProductTagsEntity>(entityName: "ProductTagsEntity")

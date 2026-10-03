@@ -24,8 +24,7 @@ and in CI.
 ## What goes in Platform
 
 A type moves into Platform once a *second* feature needs it, never in
-anticipation. Value types only. `User` moved there because Products' reviews and
-the Users feature both describe the same person.
+anticipation. Value types only.
 
 Existing Platform modules: `Identity` (the `User` value type), `AppKit`
 (`DateProvider`), `Persistence` (the Core Data stack). There is deliberately no
@@ -150,11 +149,14 @@ two features are at different maturity levels on purpose.
 `func getAll() async throws(StorageError) -> [Product]`,
 `func fetchProducts() async throws(APIError) -> [Product]`.
 
-**Core Data** lives in `Platform/Persistence`. The `.xcdatamodeld` ships in that
-module's resource bundle, so the model is loaded through
-`StorageProvider.modelBundle` (`.module`) — `Bundle.main` will not find it, and a
-project that gets this wrong crashes at launch. `StorageProvider.inMemory(...)` is
-the test factory. Model name is `ios_template`.
+**Core Data**: the stack is `StorageProvider` in `Platform/Persistence`; the
+models belong to the features. Products ships `Products.xcdatamodeld` in its own
+resource bundle and exposes it as `Products.modelBundle` (`.module`) — `Bundle.main`
+will not find it, and a project that gets this wrong crashes at launch. Users'
+entity is still in Persistence's `ios_template` model, `StorageProvider.modelBundle`.
+`AppContainer.modelBundles` lists the bundles, and `StorageProvider` merges them
+into one store named `App`. `StorageProvider.inMemory(storeName:modelBundles:)` is
+the test factory.
 
 **Networking** is the external `APIClient` package: an actor with
 `send<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(APIError) -> T`.

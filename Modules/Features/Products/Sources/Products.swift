@@ -4,6 +4,10 @@ import SwiftUI
 
 /// The feature's entry point; its repository, storage and client stay internal.
 public enum Products {
+    /// The bundle holding this feature's Core Data model, for the app to list in
+    /// its store. A resource bundle of its own, so `Bundle.main` will not find it.
+    public static var modelBundle: Bundle { .module }
+
     /// Builds the view model backing `ProductView`.
     ///
     /// - Parameter emit: Receives this feature's events, normally `AppRouter.handle`.
