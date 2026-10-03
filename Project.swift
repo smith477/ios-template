@@ -10,8 +10,8 @@ let displayName = "Template"
 let bundlePrefix = "dusan.kovacevic"
 let urlScheme = "template"
 
-// scripts/check-feature-copy.sh copies these three declarations into the scratch
-// project it builds each feature in; renaming one fails that script.
+// scripts/check-feature-copy.sh repeats these three settings in the scratch
+// project it builds each feature in; change them there too.
 let deploymentTargets: DeploymentTargets = .iOS("26.0")
 let destinations: Destinations = [.iPhone, .iPad]
 
