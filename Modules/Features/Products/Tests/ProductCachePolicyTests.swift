@@ -24,6 +24,12 @@ private final class CountingApiClient: ProductApiClient {
         count.withLock { $0 += 1 }
         return products
     }
+
+    func fetchProduct(id: Int) async throws(APIError) -> Product {
+        count.withLock { $0 += 1 }
+        guard let product = products.first(where: { $0.id == id }) else { throw .notFound }
+        return product
+    }
 }
 
 /// Counts row reads, so a test can tell how many times a request went to the
@@ -50,6 +56,10 @@ private final class CountingStorage: ProductStorage {
 
     func save(_ products: [Product]) async throws(StorageError) {
         try await base.save(products)
+    }
+
+    func upsert(_ product: Product) async throws(StorageError) {
+        try await base.upsert(product)
     }
 
     func delete(id: Int) async throws(StorageError) {

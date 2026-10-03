@@ -12,6 +12,8 @@ public enum CachePolicy: Sendable {
 
 public protocol ProductRepository: Sendable {
     func getProducts(policy: CachePolicy) async throws -> [Product]
+    /// `nil` when the API no longer has the product.
+    func getProduct(id: Int, policy: CachePolicy) async throws -> Product?
 }
 
 public extension ProductRepository {
@@ -19,5 +21,10 @@ public extension ProductRepository {
     /// immediately, and pull-to-refresh passes `.reload`.
     func getProducts() async throws -> [Product] {
         try await getProducts(policy: .cacheFirst(maxAge: .seconds(3600)))
+    }
+
+    /// The same hour as the list, measured from the list's last save.
+    func getProduct(id: Int) async throws -> Product? {
+        try await getProduct(id: id, policy: .cacheFirst(maxAge: .seconds(3600)))
     }
 }
