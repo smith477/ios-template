@@ -208,7 +208,7 @@ reviewed on its own.
    scripts/check-feature-copy.sh                                   # if a feature's dependencies changed; no simulator
    git grep -n -e 'dusan\.kovacevic' -e 'ios-template' -e 'template://' -e '"template"' -e TemplateApp \
      -- ':!.github' ':!.claude' ':!Project.swift' ':!Workspace.swift' ':!Tuist/Package.swift' ':!README.md' ':!scripts'
-     # CI's leftover-identity check, minus the files rename.sh rewrites; must print nothing
+     # the leftover-identity check, minus the files rename.sh rewrites; must print nothing
    ```
 
    A phase is not handed over uncompiled.

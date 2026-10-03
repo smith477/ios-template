@@ -78,6 +78,40 @@ public final class StorageProvider: Sendable {
         try StorageProvider(storeName: storeName, modelBundles: modelBundles, inMemory: true)
     }
 
+    /// Opens a store that holds only what the app can fetch again, deleting it and
+    /// starting empty when it will not open.
+    ///
+    /// For a store holding anything the user cannot get back, use
+    /// `init(storeName:modelBundles:inMemory:)` and plan each migration instead.
+    ///
+    /// - Throws: As `init(storeName:modelBundles:inMemory:)`, but
+    ///   `.storeLoadFailed` only when the empty store will not open either.
+    public static func cache(storeName: String, modelBundles: [Bundle]) throws(StorageError) -> StorageProvider {
+        do {
+            return try StorageProvider(storeName: storeName, modelBundles: modelBundles)
+        } catch let .storeLoadFailed(error) {
+            // Trapping instead would crash every launch until the app is reinstalled.
+            log.error("Store would not open; deleted it to start empty", error: error)
+            try destroyStore(named: storeName, model: model(merging: modelBundles))
+            return try StorageProvider(storeName: storeName, modelBundles: modelBundles)
+        } catch {
+            throw error
+        }
+    }
+
+    private static func destroyStore(named storeName: String, model: NSManagedObjectModel) throws(StorageError) {
+        // The container's own description, so the path is the one `init` opened.
+        let container = NSPersistentContainer(name: storeName, managedObjectModel: model)
+        guard let url = container.persistentStoreDescriptions.first?.url else {
+            fatalError("NSPersistentContainer gave the store \(storeName) no URL")
+        }
+        do {
+            try container.persistentStoreCoordinator.destroyPersistentStore(at: url, type: .sqlite)
+        } catch {
+            throw .storeLoadFailed(error)
+        }
+    }
+
     private static func model(merging bundles: [Bundle]) throws(StorageError) -> NSManagedObjectModel {
         try models.withLock { models throws(StorageError) -> NSManagedObjectModel in
             let key = Set(bundles.map(\.bundleURL))

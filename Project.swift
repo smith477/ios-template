@@ -50,6 +50,9 @@ func feature(
         bundleId: "\(bundlePrefix).feature.\(name.lowercased())",
         deploymentTargets: deploymentTargets,
         sources: ["Modules/Features/\(name)/Sources/**"],
+        // The feature's own strings, in its resource bundle beside its model, so
+        // a copied feature brings its translations.
+        resources: ["Modules/Features/\(name)/Sources/**/*.xcstrings"],
         dependencies: dependencies,
         coreDataModels: coreDataModels
     )

@@ -63,15 +63,13 @@ writing anything if a file no longer looks the way it expects. After it:
 A custom URL scheme is first-come on a device, so pick one you own; for
 links that prove they belong to your app, Apple recommends universal links.
 
-CI renames a copy to Acme on every run, so the script is known to work against the
-current code.
-
 ## Commands
 
 ```bash
 mise exec -- tuist generate                           # regenerate the project after changing Project.swift
-mise exec -- tuist build                              # build
 mise exec -- tuist test App --device "iPhone 18 Pro"  # run tests
+xcodebuild build -workspace *.xcworkspace -scheme App \
+    -destination 'generic/platform=iOS Simulator' -quiet  # build
 ```
 
 `--device` is required: without it `tuist test` uses whichever simulator is
@@ -95,10 +93,15 @@ left cell links to the code or section behind it.
 | Concern | The template provides | You own |
 | --- | --- | --- |
 | Environments | `API_BASE_URL` per build configuration in [`Project.swift`](Project.swift); see [Configuration](#configuration) | Your backend's hosts, and any configuration beyond Debug and Release |
+| Local store | [`StorageProvider.cache`](Modules/Platform/Persistence/Sources/StorageProvider.swift) deletes a store that will not open and starts empty, since every row comes from the network; see [architecture](docs/agents/architecture.md) | A planned migration, once a feature keeps data the user cannot fetch again |
 | Privacy manifest | [`App/PrivacyInfo.xcprivacy`](App/PrivacyInfo.xcprivacy); see [Make it yours](#make-it-yours) | Keeping it true as you add SDKs, required-reason APIs or user data |
 | Logging | [`Log`](Modules/Platform/Diagnostics/Sources/Log.swift) in `Diagnostics`, private by construction; see [Logging](docs/agents/conventions.md#logging) | Logging in your own features, and shipping logs off the device |
 | Tests | In-memory stores ([`StorageProvider`](Modules/Platform/Persistence/Sources/StorageProvider.swift)), an injected clock ([`DateProvider`](Modules/Features/Products/Sources/Domain/DateProvider.swift)) and a stubbed network ([`StubURLProtocol`](App/Debug/StubURLProtocol.swift)); see [testing](docs/agents/testing.md) | Tests for your own features, on the same seams |
-| Identity | [`scripts/rename.sh`](scripts/rename.sh), run by CI on every change; see [Make it yours](#make-it-yours) | The name, bundle prefix, and a URL scheme you own or universal links |
+| Previews | View-model initialisers whose `emit` defaults to a no-op, so a preview needs no navigation wiring; no `#Preview` yet | `#Preview`s for your own screens |
+| Identity | [`scripts/rename.sh`](scripts/rename.sh), which stops rather than half-renaming; see [Make it yours](#make-it-yours) | The name, bundle prefix, and a URL scheme you own or universal links |
+| Localization | A [`Localizable.xcstrings`](Modules/Features/Products/Sources/Localizable.xcstrings) per feature, in English, read from the feature's own bundle and enforced by lint; see [Localization](docs/agents/conventions.md#localization) | The languages you ship, and a catalog for the app's own text |
+| Release build | CI tests Debug only; [AGENTS.md](AGENTS.md) has the command for a Release build | A Release build or archive in your deploy pipeline, since the stub network is compiled out of Release |
+| Shipping | Nothing: no signing, versioning or distribution is set up | Signing, version and build numbers, and a path to TestFlight and the App Store |
 | Analytics | No SDK. Every feature event reaches a `handle(_:)` overload on [`AppRouter`](App/Router/AppRouter.swift), the one place to send them from | The SDK, and which events are worth tracking |
 | Crash reporting | Nothing: no reporter is chosen for you, and `Log` stays on the device | A crash reporter, declared in the privacy manifest |
 | Images | [`ProductImage`](Modules/Features/Products/Sources/Presentation/ProductImage.swift), over `AsyncImage`, which caches only in `URLSession`'s small default cache | An image cache, once lists grow long |

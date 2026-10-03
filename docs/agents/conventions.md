@@ -152,6 +152,24 @@ Styling is stock SwiftUI plus iOS 26 APIs — `.glassEffect(.regular.interactive
 `.backgroundExtensionEffect()`, `.tabBarMinimizeBehavior(.onScrollDown)`,
 `ContentUnavailableView`, `LabeledContent`, `.foregroundStyle(.secondary)`.
 
+## Localization
+
+A feature's user-facing text lives in its own `Sources/Localizable.xcstrings`,
+which the `feature(...)` helper in `Project.swift` puts in the feature's resource
+bundle. A literal passed to SwiftUI is looked up in the app's bundle, which never
+holds a feature's strings, so a feature resolves each string itself:
+
+```swift
+ContentUnavailableView(String(localized: "Not found", bundle: .module), systemImage: "questionmark")
+```
+
+Add the key to the feature's catalog alongside the code; translations go in the
+same file. SwiftLint's `feature_strings_from_module` rule makes a literal in
+`Text`, `Label`, `Button` and the other titled views an error inside a feature.
+Text that is data rather than copy, such as a product's title, passes as a
+`String` variable and needs nothing. The app target's own text resolves in the
+main bundle as SwiftUI expects.
+
 ## Concurrency
 
 Swift 6 language mode, strict checking. Domain models and protocols are `Sendable`.

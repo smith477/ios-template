@@ -22,8 +22,8 @@ the ceremony costs more than it returns.
 `tuist inspect dependencies --only implicit` is what catches a violation, locally
 and in CI. `scripts/check-feature-copy.sh` proves the result: it builds each
 feature, with its tests, in a scratch project holding nothing but the Platform
-modules and `APIClient`, and fails if the feature needs anything else. CI runs it,
-and it is worth running locally after changing a feature's dependencies.
+modules and `APIClient`, and fails if the feature needs anything else. CI does not
+run it; run it locally after changing a feature's dependencies.
 
 ## What goes in Platform
 
@@ -42,7 +42,8 @@ shape, deliberately simpler — copy Products when the new feature needs caching
 a detail screen, Users when it does not.
 
 Two files sit at the module root, plus `<Feature>.xcdatamodeld` when the feature
-persists anything (see Core Data below):
+persists anything (see Core Data below) and `Localizable.xcstrings` when it shows
+text (see Localization in `conventions.md`):
 
 **`<Feature>.swift`** — a `public enum` namespace that is the feature's *only*
 public factory. The repository, storage and client stay internal:
@@ -189,9 +190,15 @@ rename with a renaming ID. The store migrates itself on the next launch; the old
 version stays in the bundle beside the new one. PersistenceTests proves this on the
 simulator: a store written under one version, merged with a second model, opens
 under the next with its rows. During development, deleting the
-app resets the store instead: it is a cache, so the next load refetches. A change
-lightweight migration cannot infer fails to open the store, and `AppContainer.live()`
-traps.
+app resets the store instead: it is a cache, so the next load refetches.
+
+**A store that will not open** — a change lightweight migration cannot infer, or a
+corrupt file — is deleted and opened again empty, because `AppContainer.live()`
+opens it with `StorageProvider.cache(storeName:modelBundles:)`; the next load
+refetches. That is right only while every row can be fetched again. A feature that
+keeps something the user cannot get back, such as a draft, needs the throwing
+`StorageProvider(storeName:modelBundles:)` and a planned migration instead, and
+changing that is a decision for the owner.
 
 **Networking** is the external `APIClient` package: an actor with
 `send<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(APIError) -> T`.

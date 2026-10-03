@@ -19,7 +19,7 @@ public struct ProductDetailView: View {
             case let .loaded(product):
                 detail(product)
             case .notFound:
-                ContentUnavailableView("Not found", systemImage: "questionmark")
+                ContentUnavailableView(String(localized: "Not found", bundle: .module), systemImage: "questionmark")
             case let .error(error):
                 Text(error.localizedDescription)
             }
@@ -67,7 +67,7 @@ public struct ProductDetailView: View {
             viewModel.didTapSeller()
         } label: {
             HStack {
-                Label("Seller", systemImage: "person.crop.circle")
+                Label(String(localized: "Seller", bundle: .module), systemImage: "person.crop.circle")
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption)

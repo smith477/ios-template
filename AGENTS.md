@@ -43,7 +43,8 @@ without asking first.
 
 ```bash
 mise install && mise exec -- tuist install && mise exec -- tuist generate
-mise exec -- tuist build
+xcodebuild build -workspace *.xcworkspace -scheme App -destination 'generic/platform=iOS Simulator' -quiet
+xcodebuild build -workspace *.xcworkspace -scheme App -configuration Release -destination 'generic/platform=iOS Simulator' -quiet
 mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"
 mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"
 mise exec -- tuist inspect dependencies --only implicit

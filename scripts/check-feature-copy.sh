@@ -42,8 +42,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Writes the scratch manifest. Deployment target, Swift version and the import
-# visibility check mirror `Project.swift`; keep them in step with it.
+# Writes the scratch manifest. Deployment target, Swift version, the import
+# visibility check and the string catalogs mirror `Project.swift`; keep them in
+# step with it.
 write_manifest() {
     local feature="$1" has_tests="$2"
     local platform_targets="" platform_deps="" models="" test_target="" scheme_targets
@@ -93,6 +94,7 @@ func target(_ name: String, at path: String, dependencies: [TargetDependency], c
         bundleId: "copycheck.\(name)",
         deploymentTargets: .iOS("26.0"),
         sources: ["\(path)/Sources/**"],
+        resources: ["\(path)/Sources/**/*.xcstrings"],
         dependencies: dependencies,
         coreDataModels: coreDataModels
     )
