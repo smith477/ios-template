@@ -12,104 +12,150 @@
     /// `product.id % 30 + 1`, so products 1–3 sell through users 2–4. Image URLs
     /// are empty so `ProductImage` draws its placeholder without a network request.
     nonisolated enum StubFixtures {
+        /// What `/products` serves: products 1–3. Composed from the same bodies
+        /// `/products/{id}` serves, so the list and a detail cannot drift apart.
         static let products = """
+        { "products": [\([widget, gadget, gizmo].joined(separator: ","))] }
+        """
+
+        /// What `/products/{id}` serves, by id. Product 50 is in no list: it stands
+        /// in for a product past the API's first page, reachable only by id, which
+        /// is what `template://products/50` exercises. Its seller, user 21, is not a
+        /// fixture, so nothing taps it.
+        static let product: [Int: String] = [1: widget, 2: gadget, 3: gizmo, 50: fifty]
+
+        private static let widget = """
         {
-          "products": [
+          "id": 1,
+          "title": "Stub Widget",
+          "description": "A widget served by the stub network.",
+          "category": "stubs",
+          "price": 9.99,
+          "discountPercentage": 10.48,
+          "rating": 4.5,
+          "stock": 99,
+          "tags": ["stubs", "widgets"],
+          "brand": "Stubco",
+          "sku": "STB-WID-001",
+          "weight": 4,
+          "dimensions": { "width": 15.14, "height": 13.08, "depth": 22.99 },
+          "warrantyInformation": "1 week warranty",
+          "shippingInformation": "Ships in 3-5 business days",
+          "availabilityStatus": "In Stock",
+          "reviews": [
             {
-              "id": 1,
-              "title": "Stub Widget",
-              "description": "A widget served by the stub network.",
-              "category": "stubs",
-              "price": 9.99,
-              "discountPercentage": 10.48,
-              "rating": 4.5,
-              "stock": 99,
-              "tags": ["stubs", "widgets"],
-              "brand": "Stubco",
-              "sku": "STB-WID-001",
-              "weight": 4,
-              "dimensions": { "width": 15.14, "height": 13.08, "depth": 22.99 },
-              "warrantyInformation": "1 week warranty",
-              "shippingInformation": "Ships in 3-5 business days",
-              "availabilityStatus": "In Stock",
-              "reviews": [
-                {
-                  "rating": 5,
-                  "comment": "Highly impressed!",
-                  "date": "2025-04-30T09:41:02.053Z",
-                  "reviewerName": "Ray Viewer",
-                  "reviewerEmail": "ray.viewer@stub.invalid"
-                }
-              ],
-              "returnPolicy": "No return policy",
-              "minimumOrderQuantity": 1,
-              "meta": {
-                "createdAt": "2025-10-09T14:47:01.588Z",
-                "updatedAt": "2026-05-23T11:27:41.868Z",
-                "barcode": "5784719087687",
-                "qrCode": ""
-              },
-              "thumbnail": "",
-              "images": []
-            },
-            {
-              "id": 2,
-              "title": "Stub Gadget",
-              "description": "A gadget served by the stub network.",
-              "category": "stubs",
-              "price": 24.50,
-              "discountPercentage": 0,
-              "rating": 3.8,
-              "stock": 12,
-              "tags": ["stubs", "gadgets"],
-              "sku": "STB-GAD-002",
-              "weight": 2,
-              "dimensions": { "width": 8.5, "height": 3.2, "depth": 12.0 },
-              "warrantyInformation": "No warranty",
-              "shippingInformation": "Ships overnight",
-              "availabilityStatus": "Low Stock",
-              "reviews": [],
-              "returnPolicy": "30 days return policy",
-              "minimumOrderQuantity": 2,
-              "meta": {
-                "createdAt": "2025-10-09T14:47:01.588Z",
-                "updatedAt": "2026-05-23T11:27:41.868Z",
-                "barcode": "5784719087694",
-                "qrCode": ""
-              },
-              "thumbnail": "",
-              "images": []
-            },
-            {
-              "id": 3,
-              "title": "Stub Gizmo",
-              "description": "A gizmo served by the stub network.",
-              "category": "stubs",
-              "price": 120,
-              "discountPercentage": 5.5,
-              "rating": 4.1,
-              "stock": 0,
-              "tags": [],
-              "brand": "Stubco",
-              "sku": "STB-GIZ-003",
-              "weight": 9,
-              "dimensions": { "width": 30.0, "height": 20.0, "depth": 10.0 },
-              "warrantyInformation": "2 year warranty",
-              "shippingInformation": "Ships in 1 week",
-              "availabilityStatus": "Out of Stock",
-              "reviews": [],
-              "returnPolicy": "No return policy",
-              "minimumOrderQuantity": 1,
-              "meta": {
-                "createdAt": "2025-10-09T14:47:01.588Z",
-                "updatedAt": "2026-05-23T11:27:41.868Z",
-                "barcode": "5784719087700",
-                "qrCode": ""
-              },
-              "thumbnail": "",
-              "images": []
+              "rating": 5,
+              "comment": "Highly impressed!",
+              "date": "2025-04-30T09:41:02.053Z",
+              "reviewerName": "Ray Viewer",
+              "reviewerEmail": "ray.viewer@stub.invalid"
             }
-          ]
+          ],
+          "returnPolicy": "No return policy",
+          "minimumOrderQuantity": 1,
+          "meta": {
+            "createdAt": "2025-10-09T14:47:01.588Z",
+            "updatedAt": "2026-05-23T11:27:41.868Z",
+            "barcode": "5784719087687",
+            "qrCode": ""
+          },
+          "thumbnail": "",
+          "images": []
+        }
+        """
+
+        private static let gadget = """
+        {
+          "id": 2,
+          "title": "Stub Gadget",
+          "description": "A gadget served by the stub network.",
+          "category": "stubs",
+          "price": 24.50,
+          "discountPercentage": 0,
+          "rating": 3.8,
+          "stock": 12,
+          "tags": ["stubs", "gadgets"],
+          "sku": "STB-GAD-002",
+          "weight": 2,
+          "dimensions": { "width": 8.5, "height": 3.2, "depth": 12.0 },
+          "warrantyInformation": "No warranty",
+          "shippingInformation": "Ships overnight",
+          "availabilityStatus": "Low Stock",
+          "reviews": [],
+          "returnPolicy": "30 days return policy",
+          "minimumOrderQuantity": 2,
+          "meta": {
+            "createdAt": "2025-10-09T14:47:01.588Z",
+            "updatedAt": "2026-05-23T11:27:41.868Z",
+            "barcode": "5784719087694",
+            "qrCode": ""
+          },
+          "thumbnail": "",
+          "images": []
+        }
+        """
+
+        private static let gizmo = """
+        {
+          "id": 3,
+          "title": "Stub Gizmo",
+          "description": "A gizmo served by the stub network.",
+          "category": "stubs",
+          "price": 120,
+          "discountPercentage": 5.5,
+          "rating": 4.1,
+          "stock": 0,
+          "tags": [],
+          "brand": "Stubco",
+          "sku": "STB-GIZ-003",
+          "weight": 9,
+          "dimensions": { "width": 30.0, "height": 20.0, "depth": 10.0 },
+          "warrantyInformation": "2 year warranty",
+          "shippingInformation": "Ships in 1 week",
+          "availabilityStatus": "Out of Stock",
+          "reviews": [],
+          "returnPolicy": "No return policy",
+          "minimumOrderQuantity": 1,
+          "meta": {
+            "createdAt": "2025-10-09T14:47:01.588Z",
+            "updatedAt": "2026-05-23T11:27:41.868Z",
+            "barcode": "5784719087700",
+            "qrCode": ""
+          },
+          "thumbnail": "",
+          "images": []
+        }
+        """
+
+        private static let fifty = """
+        {
+          "id": 50,
+          "title": "Stub Fifty",
+          "description": "A product past the first page, served only by id.",
+          "category": "stubs",
+          "price": 120,
+          "discountPercentage": 5.5,
+          "rating": 4.1,
+          "stock": 0,
+          "tags": [],
+          "brand": "Stubco",
+          "sku": "STB-FIF-050",
+          "weight": 9,
+          "dimensions": { "width": 30.0, "height": 20.0, "depth": 10.0 },
+          "warrantyInformation": "2 year warranty",
+          "shippingInformation": "Ships in 1 week",
+          "availabilityStatus": "Out of Stock",
+          "reviews": [],
+          "returnPolicy": "No return policy",
+          "minimumOrderQuantity": 1,
+          "meta": {
+            "createdAt": "2025-10-09T14:47:01.588Z",
+            "updatedAt": "2026-05-23T11:27:41.868Z",
+            "barcode": "5784719087750",
+            "qrCode": ""
+          },
+          "thumbnail": "",
+          "images": []
         }
         """
 
