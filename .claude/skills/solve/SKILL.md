@@ -68,7 +68,10 @@ this one in a worktree, so neither can build on the other's uncommitted edits.
    and `tuist generate`.
 
 4. Surface anything ambiguous as a candidate grilling question, but **do not ask
-   yet**. Facts come from the code and the docs, never from the owner.
+   yet**. Facts come from the code and the docs, never from the owner. When the
+   work writes a rule and also builds the example that shows it, check the example
+   against the rule now; a mismatch is a grilling question, not a build-time
+   surprise.
 
 5. Name Phase 2 and stop.
 
@@ -86,7 +89,9 @@ this one in a worktree, so neither can build on the other's uncommitted edits.
 3. If the working tree is dirty, **stop and ask**. Do not stash or discard anything
    on your own initiative.
 
-4. Confirm with `git branch --show-current` and `git status`.
+4. Confirm with `git branch --show-current`, `git status` and `git log -1 --oneline`.
+   The commit `git log` prints is the base the plan names; never take it from the
+   session's opening git snapshot, which predates the fetch.
 
 5. Creating a branch is not a commit and needs no approval. Do not push it yet:
    the first phase's commit pushes it.
@@ -203,9 +208,12 @@ reviewed on its own.
 
    A phase is not handed over uncompiled.
 
-   Tests, and anything else on the simulator, are the owner's to run. Hand over
-   each command in its own `bash` block with what a pass looks like, and wait for
-   their result before calling the phase verified:
+   Tests, and anything else on the simulator, are the owner's to run. Chain the
+   phase's commands into one line with `&&`, put it on the owner's clipboard with
+   `printf '%s' '<command>' | pbcopy`, and show the same line in chat. The owner
+   types `!`, pastes and presses Enter, so the output lands in this session. Say
+   what a pass looks like, and wait for the result before calling the phase
+   verified:
 
    ```bash
    mise exec -- tuist test <Bundle> --no-selective-testing --device "iPhone 18 Pro"
