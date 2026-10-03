@@ -43,6 +43,45 @@ Comments are hand-wrapped at a natural break, which is why SwiftFormat's
 
 `todo` is deliberately not a SwiftLint violation — a TODO is a note, not a defect.
 
+## File size and responsibility
+
+A file holds one primary type, plus the small private helpers and extensions that
+serve only that type. A view model's state enum sits beside it, and a view's
+private subviews stay in the view's file.
+
+Split a file when a second type in it has its own reason to change, or when a size
+limit fires. Do not split a cohesive type into arbitrary pieces just to get under a
+limit; extensions spread across files to dodge `type_body_length` are the
+over-splitting the limits exist to prevent.
+
+The limits live in `.swiftlint.yml`, warning / error:
+
+| Rule | Sources | Tests |
+|---|---|---|
+| `file_length` (comment-only lines not counted) | 300 / 450 | 250 / 350 |
+| `type_body_length` | 200 / 300 | 200 / 300 |
+| `function_body_length` | 50 / 80 | 50 / 80 |
+
+CI lints with `--strict`, so the warning value is the one that blocks. They are
+defaults: a project that outgrows one changes it in the config.
+
+When a type that does one job really is that big, keep it whole and disable the
+limit with the reason on the line above, then say so in the PR:
+
+```swift
+@MainActor
+@Observable
+// One state machine; splitting it would scatter the transitions.
+// swiftlint:disable:next type_body_length
+public final class CheckoutViewModel {
+```
+
+The `disable:next` goes directly above the `struct`, `class` or `func` line,
+*below* any attributes: the violation is reported on the keyword's line, so above
+the attributes it silences nothing. For `file_length`, put
+`// swiftlint:disable file_length` between the file-name line and the imports,
+with the reason on the line above it. Never disable a limit without a reason.
+
 ## Access control
 
 Explicit and minimal. `public` on the feature entry-point enum, routes, events,

@@ -71,19 +71,25 @@ a `featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a
 
 ## Test doubles
 
-Doubles are `private` types declared in the same file as the test that uses them,
-not shared fixtures:
+A test file covers one subject, and its suite is what the file is for. A double
+that one file uses is a `private` type in that file:
 
 ```swift
-/// Counts calls so a test can tell a cache hit from a refetch.
-private final class CountingApiClient: ProductApiClient {
+/// Serves its products by id, answers 404 for any other.
+private final class ByIdApiClient: ProductApiClient {
     private let count = Mutex(0)
     ...
 }
 ```
 
-Shared *factories* are the exception, and go in a file with no `@Test` in it —
-`Modules/Features/Products/Tests/ProductStorageFactory.swift` exposes a free
+When a second file needs the same double, fixture or factory, move it to a
+`Support/` folder in the bundle's test directory (`Tests/Support/` in a module,
+`AppTests/Support/` for the app) instead of copying it: one type per file, named
+after the type, internal rather than `private`, and no `@Test` in any of them. A
+double moves when a second file needs it, not in anticipation. The bundle's source
+glob already covers the folder, so it needs no `Project.swift` change.
+
+Shared factories follow the same rule. `ProductStorageFactory.swift` exposes a free
 `makeStorage(dateProvider:)` returning storage over an in-memory store and a
 `ProductListRecord(suiteName: UUID().uuidString)`, so neither the rows nor the
 list record of one test reach the next.

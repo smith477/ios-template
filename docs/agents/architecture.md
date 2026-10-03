@@ -139,7 +139,9 @@ stored timestamp compared against an injected `DateProvider` — the timestamp i
 real, the clock is fakeable. The timestamp lives in `ProductListRecord`, in
 `UserDefaults`, beside the ids the list last returned: the store keeps every
 product it has fetched, and `getAll()` returns only the list's rows, so a product
-cached for its own screen never joins the list.
+cached for its own screen never joins the list. The ids exist only because by-id
+loads write rows the list must not show; a feature without by-id loads stores the
+plain timestamp alone.
 
 `UserDataRepository` is deliberately simpler: cache-if-non-empty, no policy. The
 two features are at different maturity levels on purpose.
