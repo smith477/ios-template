@@ -22,9 +22,12 @@ public final class StorageProvider: Sendable {
 
     /// Opens the store `storeName` over the merged models of `modelBundles`.
     ///
+    /// Every store in a process must use the same `modelBundles`, in any order.
+    ///
     /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelUnreadable`
     ///   when one will not load, `.modelConflict` when two models define the same
-    ///   entity, `.storeLoadFailed` when the store cannot open.
+    ///   entity, `.conflictingBundleLists` when a bundle is already merged from a
+    ///   different list, `.storeLoadFailed` when the store cannot open.
     public init(storeName: String, modelBundles: [Bundle], inMemory: Bool = false) throws(StorageError) {
         let model = try Self.model(merging: modelBundles)
         persistentContainer = NSPersistentContainer(name: storeName, managedObjectModel: model)
@@ -71,6 +74,14 @@ public final class StorageProvider: Sendable {
             let key = Set(bundles.map(\.bundleURL))
             if let model = models[key] {
                 return model
+            }
+
+            // A second, different list sharing a bundle would build a second model
+            // claiming the same classes, which only ever shows up as a console
+            // warning and ambiguous inserts.
+            if let overlap = models.keys.first(where: { !$0.isDisjoint(with: key) }) {
+                let shared = overlap.intersection(key).map(\.lastPathComponent).sorted()
+                throw .conflictingBundleLists(shared: shared)
             }
 
             // Each bundle's own model must be gone before the merged one is used:

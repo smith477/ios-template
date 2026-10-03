@@ -8,6 +8,7 @@ public enum StorageError: Error, Sendable {
     case modelNotFound(bundle: String)
     case modelUnreadable(model: String, bundle: String)
     case modelConflict(entity: String)
+    case conflictingBundleLists(shared: [String])
     case storeLoadFailed(Error)
     case saveFailed(Error)
     case fetchFailed(Error)
@@ -25,6 +26,8 @@ extension StorageError: LocalizedError {
             "Core Data model '\(model)' in bundle '\(bundle)' could not be loaded"
         case let .modelConflict(entity):
             "Two Core Data models define the entity '\(entity)'"
+        case let .conflictingBundleLists(shared):
+            "Bundles \(shared) are already merged into a model from a different list"
         case let .storeLoadFailed(error):
             "Failed to open the store: \(error.localizedDescription)"
         case let .saveFailed(error):
