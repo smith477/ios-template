@@ -95,3 +95,11 @@ custom_rules:
       - string
     message: "Make the conformance provable instead: store a Sendable value, or guard state in a Mutex."
     severity: error
+  no_history_in_comments:
+    name: "No history in comments"
+    regex: '(?i)\b(used to|was really|commit [0-9a-f]{7,40})\b'
+    match_kinds:
+      - comment
+      - doccomment
+    message: "Comments describe the code as it is now; history belongs in git log and the PR."
+    severity: error
