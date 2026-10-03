@@ -222,7 +222,8 @@ a module. Nothing is written by hand, so a copied or renamed module needs no edi
 SwiftLint's `log_through_diagnostics` custom rule makes either an error. `os`
 applies privacy only where a message is written, so `Log` takes no message string.
 Event text is a `StaticString` and values are `Int`s, both public; an error logs its
-domain and code publicly and its description privately. Nothing a user or server
+domain and code publicly, and those of the error it wraps (as `StorageError` wraps
+Core Data's), and its description privately. Nothing a user or server
 wrote reaches the log in the clear.
 
 Pick the level by what the user experiences:

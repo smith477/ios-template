@@ -32,10 +32,11 @@ final class ProductDataRepository: ProductRepository {
             }
         }
 
+        // Only the fetch is caught: a failed save was logged by storage already, and is
+        // not a failed refresh.
+        let products: [Product]
         do {
-            let products = try await apiClient.fetchProducts()
-            try await storage.save(products)
-            Self.log.debug("Fetched products", ["count": products.count])
+            products = try await apiClient.fetchProducts()
         } catch {
             // A failed refresh falls back to the cache, and only throws when the cache is
             // empty.
@@ -47,6 +48,8 @@ final class ProductDataRepository: ProductRepository {
             Self.log.notice("Products refresh failed; served the cache", error: error, ["count": cached.count])
             return cached
         }
+        try await storage.save(products)
+        Self.log.debug("Fetched products", ["count": products.count])
         return try await storage.getAll()
     }
 
