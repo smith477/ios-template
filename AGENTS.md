@@ -15,8 +15,8 @@ edited in `Project.swift`, then regenerated with `tuist generate`. Anything
 changed in Xcode's project editor is lost.
 
 **A feature may never import another feature.** App may import every feature and
-platform module. A feature may import platform modules and `APIClient`. Platform
-imports nothing from this project. This is the boundary that keeps a feature
+platform module. A feature may import platform modules and `APIClient`. A platform
+module may import another platform module, never a feature. This is the boundary that keeps a feature
 copyable into another project, which is what the template exists for.
 `tuist inspect dependencies --only implicit` catches a violation.
 

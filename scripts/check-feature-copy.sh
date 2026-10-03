@@ -49,7 +49,14 @@ write_manifest() {
     local platform_targets="" platform_deps="" models="" test_target="" scheme_targets
 
     for module in "${platform_modules[@]}"; do
-        platform_targets+="        target(\"$module\", at: \"Modules/Platform/$module\", dependencies: []),
+        # A Platform module may import another; its imports are its dependencies.
+        local module_deps=""
+        for other in "${platform_modules[@]}"; do
+            if [ "$other" != "$module" ] && grep -rqx "import $other" "Modules/Platform/$module/Sources"; then
+                module_deps+=".target(name: \"$other\"), "
+            fi
+        done
+        platform_targets+="        target(\"$module\", at: \"Modules/Platform/$module\", dependencies: [${module_deps}]),
 "
         platform_deps+=".target(name: \"$module\"), "
     done

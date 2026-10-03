@@ -12,7 +12,8 @@ Enforced by the target dependencies in `Project.swift`:
               A feature may never import another feature — that is the one
               boundary worth a target, because it is what keeps a feature
               copyable into another project.
-    Platform  imports nothing from this project. It knows no feature.
+    Platform  may import other Platform modules, nothing else from this
+              project. It knows no feature.
 
 Domain, Data and Presentation are **folders inside a feature, not targets**. Split
 a feature into layer targets only once it is large enough to earn them; until then
@@ -26,10 +27,11 @@ and it is worth running locally after changing a feature's dependencies.
 
 ## What goes in Platform
 
-A type moves into Platform once a *second* feature needs it, never in
+A type moves into Platform once a *second* module needs it, never in
 anticipation. Value types only.
 
-The one Platform module is `Persistence`, the Core Data stack. There is
+The Platform modules are `Persistence`, the Core Data stack, and `Diagnostics`,
+the `Log` every module writes through; Persistence imports Diagnostics. There is
 deliberately no design-system module — shared UI would become one on the same
 second-consumer rule, not before.
 

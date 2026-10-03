@@ -1,7 +1,8 @@
 import ProjectDescription
 
 // App may import any module. A feature may import Platform modules and APIClient,
-// never another feature. Platform imports nothing here. See docs/agents/architecture.md.
+// never another feature. Platform may import other Platform modules, never a
+// feature. See docs/agents/architecture.md.
 
 // The app's identity, rewritten by `scripts/rename.sh`. Every name, bundle ID and
 // URL scheme below derives from these lines.
@@ -93,7 +94,8 @@ let project = Project(
     options: .options(automaticSchemesOptions: .disabled),
     settings: .settings(base: baseSettings),
     targets: [
-        platform("Persistence"),
+        platform("Diagnostics"),
+        platform("Persistence", dependencies: [.target(name: "Diagnostics")]),
 
         feature(
             "Products",
