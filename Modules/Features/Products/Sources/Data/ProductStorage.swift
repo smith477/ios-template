@@ -1,6 +1,5 @@
 // ProductStorage.swift
 
-import AppKit
 import CoreData
 import Foundation
 import Persistence

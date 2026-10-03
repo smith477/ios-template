@@ -1,6 +1,5 @@
 // ProductCachePolicyTests.swift
 
-import AppKit
 import Foundation
 import Testing
 

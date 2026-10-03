@@ -1,6 +1,5 @@
 // ProductStorageFactory.swift
 
-import AppKit
 import Foundation
 import Persistence
 

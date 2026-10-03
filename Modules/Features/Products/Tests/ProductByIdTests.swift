@@ -1,7 +1,6 @@
 // ProductByIdTests.swift
 
 import APIClient
-import AppKit
 import Foundation
 import Persistence
 import Synchronization
