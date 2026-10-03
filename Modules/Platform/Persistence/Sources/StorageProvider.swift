@@ -22,9 +22,9 @@ public final class StorageProvider: Sendable {
 
     /// Opens the store `storeName` over the merged models of `modelBundles`.
     ///
-    /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelConflict`
-    ///   when two models define the same entity, `.storeLoadFailed` when the
-    ///   store cannot open.
+    /// - Throws: `.modelNotFound` when a bundle holds no model, `.modelUnreadable`
+    ///   when one will not load, `.modelConflict` when two models define the same
+    ///   entity, `.storeLoadFailed` when the store cannot open.
     public init(storeName: String, modelBundles: [Bundle], inMemory: Bool = false) throws(StorageError) {
         let model = try Self.model(merging: modelBundles)
         persistentContainer = NSPersistentContainer(name: storeName, managedObjectModel: model)
@@ -93,7 +93,7 @@ public final class StorageProvider: Sendable {
             }
             for url in urls {
                 guard let model = NSManagedObjectModel(contentsOf: url) else {
-                    throw .modelNotFound(bundle: bundle.bundleURL.lastPathComponent)
+                    throw .modelUnreadable(model: url.lastPathComponent, bundle: bundle.bundleURL.lastPathComponent)
                 }
                 parts.append(model)
             }

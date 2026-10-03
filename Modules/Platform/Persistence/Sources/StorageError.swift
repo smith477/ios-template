@@ -6,6 +6,7 @@ import Foundation
 public enum StorageError: Error, Sendable {
     case notFound
     case modelNotFound(bundle: String)
+    case modelUnreadable(model: String, bundle: String)
     case modelConflict(entity: String)
     case storeLoadFailed(Error)
     case saveFailed(Error)
@@ -20,6 +21,8 @@ extension StorageError: LocalizedError {
             "Record not found"
         case let .modelNotFound(bundle):
             "No Core Data model in bundle '\(bundle)'"
+        case let .modelUnreadable(model, bundle):
+            "Core Data model '\(model)' in bundle '\(bundle)' could not be loaded"
         case let .modelConflict(entity):
             "Two Core Data models define the entity '\(entity)'"
         case let .storeLoadFailed(error):
