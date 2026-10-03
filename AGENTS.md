@@ -57,7 +57,9 @@ because its Xcode 26 image has no 18 Pro. `Project.swift` says so at the top.
 ## Commits
 
 Subject line only — imperative, no body, no trailers, no `Co-Authored-By`. Match
-what `git log` already looks like. Commit and push only when asked.
+what `git log` already looks like. Commit and push only when asked, with one
+exception: a `solve` build phase is committed and pushed to its work branch as soon
+as it is built.
 
 ## Reference
 

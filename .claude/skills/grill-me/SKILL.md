@@ -44,9 +44,8 @@ Before asking anything, exhaust the sources that already hold the answer:
 - **The tests.** `AppTests/`, `Modules/*/*/Tests/` — they encode expected
   behaviour, especially around routing and caching.
 - **The issue,** if there is one: `gh issue view <n>`.
-- **Outside practice,** when a choice turns on a platform or tool convention rather
-  than this repo — Apple's guidance, a documented Tuist or SwiftPM pattern. Search
-  it before asking, and put what you found, with links, in the briefing.
+- **Outside practice** — searched per question, not once up front; see step 5 of the
+  briefing.
 
 Only what remains after that is a real question. Finish all of this before the
 first question, so no question changes under the user while they answer it.
@@ -80,15 +79,22 @@ The briefing, in this order:
    earlier answer led here, by name, not by number alone.
 2. **Today** — how the code behaves now, with a file link. If nothing exists yet,
    say what the nearest existing pattern does.
-3. **Why it needs deciding** — what goes wrong, or stays ambiguous, if nobody
-   decides.
+3. **Why it needs deciding** — a short numbered sequence of what the app's user
+   does and sees if nobody decides, with no type or function names: "1. You open
+   the Products tab: 30 items. 2. You open product 50 by link. 3. You go back: 31
+   items." The code that causes it belongs in **Today**.
 4. **The options** — the real, distinct choices. For each one, *if we pick this*:
    - what the app's user would see or experience differently;
    - what changes in the code, naming the file that already demonstrates it, or
      saying plainly that it introduces a new pattern (a cost — this repo prefers an
      existing shape);
    - what it costs later or rules out.
-5. **Recommendation** — which you would pick and why, with a confidence percentage
+5. **Outside practice** — how established libraries, Apple's guidance or well-known
+   apps settle this same kind of choice, searched before the card is sent and cited
+   with links. An option that practice suggests and the list lacks is added to the
+   list. If nothing outside this repo bears on it, say so in one sentence, with the
+   reason.
+6. **Recommendation** — which you would pick and why, with a confidence percentage
    on every option, so the user is reacting to a proposal rather than starting from
    nothing.
 

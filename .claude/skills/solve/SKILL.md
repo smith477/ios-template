@@ -88,8 +88,8 @@ this one in a worktree, so neither can build on the other's uncommitted edits.
 
 4. Confirm with `git branch --show-current` and `git status`.
 
-5. Creating a branch is not a commit and needs no approval. Do **not** push it.
-   Commits and pushes happen only on the owner's explicit instruction.
+5. Creating a branch is not a commit and needs no approval. Do not push it yet:
+   the first phase's commit pushes it.
 
 6. Name Phase 3 and stop.
 
@@ -191,10 +191,14 @@ reviewed on its own.
 3. **Verify before handing off.** Run the checks that need no simulator yourself:
 
    ```bash
-   mise exec -- tuist generate                                     # if Project.swift changed
+   mise exec -- tuist generate --no-open      # always: restores a project a per-bundle test run trimmed
+   xcodebuild build-for-testing -workspace *.xcworkspace -scheme App \
+     -destination 'generic/platform=iOS Simulator' -quiet   # compiles the app and every test bundle; boots no simulator
    mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
    mise exec -- tuist inspect dependencies --only implicit         # if the module graph changed
    ```
+
+   A phase is not handed over uncompiled.
 
    Tests, and anything else on the simulator, are the owner's to run. Hand over
    each command in its own `bash` block with what a pass looks like, and wait for
@@ -224,9 +228,13 @@ reviewed on its own.
    that revealed a surprise is a reason to re-plan the remaining phases with the
    owner, not to absorb it silently and carry on.
 
-7. **Commits and pushes happen only on explicit instruction.** Reaching the end of
-   a phase is not that instruction. When the owner does ask, the commit is a subject
-   line only — imperative, no body, no trailers.
+7. **Each phase is committed and pushed as soon as it is built**, without asking:
+   once the checks in step 3 that you can run pass, commit the phase and push the
+   branch (`git push -u origin <branch>` the first time), then hand it over. The
+   commit is a subject line only — imperative, no body, no trailers. The owner
+   reviews the pushed commit, and a fix from that review lands as its own commit.
+   This covers the work branch only: pushing to `main`, merging, or opening a PR
+   still waits for the owner's word.
 
 ## Phase 6: Retro
 

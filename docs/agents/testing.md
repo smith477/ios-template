@@ -116,6 +116,10 @@ covering what changed while iterating; run `App` before handing work over.
 simulator is booted, and a different screen geometry puts UI-test taps in the
 wrong place. CI uses iPhone 17 Pro, the newest its Xcode 26 image ships.
 
+A per-bundle `tuist test` can leave the generated project trimmed to that bundle,
+with no app target, so the `App` scheme will not run in Xcode.
+`mise exec -- tuist generate` restores it.
+
 Run `mise exec -- tuist generate` first if `Project.swift` changed.
 
 ## The UI test that used to be skipped
