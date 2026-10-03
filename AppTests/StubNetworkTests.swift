@@ -109,4 +109,8 @@ private struct FetchingProductRepository: ProductRepository {
     func getProducts(policy _: CachePolicy) async throws -> [Product] {
         try await client.fetchProducts()
     }
+
+    func getProduct(id: Int, policy _: CachePolicy) async throws -> Product? {
+        try await client.fetchProduct(id: id)
+    }
 }

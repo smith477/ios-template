@@ -11,7 +11,12 @@ public protocol ProductStorage: Sendable {
     /// as the API last returned it, not every row in the store.
     func getAll() async throws(StorageError) -> [Product]
     func get(id: Int) async throws(StorageError) -> Product?
+    /// Saves the list: writes the rows, then records them as the list.
     func save(_ products: [Product]) async throws(StorageError)
+    /// Writes one product's row without touching the list or its age, so
+    /// opening a product neither adds it to the list nor makes a stale list
+    /// look fresh.
+    func upsert(_ product: Product) async throws(StorageError)
     func delete(id: Int) async throws(StorageError)
     func deleteAll() async throws(StorageError)
 
@@ -112,6 +117,15 @@ final class ProductCoreDataStorage: ProductStorage {
     }
 
     func save(_ products: [Product]) async throws(StorageError) {
+        try await write(products)
+        listRecord.markSaved(ids: products.map(\.id), at: dateProvider.now)
+    }
+
+    func upsert(_ product: Product) async throws(StorageError) {
+        try await write([product])
+    }
+
+    private func write(_ products: [Product]) async throws(StorageError) {
         do {
             try await storageProvider.performBackground { context in
                 for product in products {
@@ -124,7 +138,6 @@ final class ProductCoreDataStorage: ProductStorage {
                 }
                 try context.save()
             }
-            listRecord.markSaved(ids: products.map(\.id), at: dateProvider.now)
         } catch {
             throw .saveFailed(error)
         }

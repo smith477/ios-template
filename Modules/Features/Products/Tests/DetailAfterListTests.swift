@@ -48,17 +48,24 @@ struct DetailAfterListTests {
 
 private struct StubClient: ProductApiClient {
     func fetchProducts() async throws(APIError) -> [Product] {
-        [Product(
-            id: 1,
-            title: "Test",
-            description: "d",
-            category: "c",
-            price: 1,
-            tags: [],
-            brand: "b",
-            meta: Meta(createdAt: Date(), updatedAt: Date()),
-            thumbnail: "",
-            images: []
-        )]
+        [Self.product]
     }
+
+    func fetchProduct(id: Int) async throws(APIError) -> Product {
+        guard id == Self.product.id else { throw .notFound }
+        return Self.product
+    }
+
+    private static let product = Product(
+        id: 1,
+        title: "Test",
+        description: "d",
+        category: "c",
+        price: 1,
+        tags: [],
+        brand: "b",
+        meta: Meta(createdAt: Date(), updatedAt: Date()),
+        thumbnail: "",
+        images: []
+    )
 }

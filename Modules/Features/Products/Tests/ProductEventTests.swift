@@ -99,6 +99,10 @@ private struct StubProductRepository: ProductRepository {
     var products: [Product] = []
 
     func getProducts(policy: CachePolicy) async throws -> [Product] { products }
+
+    func getProduct(id: Int, policy: CachePolicy) async throws -> Product? {
+        products.first { $0.id == id }
+    }
 }
 
 private extension Product {
