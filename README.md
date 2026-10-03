@@ -56,8 +56,7 @@ writing anything if a file no longer looks the way it expects. After it:
   call another [required-reason API](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api),
   or send user data to your backend.
 
-The Core Data model keeps its name, `ios_template`: it is internal and never shown
-to users. A custom URL scheme is first-come on a device, so pick one you own; for
+A custom URL scheme is first-come on a device, so pick one you own; for
 links that prove they belong to your app, Apple recommends universal links.
 
 CI renames a copy to Acme on every run, so the script is known to work against the

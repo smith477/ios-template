@@ -2,7 +2,6 @@
 
 import CoreData
 import Foundation
-import Identity
 import Persistence
 
 protocol UserStorage: Sendable {

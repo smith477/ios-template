@@ -86,7 +86,7 @@ so `ignore_comment_only_lines` and SwiftLint's default `allowed_rules` have to b
 restated. `type_body_length` and `function_body_length` are left out and come from
 the root.
 
-`Users` and `Identity` have no test targets yet. Adding one means a
+`Users` has no test target yet. Adding one means a
 `featureTests(...)` / `platformTests(...)` entry in `Project.swift`, a
 `testScheme(...)`, and the bundle name in the `App` scheme's `testAction`.
 

@@ -2,7 +2,7 @@
 
 import Foundation
 
-/// A person, as more than one feature understands them.
+/// A person, as this feature shows them.
 public struct User: Identifiable, Sendable, Hashable {
     public let id: Int
     public let firstName: String

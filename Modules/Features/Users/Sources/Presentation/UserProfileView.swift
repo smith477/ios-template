@@ -1,6 +1,5 @@
 // UserProfileView.swift
 
-import Identity
 import SwiftUI
 
 public struct UserProfileView: View {
