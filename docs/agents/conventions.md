@@ -171,8 +171,8 @@ the conformance provable instead:
 - Store something `Sendable` rather than the non-`Sendable` object.
   `ProductListRecord` keeps a suite name and resolves `UserDefaults` per call.
 - Guard mutable state in a `Mutex` from `Synchronization`, as the test doubles in
-  `ProductCachePolicyTests.swift` do. An actor is the alternative, but it cannot
-  satisfy a synchronous protocol requirement.
+  `Modules/Features/Products/Tests/Support/` do. An actor is the alternative, but
+  it cannot satisfy a synchronous protocol requirement.
 - Check the SDK before assuming a type is unmarked: `NSPersistentContainer` is
   `NS_SWIFT_SENDABLE`, so `StorageProvider` conforms plainly.
 

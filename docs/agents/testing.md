@@ -89,8 +89,10 @@ after the type, internal rather than `private`, and no `@Test` in any of them. A
 double moves when a second file needs it, not in anticipation. The bundle's source
 glob already covers the folder, so it needs no `Project.swift` change.
 
-Shared factories follow the same rule. `ProductStorageFactory.swift` exposes a free
-`makeStorage(dateProvider:)` returning storage over an in-memory store and a
+`Modules/Features/Products/Tests/Support/` is the example to copy:
+`Product.fixture(id:title:)` in `Product+Fixture.swift`, the counting doubles,
+`MovableDateProvider`, and `ProductStorageFactory.swift`, whose free
+`makeStorage(dateProvider:)` returns storage over an in-memory store and a
 `ProductListRecord(suiteName: UUID().uuidString)`, so neither the rows nor the
 list record of one test reach the next.
 
