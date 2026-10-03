@@ -25,7 +25,8 @@ copyable into another project, which is what the template exists for.
 
 **Never force unwrap.** `force_unwrapping`, `force_cast` and `force_try` are
 SwiftLint errors, not warnings. Trap deliberately with `fatalError` naming what
-broke. Test targets disable these rules; shipping code does not get an exemption.
+broke. A test file may disable them for the whole file, with a reason; shipping
+code gets no exemption.
 
 **`import AppKit` means this project's Platform module**, not Apple's framework.
 

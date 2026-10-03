@@ -1,5 +1,8 @@
 // ProductStorageTests.swift
 
+// A literal price that fails to parse should fail the test on the spot.
+// swiftlint:disable force_unwrapping
+
 import Foundation
 import Persistence
 import Testing
