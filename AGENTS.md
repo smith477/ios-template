@@ -47,6 +47,7 @@ mise exec -- tuist build
 mise exec -- tuist test App --no-selective-testing --device "iPhone 18 Pro"
 mise exec -- tuist test ProductsTests --no-selective-testing --device "iPhone 18 Pro"
 mise exec -- tuist inspect dependencies --only implicit
+scripts/check-feature-copy.sh
 mise exec -- swiftformat . --lint && mise exec -- swiftlint lint --strict
 ```
 
