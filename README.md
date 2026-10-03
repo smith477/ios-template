@@ -87,6 +87,24 @@ configuration on the App target in `Project.swift`, reaches the app as the
 and Release point at `https://dummyjson.com`; change those two values to give each
 its own backend, then run `tuist generate`.
 
+## Production checklist
+
+What the template already handles, and what is still yours before you ship. Each
+left cell links to the code or section behind it.
+
+| Concern | The template provides | You own |
+| --- | --- | --- |
+| Environments | `API_BASE_URL` per build configuration in [`Project.swift`](Project.swift); see [Configuration](#configuration) | Your backend's hosts, and any configuration beyond Debug and Release |
+| Privacy manifest | [`App/PrivacyInfo.xcprivacy`](App/PrivacyInfo.xcprivacy); see [Make it yours](#make-it-yours) | Keeping it true as you add SDKs, required-reason APIs or user data |
+| Logging | [`Log`](Modules/Platform/Diagnostics/Sources/Log.swift) in `Diagnostics`, private by construction; see [Logging](docs/agents/conventions.md#logging) | Logging in your own features, and shipping logs off the device |
+| Tests | In-memory stores ([`StorageProvider`](Modules/Platform/Persistence/Sources/StorageProvider.swift)), an injected clock ([`DateProvider`](Modules/Features/Products/Sources/Domain/DateProvider.swift)) and a stubbed network ([`StubURLProtocol`](App/Debug/StubURLProtocol.swift)); see [testing](docs/agents/testing.md) | Tests for your own features, on the same seams |
+| Identity | [`scripts/rename.sh`](scripts/rename.sh), run by CI on every change; see [Make it yours](#make-it-yours) | The name, bundle prefix, and a URL scheme you own or universal links |
+| Analytics | No SDK. Every feature event reaches a `handle(_:)` overload on [`AppRouter`](App/Router/AppRouter.swift), the one place to send them from | The SDK, and which events are worth tracking |
+| Crash reporting | Nothing: no reporter is chosen for you, and `Log` stays on the device | A crash reporter, declared in the privacy manifest |
+| Images | [`ProductImage`](Modules/Features/Products/Sources/Presentation/ProductImage.swift), over `AsyncImage`, which caches only in `URLSession`'s small default cache | An image cache, once lists grow long |
+| Auth | [APIClient](https://github.com/smith477/api-client)'s per-endpoint headers, and `APIError.unauthorized` for a 401 | Sign-in, token storage in the Keychain, refresh, and attaching the token |
+| Placeholder seller id | A seller derived from the product id, since the sample API has none; see [`ProductDetailViewModel`](Modules/Features/Products/Sources/Presentation/ProductDetailViewModel.swift) | Your API's real seller id, or removing the seller row |
+
 ## Contributing
 
 [AGENTS.md](AGENTS.md) holds the rules for this repo, for people and agents alike,
